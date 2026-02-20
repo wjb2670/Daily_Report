@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import Header from '../components/report/Header';
-import ReportHeader from '../components/report/ReportHeader';
-import WeatherCard from '../components/report/WeatherCard';
-import SiteVisitorsCard from '../components/report/SiteVisitorsCard';
-import SubcontractorsCard from '../components/report/SubcontractorsCard';
-import DeliveriesCard from '../components/report/DeliveriesCard';
-import UtilitiesCard from '../components/report/UtilitiesCard';
-import PhotoGalleryCard from '../components/report/PhotoGalleryCard';
-import NotesCard from '../components/report/NotesCard';
-import FooterActions from '../components/report/FooterActions';
+import Header from '@/components/report/Header';
+import ReportHeader from '@/components/report/ReportHeader';
+import WeatherCard from '@/components/report/WeatherCard';
+import SiteVisitorsCard from '@/components/report/SiteVisitorsCard';
+import SubcontractorsCard from '@/components/report/SubcontractorsCard';
+import DeliveriesCard from '@/components/report/DeliveriesCard';
+import UtilitiesCard from '@/components/report/UtilitiesCard';
+import PhotoGalleryCard from '@/components/report/PhotoGalleryCard';
+import NotesCard from '@/components/report/NotesCard';
+import FooterActions from '@/components/report/FooterActions';
 import { useToast } from '@/components/ui/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 
