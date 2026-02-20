@@ -10,12 +10,14 @@ import {
   DollarSign,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Layers
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", page: "Dashboard", icon: LayoutDashboard },
   { label: "Projects", page: "Projects", icon: FolderOpen },
+  { label: "Scopes", page: "Scopes", icon: Layers },
   { label: "Daily Reports", page: "DailyReport", icon: ClipboardList },
   { label: "Subcontractors", page: "Subcontractors", icon: Users },
   { label: "Contracts", page: "Contracts", icon: FileText },
