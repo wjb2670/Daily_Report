@@ -179,7 +179,7 @@ export default function SOVSection({ projectId }) {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 text-sm font-semibold text-[#0f2a5e]">
             <DollarSign className="w-4 h-4" />
-            Total: ${total.toLocaleString()}
+            Total: ${total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <input type="file" ref={fileRef} className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileImport} />
           <Button variant="outline" size="sm" className="text-gray-500 border-gray-300"
@@ -237,7 +237,7 @@ export default function SOVSection({ projectId }) {
               <div className="col-span-1 text-gray-400">{line.line_number}</div>
               <div className="col-span-4 font-medium text-gray-800">{line.description}</div>
               <div className="col-span-3 text-gray-500">{line.cost_code}</div>
-              <div className="col-span-3 text-right font-medium text-[#0f2a5e]">${(line.scheduled_value || 0).toLocaleString()}</div>
+              <div className="col-span-3 text-right font-medium text-[#0f2a5e]">${(line.scheduled_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               <div className="col-span-1 flex justify-end">
                 <button onClick={() => deleteLine(line.id)} className="text-gray-300 hover:text-red-500 transition-colors">
                   <Trash2 className="w-4 h-4" />
