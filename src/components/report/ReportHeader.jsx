@@ -13,7 +13,7 @@ export default function ReportHeader({ formData, setFormData }) {
     <Card className="shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <ClipboardList className="w-5 h-5 text-yellow-500" />
+          <ClipboardList className="w-5 h-5 text-[#1e3a8a]" />
           Report Information
         </CardTitle>
       </CardHeader>

@@ -41,7 +41,7 @@ export default function FooterActions({ lastSaved, onSave, onSubmit, onReset }) 
             <Button
               size="sm"
               onClick={onSubmit}
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold"
+              className="bg-[#1e3a8a] hover:bg-[#1a317a] text-white font-semibold"
             >
               <Send className="w-4 h-4 mr-1" /> Submit Report
             </Button>

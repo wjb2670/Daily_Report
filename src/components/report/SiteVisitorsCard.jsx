@@ -31,7 +31,7 @@ export default function SiteVisitorsCard({ formData, setFormData }) {
     <Card className="shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Users className="w-5 h-5 text-yellow-500" />
+          <Users className="w-5 h-5 text-[#1e3a8a]" />
           Site Visitors
         </CardTitle>
       </CardHeader>
@@ -41,7 +41,7 @@ export default function SiteVisitorsCard({ formData, setFormData }) {
           <Input placeholder="Company" value={company} onChange={e => setCompany(e.target.value)} />
           <Input placeholder="Purpose of visit" value={purpose} onChange={e => setPurpose(e.target.value)} />
         </div>
-        <Button onClick={addVisitor} size="sm" className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold">
+        <Button onClick={addVisitor} size="sm" className="bg-[#1e3a8a] hover:bg-[#1a317a] text-white font-semibold">
           <Plus className="w-4 h-4 mr-1" /> Add Visitor
         </Button>
 

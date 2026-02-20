@@ -8,7 +8,7 @@ export default function NotesCard({ formData, setFormData }) {
     <Card className="shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <FileText className="w-5 h-5 text-yellow-500" />
+          <FileText className="w-5 h-5 text-[#1e3a8a]" />
           General Notes
         </CardTitle>
       </CardHeader>

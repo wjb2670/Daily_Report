@@ -48,7 +48,7 @@ export default function WeatherCard({ zipCode }) {
     <Card className="shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <CloudSun className="w-5 h-5 text-yellow-500" />
+          <CloudSun className="w-5 h-5 text-[#1e3a8a]" />
           Weather Conditions
         </CardTitle>
       </CardHeader>

@@ -33,7 +33,7 @@ export default function DeliveriesCard({ formData, setFormData }) {
     <Card className="shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Truck className="w-5 h-5 text-yellow-500" />
+          <Truck className="w-5 h-5 text-[#1e3a8a]" />
           Deliveries
         </CardTitle>
       </CardHeader>
@@ -44,7 +44,7 @@ export default function DeliveriesCard({ formData, setFormData }) {
           <Input placeholder="Quantity" value={quantity} onChange={e => setQuantity(e.target.value)} />
           <Input placeholder="Notes" value={notes} onChange={e => setNotes(e.target.value)} />
         </div>
-        <Button onClick={addDelivery} size="sm" className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold">
+        <Button onClick={addDelivery} size="sm" className="bg-[#1e3a8a] hover:bg-[#1a317a] text-white font-semibold">
           <Plus className="w-4 h-4 mr-1" /> Add Delivery
         </Button>
 

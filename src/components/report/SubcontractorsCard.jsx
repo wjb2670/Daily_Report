@@ -33,7 +33,7 @@ export default function SubcontractorsCard({ formData, setFormData }) {
     <Card className="shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <HardHat className="w-5 h-5 text-yellow-500" />
+          <HardHat className="w-5 h-5 text-[#1e3a8a]" />
           Subcontractors
         </CardTitle>
       </CardHeader>
@@ -44,7 +44,7 @@ export default function SubcontractorsCard({ formData, setFormData }) {
           <Input placeholder="# of workers" type="number" value={workers} onChange={e => setWorkers(e.target.value)} />
           <Input placeholder="Work performed" value={workPerformed} onChange={e => setWorkPerformed(e.target.value)} />
         </div>
-        <Button onClick={addSubcontractor} size="sm" className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold">
+        <Button onClick={addSubcontractor} size="sm" className="bg-[#1e3a8a] hover:bg-[#1a317a] text-white font-semibold">
           <Plus className="w-4 h-4 mr-1" /> Add Subcontractor
         </Button>
 
