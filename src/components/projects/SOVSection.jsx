@@ -8,6 +8,9 @@ export default function SOVSection({ projectId }) {
   const [lines, setLines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newLine, setNewLine] = useState({ line_number: "", description: "", cost_code: "", scheduled_value: "" });
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+  const fileRef = useRef();
 
   useEffect(() => {
     loadLines();
