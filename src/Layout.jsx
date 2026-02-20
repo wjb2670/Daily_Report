@@ -35,14 +35,12 @@ export default function Layout({ children, currentPageName }) {
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static md:flex`}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between px-4 py-5 border-b border-[#1e3a8a]">
+        <div className="flex items-center justify-between px-4 py-4 border-b border-[#1e3a8a]">
           <img
-            src="https://i.ibb.co/your-logo"
-            onError={e => { e.target.style.display = 'none'; }}
-            alt=""
-            className="h-8"
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69986966442e93bb8f52d310/22dfce6e0_6671BlueandGrayLogo.png"
+            alt="Whayland"
+            className="h-10 w-auto"
           />
-          <span className="text-white font-bold text-lg tracking-wide">WHAYLAND</span>
           <button className="md:hidden text-white" onClick={() => setSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
