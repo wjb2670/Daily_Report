@@ -99,8 +99,8 @@ export default function SOVSection({ projectId }) {
       }
       return "";
     };
-    const rawValue = find(["scheduled_value", "value", "amount", "scheduled"]);
-    const numValue = parseFloat(String(rawValue).replace(/[$,\s]/g, "")) || 0;
+    const rawValue = find(["scheduled_value", "scheduled", "value", "amount"]);
+    const numValue = parseFloat(String(rawValue).replace(/[$,\s\r]/g, "")) || 0;
     return {
       line_number: find(["line_number", "line", "item", "no"]),
       description: find(["description", "desc", "name", "item"]),
