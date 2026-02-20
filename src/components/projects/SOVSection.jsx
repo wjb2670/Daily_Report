@@ -40,6 +40,25 @@ export default function SOVSection({ projectId }) {
 
   const total = lines.reduce((sum, l) => sum + (l.scheduled_value || 0), 0);
 
+  const downloadTemplate = () => {
+    const csv = [
+      ["Line Number", "Description", "Cost Code", "Scheduled Value", "Category"],
+      ["1", "General Conditions", "1000", "50000", "General"],
+      ["2", "Site Work", "2100", "150000", "Site"],
+      ["3", "Concrete Footings & Foundation", "3010", "80000", "Structural"],
+      ["4", "Rough Carpentry", "6100", "120000", "Framing"],
+      ["5", "Roofing", "7400", "75000", "Exterior"],
+    ].map(row => row.join(",")).join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "SOV_Template.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleFileImport = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
