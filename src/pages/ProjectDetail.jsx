@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import ProjectFormModal from "@/components/projects/ProjectFormModal";
-import SOVSection from "@/components/projects/SOVSection";
+import ProjectFormModal from "@/components/projects/ProjectFormModal.jsx";
+import SOVSection from "@/components/projects/SOVSection.jsx";
 
 const statusColors = {
   bidding: "bg-yellow-100 text-yellow-800",

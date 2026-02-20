@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import ProjectFormModal from "@/components/projects/ProjectFormModal";
+import ProjectFormModal from "@/components/projects/ProjectFormModal.jsx";
 
 const statusColors = {
   bidding: "bg-yellow-100 text-yellow-800",
