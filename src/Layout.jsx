@@ -89,7 +89,11 @@ export default function Layout({ children, currentPageName }) {
           <button onClick={() => setSidebarOpen(true)} className="text-[#0f2a5e]">
             <Menu className="w-6 h-6" />
           </button>
-          <span className="font-bold text-[#0f2a5e] text-lg tracking-wide">WHAYLAND</span>
+          <img
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69986966442e93bb8f52d310/22dfce6e0_6671BlueandGrayLogo.png"
+            alt="Whayland"
+            className="h-8 w-auto"
+          />
         </header>
 
         <main className="flex-1 overflow-auto p-4 md:p-6">
