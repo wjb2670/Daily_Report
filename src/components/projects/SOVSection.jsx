@@ -40,15 +40,78 @@ export default function SOVSection({ projectId }) {
 
   const total = lines.reduce((sum, l) => sum + (l.scheduled_value || 0), 0);
 
+  const handleFileImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImporting(true);
+    setImportResult(null);
+
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+
+    const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({
+      file_url,
+      json_schema: {
+        type: "object",
+        properties: {
+          line_items: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                line_number: { type: "string" },
+                description: { type: "string" },
+                cost_code: { type: "string" },
+                scheduled_value: { type: "number" },
+                category: { type: "string" }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (extracted.status === "success" && extracted.output?.line_items?.length) {
+      const items = extracted.output.line_items;
+      for (const item of items) {
+        if (item.description && item.scheduled_value) {
+          await base44.entities.ScheduleOfValues.create({ ...item, project_id: projectId });
+        }
+      }
+      setImportResult({ success: true, count: items.filter(i => i.description && i.scheduled_value).length });
+      loadLines();
+    } else {
+      setImportResult({ success: false, error: extracted.details || "Could not extract data from file." });
+    }
+    setImporting(false);
+    e.target.value = "";
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h3 className="font-bold text-[#0f2a5e] text-lg">Schedule of Values</h3>
-        <div className="flex items-center gap-1 text-sm font-semibold text-[#0f2a5e]">
-          <DollarSign className="w-4 h-4" />
-          Total: ${total.toLocaleString()}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 text-sm font-semibold text-[#0f2a5e]">
+            <DollarSign className="w-4 h-4" />
+            Total: ${total.toLocaleString()}
+          </div>
+          <input type="file" ref={fileRef} className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileImport} />
+          <Button variant="outline" size="sm" className="text-[#1e3a8a] border-[#1e3a8a]"
+            onClick={() => fileRef.current.click()} disabled={importing}>
+            <Upload className="w-4 h-4 mr-1" />
+            {importing ? "Importing..." : "Import File"}
+          </Button>
         </div>
       </div>
+
+      {importResult && (
+        <div className={`flex items-center gap-2 text-sm p-3 rounded-lg mb-4 ${importResult.success ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
+          {importResult.success
+            ? <><CheckCircle className="w-4 h-4" /> Imported {importResult.count} line items successfully.</>
+            : <><AlertCircle className="w-4 h-4" /> {importResult.error}</>}
+        </div>
+      )}
+
 
       {/* Add new line */}
       <div className="grid grid-cols-12 gap-2 mb-4 text-sm">
