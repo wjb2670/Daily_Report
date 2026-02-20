@@ -115,6 +115,10 @@ export default function SOVSection({ projectId }) {
             Total: ${total.toLocaleString()}
           </div>
           <input type="file" ref={fileRef} className="hidden" accept=".xlsx,.xls,.csv" onChange={handleFileImport} />
+          <Button variant="outline" size="sm" className="text-gray-500 border-gray-300"
+            onClick={downloadTemplate}>
+            Download Template
+          </Button>
           <Button variant="outline" size="sm" className="text-[#1e3a8a] border-[#1e3a8a]"
             onClick={() => fileRef.current.click()} disabled={importing}>
             <Upload className="w-4 h-4 mr-1" />
