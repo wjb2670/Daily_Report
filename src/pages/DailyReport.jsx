@@ -89,7 +89,7 @@ export default function DailyReport() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-800 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gray-50 text-gray-800 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
         <Header />
         <main className="space-y-6">
