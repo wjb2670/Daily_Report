@@ -62,13 +62,32 @@ export default function SOVSection({ projectId }) {
   const parseCSV = (text) => {
     const lines = text.trim().split("\n");
     if (lines.length < 2) return [];
-    const headers = lines[0].split(",").map(h => h.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, ""));
+    const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, ""));
     return lines.slice(1).map(line => {
-      const cols = line.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+      const cols = parseCSVLine(line);
       const obj = {};
-      headers.forEach((h, i) => { obj[h] = cols[i] || ""; });
+      headers.forEach((h, i) => { obj[h] = (cols[i] || "").trim(); });
       return obj;
     });
+  };
+
+  const parseCSVLine = (line) => {
+    const result = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+      } else if (ch === "," && !inQuotes) {
+        result.push(current);
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+    result.push(current);
+    return result;
   };
 
   const normalizeRow = (row) => {
