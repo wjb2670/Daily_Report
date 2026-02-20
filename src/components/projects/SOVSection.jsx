@@ -59,48 +59,96 @@ export default function SOVSection({ projectId }) {
     URL.revokeObjectURL(url);
   };
 
+  const parseCSV = (text) => {
+    const lines = text.trim().split("\n");
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(",").map(h => h.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, ""));
+    return lines.slice(1).map(line => {
+      const cols = line.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = cols[i] || ""; });
+      return obj;
+    });
+  };
+
+  const normalizeRow = (row) => {
+    // Map flexible header names to our fields
+    const find = (keys) => {
+      for (const k of keys) {
+        const match = Object.keys(row).find(h => h.includes(k));
+        if (match && row[match]) return row[match];
+      }
+      return "";
+    };
+    const rawValue = find(["scheduled_value", "value", "amount", "scheduled"]);
+    const numValue = parseFloat(String(rawValue).replace(/[$,\s]/g, "")) || 0;
+    return {
+      line_number: find(["line_number", "line", "item", "no"]),
+      description: find(["description", "desc", "name", "item"]),
+      cost_code: find(["cost_code", "cost", "code"]),
+      scheduled_value: numValue,
+      category: find(["category", "cat", "type"]),
+    };
+  };
+
   const handleFileImport = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setImporting(true);
     setImportResult(null);
 
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-
-    const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({
-      file_url,
-      json_schema: {
-        type: "object",
-        properties: {
-          line_items: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                line_number: { type: "string" },
-                description: { type: "string" },
-                cost_code: { type: "string" },
-                scheduled_value: { type: "number" },
-                category: { type: "string" }
+    // For CSV files, parse directly in the browser
+    if (file.name.endsWith(".csv")) {
+      const text = await file.text();
+      const rows = parseCSV(text);
+      const items = rows.map(normalizeRow).filter(i => i.description && i.scheduled_value);
+      if (items.length === 0) {
+        setImportResult({ success: false, error: "No valid rows found. Make sure your CSV has Description and Scheduled Value columns." });
+        setImporting(false);
+        e.target.value = "";
+        return;
+      }
+      for (const item of items) {
+        await base44.entities.ScheduleOfValues.create({ ...item, project_id: projectId });
+      }
+      setImportResult({ success: true, count: items.length });
+      loadLines();
+    } else {
+      // For Excel files, use the AI extraction
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const extracted = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url,
+        json_schema: {
+          type: "object",
+          properties: {
+            line_items: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  line_number: { type: "string" },
+                  description: { type: "string" },
+                  cost_code: { type: "string" },
+                  scheduled_value: { type: "number" },
+                  category: { type: "string" }
+                }
               }
             }
           }
         }
-      }
-    });
-
-    if (extracted.status === "success" && extracted.output?.line_items?.length) {
-      const items = extracted.output.line_items;
-      for (const item of items) {
-        if (item.description && item.scheduled_value) {
+      });
+      if (extracted.status === "success" && extracted.output?.line_items?.length) {
+        const items = extracted.output.line_items.filter(i => i.description && i.scheduled_value);
+        for (const item of items) {
           await base44.entities.ScheduleOfValues.create({ ...item, project_id: projectId });
         }
+        setImportResult({ success: true, count: items.length });
+        loadLines();
+      } else {
+        setImportResult({ success: false, error: "Could not extract data. Please use the CSV template format." });
       }
-      setImportResult({ success: true, count: items.filter(i => i.description && i.scheduled_value).length });
-      loadLines();
-    } else {
-      setImportResult({ success: false, error: extracted.details || "Could not extract data from file." });
     }
+
     setImporting(false);
     e.target.value = "";
   };
