@@ -47,8 +47,14 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import DailyReport from './pages/DailyReport';
 
-export const pagesConfig = {
-	Pages: {}
+
+export const PAGES = {
+    "DailyReport": DailyReport,
 }
 
+export const pagesConfig = {
+    mainPage: "DailyReport",
+    Pages: PAGES,
+};
