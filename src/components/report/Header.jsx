@@ -1,14 +1,14 @@
 import React from 'react';
-import { HardHat } from 'lucide-react';
 
 export default function Header() {
   return (
     <header className="mb-8 text-center">
-      <div className="flex items-center justify-center gap-3 mb-2">
-        <div className="bg-[#1e3a8a] p-2 rounded-full">
-          <HardHat className="w-8 h-8 text-white" />
-        </div>
-        <h1 className="text-3xl font-bold text-[#1e3a8a] tracking-tight">Whayland</h1>
+      <div className="flex items-center justify-center mb-2">
+        <img
+          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69986966442e93bb8f52d310/2d6e79006_6671BlueandGrayLogo.png"
+          alt="Whayland Logo"
+          className="h-16 w-auto"
+        />
       </div>
       <p className="text-gray-500 text-sm font-medium uppercase tracking-widest">Daily Construction Report</p>
     </header>
