@@ -39,7 +39,7 @@ export default function Layout({ children, currentPageName }) {
           <img
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69986966442e93bb8f52d310/5f8462f80_whayland-logo-white1.png"
                               alt="Whayland"
-                              className="h-10 w-auto"
+                              className="h-16 w-auto"
           />
           <button className="md:hidden text-white" onClick={() => setSidebarOpen(false)}>
             <X className="w-5 h-5" />
