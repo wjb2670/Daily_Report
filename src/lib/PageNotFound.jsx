@@ -7,6 +7,12 @@ export default function PageNotFound({}) {
     const location = useLocation();
     const pageName = location.pathname.substring(1);
 
+    // Redirect root path to Dashboard
+    if (location.pathname === "/" || location.pathname === "") {
+        window.location.href = "/Dashboard";
+        return null;
+    }
+
     const { data: authData, isFetched } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {
