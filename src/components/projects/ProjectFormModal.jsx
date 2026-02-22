@@ -84,6 +84,16 @@ export default function ProjectFormModal({ project, onSave, onClose }) {
                   <Input value={form.job_number} onChange={e => set("job_number", e.target.value)} required placeholder="e.g. 2024-001" />
                 </div>
                 <div>
+                  <Label>Project Type *</Label>
+                  <Select value={form.project_type} onValueChange={v => set("project_type", v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GC">GC – General Contractor</SelectItem>
+                      <SelectItem value="CM">CM – Construction Manager</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
                   <Label>Status</Label>
                   <Select value={form.status} onValueChange={v => set("status", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
