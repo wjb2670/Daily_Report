@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import G702Summary from "@/components/billing/G702Summary";
-import G703ContinuationSheet from "@/components/billing/G703ContinuationSheet";
+import G702Summary from "@/components/billing/G702Summary.jsx";
+import G703ContinuationSheet from "@/components/billing/G703ContinuationSheet.jsx";
 
 export default function BillingPeriodDetail() {
   const params = new URLSearchParams(window.location.search);
