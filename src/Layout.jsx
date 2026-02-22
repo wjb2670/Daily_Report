@@ -14,6 +14,7 @@ import {
   Layers
 } from "lucide-react";
 
+// BillingPeriodDetail and ProjectBilling are sub-pages, not in nav
 const navItems = [
   { label: "Dashboard", page: "Dashboard", icon: LayoutDashboard },
   { label: "Projects", page: "Projects", icon: FolderOpen },
