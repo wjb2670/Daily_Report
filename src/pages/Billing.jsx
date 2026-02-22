@@ -1,139 +1,146 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { DollarSign, FileText, ChevronRight, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { Badge } from "@/components/ui/badge";
+import { Plus, Building2, DollarSign, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const statusColors = {
-  draft: "bg-gray-100 text-gray-700",
-  submitted: "bg-blue-100 text-blue-800",
-  approved: "bg-green-100 text-green-800",
-  paid: "bg-purple-100 text-purple-800",
-};
+import { Badge } from "@/components/ui/badge";
+import { createPageUrl } from "@/utils";
+import { Link } from "react-router-dom";
 
 export default function Billing() {
-  const [draws, setDraws] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [periods, setPeriods] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
-      base44.entities.DrawRequest.list("-created_date", 50),
       base44.entities.Project.list("-created_date", 100),
-    ]).then(([drawData, projectData]) => {
-      setDraws(drawData);
-      setProjects(projectData);
+      base44.entities.BillingPeriod.list("-created_date", 200),
+    ]).then(([proj, per]) => {
+      setProjects(proj);
+      setPeriods(per);
       setLoading(false);
     });
   }, []);
 
-  const projectMap = Object.fromEntries(projects.map(p => [p.id, p]));
+  const totalContractValue = projects.reduce((s, p) => s + (p.contract_value || 0), 0);
+  const activeProjects = projects.filter(p => p.status === "active").length;
 
-  const totalBilled = draws.reduce((sum, d) => sum + (d.total_amount || 0), 0);
-  const totalPaid = draws.filter(d => d.status === "paid").reduce((sum, d) => sum + (d.net_amount || 0), 0);
-  const pending = draws.filter(d => d.status === "submitted").length;
-  const drafts = draws.filter(d => d.status === "draft").length;
-
-  const stats = [
-    { label: "Total Billed", value: `$${totalBilled.toLocaleString()}`, color: "text-blue-600 bg-blue-50" },
-    { label: "Total Paid", value: `$${totalPaid.toLocaleString()}`, color: "text-green-600 bg-green-50" },
-    { label: "Pending Approval", value: pending, color: "text-yellow-600 bg-yellow-50" },
-    { label: "Draft Draws", value: drafts, color: "text-gray-600 bg-gray-50" },
-  ];
+  // Latest period per project for "last billed"
+  const latestPeriodByProject = {};
+  periods.forEach(p => {
+    if (!latestPeriodByProject[p.project_id] || p.period_number > latestPeriodByProject[p.project_id].period_number) {
+      latestPeriodByProject[p.project_id] = p;
+    }
+  });
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#0f2a5e]">Billing</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Draw requests & AIA billing</p>
+          <h1 className="text-2xl font-bold text-[#0f2a5e]">Project Dashboard</h1>
+          <p className="text-gray-500 text-sm mt-0.5">AIA G702/G703 Billing Management</p>
         </div>
+        <Link to={createPageUrl("Projects")}>
+          <Button className="bg-[#0f2a5e] hover:bg-[#1e3a8a] text-white">
+            <Plus className="w-4 h-4 mr-1" /> New Project
+          </Button>
+        </Link>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {stats.map(({ label, value, color }) => (
-          <div key={label} className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
-            <div className={`inline-flex p-2 rounded-lg ${color} mb-3`}>
-              <DollarSign className="w-5 h-5" />
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <Building2 className="w-5 h-5 text-blue-600" />
             </div>
-            <div className="text-2xl font-bold text-[#0f2a5e]">{loading ? "—" : value}</div>
-            <div className="text-sm text-gray-500 mt-0.5">{label}</div>
+            <div>
+              <div className="text-xs text-gray-500">Active Projects</div>
+              <div className="text-2xl font-bold text-[#0f2a5e]">{loading ? "—" : activeProjects}</div>
+            </div>
           </div>
-        ))}
+        </div>
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-50 rounded-lg">
+              <FileText className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <div className="text-xs text-gray-500">Total Contract Value</div>
+              <div className="text-2xl font-bold text-[#0f2a5e]">{loading ? "—" : `$${totalContractValue.toLocaleString()}`}</div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-50 rounded-lg">
+              <DollarSign className="w-5 h-5 text-purple-600" />
+            </div>
+            <div>
+              <div className="text-xs text-gray-500">Total Billed</div>
+              <div className="text-2xl font-bold text-[#0f2a5e]">—</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Draw Requests Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-[#0f2a5e] text-lg flex items-center gap-2">
-            <FileText className="w-5 h-5" /> Draw Requests
-          </h2>
+      {/* Project Cards */}
+      {loading ? (
+        <p className="text-gray-400 text-sm">Loading...</p>
+      ) : projects.length === 0 ? (
+        <div className="text-center py-16 text-gray-400">
+          <Building2 className="w-10 h-10 mx-auto mb-2 opacity-30" />
+          <p className="text-sm">No projects yet. Create one to get started.</p>
         </div>
-
-        {loading ? (
-          <p className="text-gray-400 text-sm">Loading...</p>
-        ) : draws.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <DollarSign className="w-10 h-10 mx-auto mb-2 opacity-30" />
-            <p className="text-sm">No draw requests yet.</p>
-            <p className="text-xs mt-1">Open a project's Schedule of Values to create a draw request.</p>
-          </div>
-        ) : (
-          <div className="divide-y">
-            {/* Header */}
-            <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-gray-400 uppercase pb-2 px-1">
-              <div className="col-span-3">Project</div>
-              <div className="col-span-1 text-center">Draw #</div>
-              <div className="col-span-2">Period</div>
-              <div className="col-span-2 text-right">Amount</div>
-              <div className="col-span-2 text-right">Retainage</div>
-              <div className="col-span-1 text-center">Status</div>
-              <div className="col-span-1" />
-            </div>
-
-            {draws.map(draw => {
-              const project = projectMap[draw.project_id];
-              return (
-                <div key={draw.id} className="grid grid-cols-12 gap-2 py-3 text-sm items-center px-1">
-                  <div className="col-span-3">
-                    <div className="font-medium text-[#0f2a5e]">{project?.name || "—"}</div>
-                    {project && <div className="text-xs text-gray-400">#{project.job_number}</div>}
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {projects.map(project => {
+            const projectPeriods = periods.filter(p => p.project_id === project.id);
+            const latestPeriod = latestPeriodByProject[project.id];
+            return (
+              <Link key={project.id} to={createPageUrl(`ProjectBilling?id=${project.id}`)}>
+                <div className="bg-[#0f2a5e] text-white rounded-xl p-5 hover:bg-[#1e3a8a] transition-colors cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-white/10 rounded-lg">
+                        <Building2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-base leading-tight">{project.name}</div>
+                        <div className="text-blue-200 text-xs">{project.job_number}</div>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      {project.project_type && (
+                        <Badge className="bg-white/20 text-white text-xs border-0">{project.project_type}</Badge>
+                      )}
+                      {latestPeriod && (
+                        <Badge className="bg-white/20 text-white text-xs border-0">Period {latestPeriod.period_number}</Badge>
+                      )}
+                    </div>
                   </div>
-                  <div className="col-span-1 text-center text-gray-600">{draw.draw_number}</div>
-                  <div className="col-span-2 text-gray-500 text-xs">
-                    {draw.period_from && draw.period_to
-                      ? `${draw.period_from} – ${draw.period_to}`
-                      : draw.period_from || "—"}
-                  </div>
-                  <div className="col-span-2 text-right font-medium text-[#0f2a5e]">
-                    {draw.total_amount != null ? `$${draw.total_amount.toLocaleString()}` : "—"}
-                  </div>
-                  <div className="col-span-2 text-right text-gray-500">
-                    {draw.retainage_held != null ? `$${draw.retainage_held.toLocaleString()}` : "—"}
-                  </div>
-                  <div className="col-span-1 text-center">
-                    <Badge className={statusColors[draw.status] || "bg-gray-100 text-gray-700"}>
-                      {draw.status}
-                    </Badge>
-                  </div>
-                  <div className="col-span-1 flex justify-end">
-                    {project && (
-                      <Link to={createPageUrl(`ProjectDetail?id=${draw.project_id}`)}>
-                        <button className="text-gray-300 hover:text-[#1e3a8a] transition-colors">
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      </Link>
-                    )}
+                  <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/20">
+                    <div>
+                      <div className="text-blue-200 text-xs flex items-center gap-1">
+                        <DollarSign className="w-3 h-3" /> CONTRACT
+                      </div>
+                      <div className="font-bold text-sm mt-0.5">
+                        ${(project.contract_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-blue-200 text-xs flex items-center gap-1">
+                        <FileText className="w-3 h-3" /> LAST BILLED
+                      </div>
+                      <div className="font-bold text-sm mt-0.5">$0.00</div>
+                    </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
