@@ -62,6 +62,11 @@ export default function ProjectDetail() {
               <Badge className={statusColors[project.status] || "bg-gray-100 text-gray-700"}>
                 {project.status?.replace("_", " ")}
               </Badge>
+              {project.project_type && (
+                <Badge className="bg-[#0f2a5e] text-white">
+                  {project.project_type}
+                </Badge>
+              )}
             </div>
             <p className="text-gray-500 mt-1">Job #{project.job_number}</p>
           </div>
