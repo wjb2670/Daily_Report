@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import GeneralConditionsDrawer from "./GeneralConditionsDrawer";
 
-export default function SOVSection({ projectId }) {
+export default function SOVSection({ projectId, projectType }) {
   const [lines, setLines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newLine, setNewLine] = useState({ line_number: "", description: "", cost_code: "", scheduled_value: "" });
