@@ -15,6 +15,7 @@ export default function ProjectFormModal({ project, onSave, onClose }) {
   const [form, setForm] = useState({
     name: project?.name || "",
     job_number: project?.job_number || "",
+    project_type: project?.project_type || "GC",
     status: project?.status || "awarded",
     address: project?.address || "",
     city: project?.city || "",
