@@ -195,6 +195,13 @@ export default function SOVSection({ projectId, projectType }) {
         </div>
       </div>
 
+      {/* General Conditions Drawer – shown for CM projects */}
+      {projectType === "CM" && (
+        <div className="mb-4">
+          <GeneralConditionsDrawer projectId={projectId} sovTotal={total} />
+        </div>
+      )}
+
       {importResult && (
         <div className={`flex items-center gap-2 text-sm p-3 rounded-lg mb-4 ${importResult.success ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
           {importResult.success
