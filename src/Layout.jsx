@@ -26,6 +26,13 @@ const navItems = [
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!currentPageName || currentPageName === "") {
+      navigate(createPageUrl("Dashboard"));
+    }
+  }, [currentPageName]);
 
   return (
     <div className="min-h-screen bg-blue-50 flex">
