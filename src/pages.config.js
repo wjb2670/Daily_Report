@@ -53,6 +53,7 @@ import Dashboard from './pages/Dashboard';
 import ProjectDetail from './pages/ProjectDetail';
 import Projects from './pages/Projects';
 import Scopes from './pages/Scopes';
+import ProjectBilling from './pages/ProjectBilling';
 import __Layout from './Layout.jsx';
 
 
@@ -63,6 +64,7 @@ export const PAGES = {
     "ProjectDetail": ProjectDetail,
     "Projects": Projects,
     "Scopes": Scopes,
+    "ProjectBilling": ProjectBilling,
 }
 
 export const pagesConfig = {
