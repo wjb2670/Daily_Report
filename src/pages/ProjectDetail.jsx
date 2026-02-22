@@ -184,7 +184,7 @@ export default function ProjectDetail() {
         </div>
       )}
 
-      {activeTab === "sov" && <SOVSection projectId={projectId} />}
+      {activeTab === "sov" && <SOVSection projectId={projectId} projectType={project.project_type} />}
 
       {activeTab === "subcontractors" && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center text-gray-400">
