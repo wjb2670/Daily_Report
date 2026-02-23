@@ -118,7 +118,7 @@ export default function BillingPeriodDetail() {
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-2xl font-bold text-[#0f2a5e]">Period {period.period_number}</h1>
-            <Badge className="bg-blue-100 text-blue-800">{isGC ? "General Conditions AIA" : "Construction Management AIA"}</Badge>
+            <Badge className="bg-blue-100 text-blue-800">AIA Application</Badge>
             {period.locked && <Badge className="bg-gray-100 text-gray-700 flex items-center gap-1"><Lock className="w-3 h-3" /> locked</Badge>}
           </div>
           <p className="text-[#1e3a8a] text-sm font-medium mt-0.5">{project.name}</p>
