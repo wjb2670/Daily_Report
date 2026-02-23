@@ -51,8 +51,9 @@ export default function ProjectBilling() {
       description: newItem.description,
       scheduled_value: parseFloat(newItem.scheduled_value),
       category: newItem.is_general_conditions ? "General Conditions" : "Construction",
+      retainage_percent: parseFloat(newItem.retainage_percent) || 10,
     });
-    setNewItem({ item_number: "", description: "", scheduled_value: "", is_general_conditions: false });
+    setNewItem({ item_number: "", description: "", scheduled_value: "", is_general_conditions: false, retainage_percent: 10 });
     setAddingItem(false);
     loadAll();
   };
