@@ -111,7 +111,8 @@ export default function ProjectBilling() {
 
     for (const row of rows) {
       const desc = row.description || row.desc || row.name || "";
-      const val = parseFloat(row.scheduled_value || row.value || row.amount || "0") || 0;
+      const rawVal = row.scheduled_value || row.value || row.amount || "0";
+      const val = parseFloat(rawVal.replace(/[$,\s]/g, "")) || 0;
       if (!desc) continue;
       await base44.entities.ScheduleOfValues.create({
         project_id: projectId,
