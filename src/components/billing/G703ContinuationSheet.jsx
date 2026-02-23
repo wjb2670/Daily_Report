@@ -123,10 +123,7 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {/* CM line items — editable */}
-            {cmItems.map((item, idx) => renderEditableRow(item, idx))}
-
-            {/* General Conditions — lump sum row with expand toggle */}
+            {/* General Conditions — lump sum row with expand toggle, shown first as item 01 */}
             {gcItems.length > 0 && (
               <>
                 <tr
