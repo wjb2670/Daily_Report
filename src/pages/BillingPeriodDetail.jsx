@@ -62,7 +62,7 @@ export default function BillingPeriodDetail() {
           materials_this_period: 0,
           retainage_percent: 0,
           retainage_amount: 0,
-          is_general_conditions: sov.category === "General Conditions",
+          is_general_conditions: sovItem.category === "General Conditions",
         });
         mergedLines.push(created);
       }
