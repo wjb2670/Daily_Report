@@ -61,7 +61,7 @@ export default function BillingPeriodDetail() {
           previous_applications: 0,
           work_this_period: 0,
           materials_this_period: 0,
-          retainage_percent: 0,
+          retainage_percent: sovItem.retainage_percent ?? 10,
           retainage_amount: 0,
           is_general_conditions: isGCItem,
         });
