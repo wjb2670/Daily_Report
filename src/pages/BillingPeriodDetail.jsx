@@ -45,18 +45,18 @@ export default function BillingPeriodDetail() {
 
     // Create line items for any SOV items that don't have one yet
     const mergedLines = [];
-    for (const sov of sov) {
-      if (lineMap[sov.id]) {
-        mergedLines.push(lineMap[sov.id]);
+    for (const sovItem of sov) {
+      if (lineMap[sovItem.id]) {
+        mergedLines.push(lineMap[sovItem.id]);
       } else {
         // Create a default line item
         const created = await base44.entities.BillingLineItem.create({
           billing_period_id: periodId,
           project_id: per.project_id,
-          sov_item_id: sov.id,
-          item_number: sov.line_number || "",
-          description: sov.description,
-          scheduled_value: sov.scheduled_value || 0,
+          sov_item_id: sovItem.id,
+          item_number: sovItem.line_number || "",
+          description: sovItem.description,
+          scheduled_value: sovItem.scheduled_value || 0,
           previous_applications: 0,
           work_this_period: 0,
           materials_this_period: 0,
