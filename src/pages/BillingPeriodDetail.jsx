@@ -32,36 +32,23 @@ export default function BillingPeriodDetail() {
     if (!per) { setLoading(false); return; }
     setPeriod(per);
 
-    const aiaType = new URLSearchParams(window.location.search).get("type");
-    const isGC = aiaType === "gc_aia";
-
     const [proj, allSov, existingLines] = await Promise.all([
         base44.entities.Project.filter({ id: per.project_id }),
         base44.entities.ScheduleOfValues.filter({ project_id: per.project_id }, "line_number"),
         base44.entities.BillingLineItem.filter({ billing_period_id: periodId }),
       ]);
 
-    // If there are already line items, use them to determine GC vs CM (ignore URL param)
-    let resolvedIsGC = isGC;
-    if (existingLines.length > 0) {
-      resolvedIsGC = existingLines.some(l => l.is_general_conditions);
-    }
-
-    const sov = resolvedIsGC
-      ? allSov.filter(s => s.category === "General Conditions")
-      : allSov.filter(s => s.category !== "General Conditions");
-
     setProject(proj[0] || null);
-    setSovItems(sov);
-    setIsGC(resolvedIsGC);
+    setSovItems(allSov);
 
     // Map existing line items by sov_item_id
     const lineMap = {};
     existingLines.forEach(l => { lineMap[l.sov_item_id] = l; });
 
-    // Create line items only for SOV items that don't have one yet
+    // Create line items for all SOV items that don't have one yet
     const mergedLines = [];
-    for (const sovItem of sov) {
+    for (const sovItem of allSov) {
+      const isGCItem = sovItem.category === "General Conditions";
       if (lineMap[sovItem.id]) {
         mergedLines.push(lineMap[sovItem.id]);
       } else {
@@ -77,7 +64,7 @@ export default function BillingPeriodDetail() {
           materials_this_period: 0,
           retainage_percent: 0,
           retainage_amount: 0,
-          is_general_conditions: resolvedIsGC,
+          is_general_conditions: isGCItem,
         });
         mergedLines.push(created);
       }
