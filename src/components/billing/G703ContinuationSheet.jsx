@@ -130,7 +130,7 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                   className="bg-amber-50/60 hover:bg-amber-50 cursor-pointer"
                   onClick={() => setGcExpanded(v => !v)}
                 >
-                  <td className="py-2 px-1 text-gray-500">GC</td>
+                  <td className="py-2 px-1 text-gray-500">01</td>
                   <td className="py-2 px-1 font-semibold text-amber-800">
                     <span className="flex items-center gap-1">
                       {gcExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
