@@ -17,7 +17,6 @@ export default function BillingPeriodDetail() {
   const [project, setProject] = useState(null);
   const [sovItems, setSovItems] = useState([]);
   const [lineItems, setLineItems] = useState([]);
-  const [isGC, setIsGC] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
