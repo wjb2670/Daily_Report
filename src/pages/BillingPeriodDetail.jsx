@@ -31,11 +31,17 @@ export default function BillingPeriodDetail() {
     if (!per) { setLoading(false); return; }
     setPeriod(per);
 
-    const [proj, sov, lines] = await Promise.all([
-      base44.entities.Project.filter({ id: per.project_id }),
-      base44.entities.ScheduleOfValues.filter({ project_id: per.project_id }, "line_number"),
-      base44.entities.BillingLineItem.filter({ billing_period_id: periodId }),
-    ]);
+    const aiaType = new URLSearchParams(window.location.search).get("type");
+    const isGC = aiaType === "gc_aia";
+
+    const [proj, allSov, lines] = await Promise.all([
+        base44.entities.Project.filter({ id: per.project_id }),
+        base44.entities.ScheduleOfValues.filter({ project_id: per.project_id }, "line_number"),
+        base44.entities.BillingLineItem.filter({ billing_period_id: periodId }),
+      ]);
+    const sov = isGC
+      ? allSov.filter(s => s.category === "General Conditions")
+      : allSov.filter(s => s.category !== "General Conditions");
     setProject(proj[0] || null);
     setSovItems(sov);
 
