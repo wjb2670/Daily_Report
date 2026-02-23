@@ -47,26 +47,26 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import Billing from './pages/Billing';
+import BillingPeriodDetail from './pages/BillingPeriodDetail';
 import DailyReport from './pages/DailyReport';
 import Dashboard from './pages/Dashboard';
+import ProjectBilling from './pages/ProjectBilling';
 import ProjectDetail from './pages/ProjectDetail';
 import Projects from './pages/Projects';
 import Scopes from './pages/Scopes';
-import ProjectBilling from './pages/ProjectBilling';
-import BillingPeriodDetail from './pages/BillingPeriodDetail';
-import Billing from './pages/Billing';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "Billing": Billing,
+    "BillingPeriodDetail": BillingPeriodDetail,
     "DailyReport": DailyReport,
     "Dashboard": Dashboard,
+    "ProjectBilling": ProjectBilling,
     "ProjectDetail": ProjectDetail,
     "Projects": Projects,
     "Scopes": Scopes,
-    "ProjectBilling": ProjectBilling,
-    "BillingPeriodDetail": BillingPeriodDetail,
-    "Billing": Billing,
 }
 
 export const pagesConfig = {

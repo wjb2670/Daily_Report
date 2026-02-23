@@ -99,6 +99,7 @@ export default function ProjectBilling() {
         description: desc,
         scheduled_value: val,
         cost_code: row.cost_code || row.code || "",
+        category: activeTab === "gc_aia" ? "General Conditions" : "Construction",
       });
     }
     setImporting(false);
