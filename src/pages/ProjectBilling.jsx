@@ -185,10 +185,11 @@ export default function ProjectBilling() {
           <>
             {/* Table Header */}
             <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-gray-400 uppercase pb-2 px-1 border-b">
-              <div className="col-span-2">Item #</div>
-              <div className="col-span-6">Description</div>
+              <div className="col-span-1">Item #</div>
+              <div className="col-span-5">Description</div>
               <div className="col-span-2 text-center">Type</div>
-              <div className="col-span-1 text-right">Scheduled Value</div>
+              <div className="col-span-2 text-right">Scheduled Value</div>
+              <div className="col-span-1 text-right text-orange-500">Ret. %</div>
               <div className="col-span-1" />
             </div>
 
