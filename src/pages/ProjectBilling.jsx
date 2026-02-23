@@ -129,8 +129,11 @@ export default function ProjectBilling() {
     URL.revokeObjectURL(url);
   };
 
+  const [gcExpanded, setGcExpanded] = useState(false);
+
   const cmItems = sovItems.filter(i => i.category !== "General Conditions");
   const gcItems = sovItems.filter(i => i.category === "General Conditions");
+  const gcTotal = gcItems.reduce((s, i) => s + (i.scheduled_value || 0), 0);
   const totalScheduled = sovItems.reduce((s, i) => s + (i.scheduled_value || 0), 0);
 
   if (loading) return <div className="text-center py-16 text-gray-400">Loading...</div>;
