@@ -30,10 +30,10 @@ export default function Layout({ children, currentPageName }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!currentPageName || currentPageName === "") {
+    if (!currentPageName || currentPageName === "" || currentPageName === "DailyReport") {
       navigate(createPageUrl("Dashboard"));
     }
-  }, [currentPageName]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-blue-50 flex">
