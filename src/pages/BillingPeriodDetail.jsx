@@ -53,6 +53,7 @@ export default function BillingPeriodDetail() {
 
     setProject(proj[0] || null);
     setSovItems(sov);
+    setIsGC(resolvedIsGC);
 
     // Map existing line items by sov_item_id
     const lineMap = {};
