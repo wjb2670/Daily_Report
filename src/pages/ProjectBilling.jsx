@@ -283,11 +283,11 @@ export default function ProjectBilling() {
             {/* Add item row */}
             {addingItem && (
               <div className="grid grid-cols-12 gap-2 py-2 items-center px-1 border-b border-blue-100 bg-blue-50">
-                <div className="col-span-2">
+                <div className="col-span-1">
                   <Input className="h-7 text-xs" placeholder="#" value={newItem.item_number}
                     onChange={e => setNewItem(p => ({ ...p, item_number: e.target.value }))} />
                 </div>
-                <div className="col-span-5">
+                <div className="col-span-4">
                   <Input className="h-7 text-xs" placeholder="Description *" value={newItem.description}
                     onChange={e => setNewItem(p => ({ ...p, description: e.target.value }))} />
                 </div>
@@ -299,6 +299,11 @@ export default function ProjectBilling() {
                 <div className="col-span-2">
                   <Input className="h-7 text-xs" type="number" placeholder="Value *" value={newItem.scheduled_value}
                     onChange={e => setNewItem(p => ({ ...p, scheduled_value: e.target.value }))} />
+                </div>
+                <div className="col-span-2 flex items-center gap-1">
+                  <Input className="h-7 text-xs w-14" type="number" placeholder="10" value={newItem.retainage_percent}
+                    onChange={e => setNewItem(p => ({ ...p, retainage_percent: e.target.value }))} />
+                  <span className="text-xs text-gray-500">%</span>
                 </div>
                 <div className="col-span-1 flex gap-1">
                   <button onClick={addSOVItem} className="text-green-600 hover:text-green-700"><Check className="w-4 h-4" /></button>
