@@ -200,16 +200,19 @@ export default function ProjectBilling() {
                   className="grid grid-cols-12 gap-2 py-2.5 text-sm items-center px-1 border-b border-amber-100 bg-amber-50/60 cursor-pointer hover:bg-amber-50"
                   onClick={() => setGcExpanded(v => !v)}
                 >
-                  <div className="col-span-2 text-gray-500">01</div>
-                  <div className="col-span-6 font-semibold text-amber-800 flex items-center gap-1">
+                  <div className="col-span-1 text-gray-500">01</div>
+                  <div className="col-span-5 font-semibold text-amber-800 flex items-center gap-1">
                     {gcExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                     General Conditions
                   </div>
                   <div className="col-span-2 text-center">
                     <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs">GC</Badge>
                   </div>
-                  <div className="col-span-1 text-right text-[#0f2a5e] font-semibold">
+                  <div className="col-span-2 text-right text-[#0f2a5e] font-semibold">
                     ${gcTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  </div>
+                  <div className="col-span-1 text-right text-orange-500 text-xs">
+                    {gcItems[0]?.retainage_percent != null ? `${gcItems[0].retainage_percent}%` : "10%"}
                   </div>
                   <div className="col-span-1" />
                 </div>
@@ -217,13 +220,26 @@ export default function ProjectBilling() {
                 {/* Expanded GC sub-items */}
                 {gcExpanded && gcItems.map(item => (
                   <div key={item.id} className="grid grid-cols-12 gap-2 py-2 text-xs items-center px-1 border-b border-amber-50 bg-amber-50/20">
-                    <div className="col-span-2 pl-5 text-gray-400">—</div>
-                    <div className="col-span-6 pl-5 text-gray-600 italic">{item.description}</div>
+                    <div className="col-span-1 pl-4 text-gray-400">—</div>
+                    <div className="col-span-5 pl-4 text-gray-600 italic">{item.description}</div>
                     <div className="col-span-2 text-center">
                       <span className="text-gray-400 text-xs">{item.cost_code}</span>
                     </div>
-                    <div className="col-span-1 text-right text-gray-500">
+                    <div className="col-span-2 text-right text-gray-500">
                       ${(item.scheduled_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="col-span-1 text-right">
+                      <input
+                        type="number"
+                        className="w-12 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-500"
+                        value={item.retainage_percent ?? 10}
+                        onClick={e => e.stopPropagation()}
+                        onChange={e => {
+                          e.stopPropagation();
+                          base44.entities.ScheduleOfValues.update(item.id, { retainage_percent: parseFloat(e.target.value) || 0 }).then(loadAll);
+                        }}
+                      />
+                      <span className="text-gray-400 ml-0.5">%</span>
                     </div>
                     <div className="col-span-1 flex justify-end">
                       <button onClick={e => { e.stopPropagation(); deleteSOVItem(item.id); }} className="text-gray-300 hover:text-red-500 transition-colors">
