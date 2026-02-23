@@ -71,7 +71,7 @@ export default function ProjectBilling() {
       period_number: nextNum,
       status: "draft",
     });
-    window.location.href = createPageUrl(`BillingPeriodDetail?period_id=${created.id}`);
+    window.location.href = createPageUrl(`BillingPeriodDetail?period_id=${created.id}&type=${activeTab}`);
   };
 
   // Properly parse CSV lines, handling quoted fields with commas inside
