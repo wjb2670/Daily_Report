@@ -173,6 +173,9 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                 })}
               </>
             )}
+
+            {/* CM line items — editable, after GC */}
+            {cmItems.map((item, idx) => renderEditableRow(item, gcItems.length > 0 ? idx + 1 : idx))}
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-gray-300 font-bold text-gray-700">
