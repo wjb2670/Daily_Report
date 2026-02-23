@@ -74,6 +74,26 @@ export default function ProjectBilling() {
     window.location.href = createPageUrl(`BillingPeriodDetail?period_id=${created.id}`);
   };
 
+  // Properly parse CSV lines, handling quoted fields with commas inside
+  const parseCSVLine = (line) => {
+    const cols = [];
+    let cur = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+      } else if (ch === "," && !inQuotes) {
+        cols.push(cur.trim().replace(/[$,]/g, ""));
+        cur = "";
+      } else {
+        cur += ch;
+      }
+    }
+    cols.push(cur.trim().replace(/[$,]/g, ""));
+    return cols;
+  };
+
   const handleCSVImport = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -81,11 +101,11 @@ export default function ProjectBilling() {
     const text = await file.text();
     const lines = text.trim().split("\n");
     if (lines.length < 2) { setImporting(false); return; }
-    const headers = lines[0].split(",").map(h => h.trim().toLowerCase().replace(/\s+/g, "_"));
+    const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().replace(/\s+/g, "_"));
     const rows = lines.slice(1).map(line => {
-      const cols = line.split(",");
+      const cols = parseCSVLine(line);
       const obj = {};
-      headers.forEach((h, i) => { obj[h] = (cols[i] || "").trim().replace(/[$,"]/g, ""); });
+      headers.forEach((h, i) => { obj[h] = (cols[i] || "").trim(); });
       return obj;
     }).filter(r => r.description || r.desc);
 
