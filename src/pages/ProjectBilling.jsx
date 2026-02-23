@@ -24,7 +24,7 @@ export default function ProjectBilling() {
   const [loading, setLoading] = useState(true);
 
   const [addingItem, setAddingItem] = useState(false);
-  const [newItem, setNewItem] = useState({ item_number: "", description: "", scheduled_value: "", is_general_conditions: false });
+  const [newItem, setNewItem] = useState({ item_number: "", description: "", scheduled_value: "", is_general_conditions: false, retainage_percent: 10 });
   const [importing, setImporting] = useState(false);
 
   useEffect(() => {
