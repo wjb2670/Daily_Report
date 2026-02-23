@@ -21,7 +21,7 @@ export default function ProjectBilling() {
   const [project, setProject] = useState(null);
   const [sovItems, setSovItems] = useState([]);
   const [periods, setPeriods] = useState([]);
-  const [activeTab, setActiveTab] = useState("cm_aia"); // cm_aia | gc_aia
+  
   const [loading, setLoading] = useState(true);
 
   // Inline add SOV item
