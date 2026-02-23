@@ -192,32 +192,55 @@ export default function ProjectBilling() {
               <div className="col-span-1" />
             </div>
 
-            {/* CM Items */}
+            {/* GC Lump Sum Row — item 01, expandable */}
+            {gcItems.length > 0 && (
+              <>
+                <div
+                  className="grid grid-cols-12 gap-2 py-2.5 text-sm items-center px-1 border-b border-amber-100 bg-amber-50/60 cursor-pointer hover:bg-amber-50"
+                  onClick={() => setGcExpanded(v => !v)}
+                >
+                  <div className="col-span-2 text-gray-500">01</div>
+                  <div className="col-span-6 font-semibold text-amber-800 flex items-center gap-1">
+                    {gcExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                    General Conditions
+                  </div>
+                  <div className="col-span-2 text-center">
+                    <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs">GC</Badge>
+                  </div>
+                  <div className="col-span-1 text-right text-[#0f2a5e] font-semibold">
+                    ${gcTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                  </div>
+                  <div className="col-span-1" />
+                </div>
+
+                {/* Expanded GC sub-items */}
+                {gcExpanded && gcItems.map(item => (
+                  <div key={item.id} className="grid grid-cols-12 gap-2 py-2 text-xs items-center px-1 border-b border-amber-50 bg-amber-50/20">
+                    <div className="col-span-2 pl-5 text-gray-400">—</div>
+                    <div className="col-span-6 pl-5 text-gray-600 italic">{item.description}</div>
+                    <div className="col-span-2 text-center">
+                      <span className="text-gray-400 text-xs">{item.cost_code}</span>
+                    </div>
+                    <div className="col-span-1 text-right text-gray-500">
+                      ${(item.scheduled_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="col-span-1 flex justify-end">
+                      <button onClick={e => { e.stopPropagation(); deleteSOVItem(item.id); }} className="text-gray-300 hover:text-red-500 transition-colors">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {/* CM Items — numbered starting at 02 if GC exists */}
             {cmItems.map((item, idx) => (
               <div key={item.id} className="grid grid-cols-12 gap-2 py-2.5 text-sm items-center px-1 border-b border-gray-50">
-                <div className="col-span-2 text-gray-500">{item.line_number || String(idx + 1).padStart(2, "0")}</div>
+                <div className="col-span-2 text-gray-500">{item.line_number || String((gcItems.length > 0 ? 1 : 0) + idx + 1).padStart(2, "0")}</div>
                 <div className="col-span-6 font-medium text-gray-800">{item.description}</div>
                 <div className="col-span-2 text-center">
                   <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs">CM</Badge>
-                </div>
-                <div className="col-span-1 text-right text-[#0f2a5e] font-medium">
-                  ${(item.scheduled_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                </div>
-                <div className="col-span-1 flex justify-end">
-                  <button onClick={() => deleteSOVItem(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {/* GC Items */}
-            {gcItems.map((item, idx) => (
-              <div key={item.id} className="grid grid-cols-12 gap-2 py-2.5 text-sm items-center px-1 border-b border-gray-50 bg-amber-50/40">
-                <div className="col-span-2 text-gray-500">{item.line_number || String(cmItems.length + idx + 1).padStart(2, "0")}</div>
-                <div className="col-span-6 font-medium text-gray-800">{item.description}</div>
-                <div className="col-span-2 text-center">
-                  <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs">GC</Badge>
                 </div>
                 <div className="col-span-1 text-right text-[#0f2a5e] font-medium">
                   ${(item.scheduled_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
