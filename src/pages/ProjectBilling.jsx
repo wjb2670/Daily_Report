@@ -254,13 +254,22 @@ export default function ProjectBilling() {
             {/* CM Items — numbered starting at 02 if GC exists */}
             {cmItems.map((item, idx) => (
               <div key={item.id} className="grid grid-cols-12 gap-2 py-2.5 text-sm items-center px-1 border-b border-gray-50">
-                <div className="col-span-2 text-gray-500">{item.line_number || String((gcItems.length > 0 ? 1 : 0) + idx + 1).padStart(2, "0")}</div>
-                <div className="col-span-6 font-medium text-gray-800">{item.description}</div>
+                <div className="col-span-1 text-gray-500">{item.line_number || String((gcItems.length > 0 ? 1 : 0) + idx + 1).padStart(2, "0")}</div>
+                <div className="col-span-5 font-medium text-gray-800">{item.description}</div>
                 <div className="col-span-2 text-center">
                   <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs">CM</Badge>
                 </div>
-                <div className="col-span-1 text-right text-[#0f2a5e] font-medium">
+                <div className="col-span-2 text-right text-[#0f2a5e] font-medium">
                   ${(item.scheduled_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </div>
+                <div className="col-span-1 text-right flex items-center justify-end gap-0.5">
+                  <input
+                    type="number"
+                    className="w-12 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-500"
+                    value={item.retainage_percent ?? 10}
+                    onChange={e => base44.entities.ScheduleOfValues.update(item.id, { retainage_percent: parseFloat(e.target.value) || 0 }).then(loadAll)}
+                  />
+                  <span className="text-gray-400 text-xs">%</span>
                 </div>
                 <div className="col-span-1 flex justify-end">
                   <button onClick={() => deleteSOVItem(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
