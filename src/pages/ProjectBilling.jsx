@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Plus, Upload, Download, Trash2, Edit2, Check, X } from "lucide-react";
+import { ArrowLeft, Plus, Upload, Download, Trash2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -21,10 +21,8 @@ export default function ProjectBilling() {
   const [project, setProject] = useState(null);
   const [sovItems, setSovItems] = useState([]);
   const [periods, setPeriods] = useState([]);
-  
   const [loading, setLoading] = useState(true);
 
-  // Inline add SOV item
   const [addingItem, setAddingItem] = useState(false);
   const [newItem, setNewItem] = useState({ item_number: "", description: "", scheduled_value: "", is_general_conditions: false });
   const [importing, setImporting] = useState(false);
@@ -71,30 +69,24 @@ export default function ProjectBilling() {
       period_number: nextNum,
       status: "draft",
     });
-    window.location.href = createPageUrl(`BillingPeriodDetail?period_id=${created.id}&type=${activeTab}`);
+    window.location.href = createPageUrl(`BillingPeriodDetail?period_id=${created.id}`);
   };
 
-  // Properly parse CSV lines, handling quoted fields with commas inside
   const parseCSVLine = (line) => {
     const cols = [];
     let cur = "";
     let inQuotes = false;
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
-      if (ch === '"') {
-        inQuotes = !inQuotes;
-      } else if (ch === "," && !inQuotes) {
-        cols.push(cur.trim().replace(/[$,]/g, ""));
-        cur = "";
-      } else {
-        cur += ch;
-      }
+      if (ch === '"') { inQuotes = !inQuotes; }
+      else if (ch === "," && !inQuotes) { cols.push(cur.trim().replace(/[$,]/g, "")); cur = ""; }
+      else { cur += ch; }
     }
     cols.push(cur.trim().replace(/[$,]/g, ""));
     return cols;
   };
 
-  const handleCSVImport = async (e) => {
+  const handleCSVImport = async (e, isGC = false) => {
     const file = e.target.files[0];
     if (!file) return;
     setImporting(true);
@@ -120,7 +112,7 @@ export default function ProjectBilling() {
         description: desc,
         scheduled_value: val,
         cost_code: row.cost_code || row.code || "",
-        category: activeTab === "gc_aia" ? "General Conditions" : "Construction",
+        category: isGC ? "General Conditions" : "Construction",
       });
     }
     setImporting(false);
@@ -137,18 +129,15 @@ export default function ProjectBilling() {
     URL.revokeObjectURL(url);
   };
 
-  // Split SOV items
   const cmItems = sovItems.filter(i => i.category !== "General Conditions");
   const gcItems = sovItems.filter(i => i.category === "General Conditions");
-  const displayItems = activeTab === "cm_aia" ? cmItems : gcItems;
-  const totalScheduled = displayItems.reduce((s, i) => s + (i.scheduled_value || 0), 0);
+  const totalScheduled = sovItems.reduce((s, i) => s + (i.scheduled_value || 0), 0);
 
   if (loading) return <div className="text-center py-16 text-gray-400">Loading...</div>;
   if (!project) return <div className="text-center py-16 text-gray-400">Project not found.</div>;
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Header */}
       <Link to={createPageUrl("Billing")} className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#1e3a8a] mb-4">
         <ArrowLeft className="w-4 h-4" /> Back
       </Link>
@@ -163,44 +152,21 @@ export default function ProjectBilling() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 border-b border-gray-200 mb-6">
-        <button
-          onClick={() => setActiveTab("cm_aia")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${activeTab === "cm_aia" ? "border-[#1e3a8a] text-[#1e3a8a]" : "border-transparent text-gray-500 hover:text-gray-700"}`}
-        >
-          Construction Management AIA
-        </button>
-        <button
-          onClick={() => setActiveTab("gc_aia")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${activeTab === "gc_aia" ? "border-[#1e3a8a] text-[#1e3a8a]" : "border-transparent text-gray-500 hover:text-gray-700"}`}
-        >
-          General Conditions AIA
-        </button>
-      </div>
-
       {/* Schedule of Values */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <h2 className="font-bold text-[#0f2a5e] text-base">
-            Schedule of Values ({displayItems.length} items)
-          </h2>
+          <h2 className="font-bold text-[#0f2a5e] text-base">Schedule of Values ({sovItems.length} items)</h2>
           <div className="flex items-center gap-2 flex-wrap">
-            <input type="file" id="csv-import" className="hidden" accept=".csv" onChange={handleCSVImport} />
+            <input type="file" id="csv-import-cm" className="hidden" accept=".csv" onChange={e => handleCSVImport(e, false)} />
+            <input type="file" id="csv-import-gc" className="hidden" accept=".csv" onChange={e => handleCSVImport(e, true)} />
             <Button variant="outline" size="sm" onClick={downloadTemplate}>
               <Download className="w-3.5 h-3.5 mr-1" /> Template
             </Button>
-            <Button variant="outline" size="sm" onClick={() => document.getElementById("csv-import").click()} disabled={importing}>
-              <Upload className="w-3.5 h-3.5 mr-1" /> {importing ? "Importing..." : "Import CSV"}
+            <Button variant="outline" size="sm" onClick={() => document.getElementById("csv-import-cm").click()} disabled={importing}>
+              <Upload className="w-3.5 h-3.5 mr-1" /> {importing ? "Importing..." : "Import CM"}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => {
-              // Bulk import via AI
-              const input = document.createElement("input");
-              input.type = "file"; input.accept = ".xlsx,.csv";
-              input.onchange = handleCSVImport;
-              input.click();
-            }}>
-              Bulk Import
+            <Button variant="outline" size="sm" onClick={() => document.getElementById("csv-import-gc").click()} disabled={importing}>
+              <Upload className="w-3.5 h-3.5 mr-1" /> Import GC
             </Button>
             <Button size="sm" className="bg-[#0f2a5e] hover:bg-[#1e3a8a] text-white" onClick={() => setAddingItem(true)}>
               <Plus className="w-3.5 h-3.5 mr-1" /> Add Item
@@ -208,7 +174,7 @@ export default function ProjectBilling() {
           </div>
         </div>
 
-        {displayItems.length === 0 && !addingItem ? (
+        {sovItems.length === 0 && !addingItem ? (
           <div className="text-center py-10 text-gray-400">
             <p className="text-sm">No line items yet. Add or import items to get started.</p>
           </div>
@@ -217,19 +183,43 @@ export default function ProjectBilling() {
             {/* Table Header */}
             <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-gray-400 uppercase pb-2 px-1 border-b">
               <div className="col-span-2">Item #</div>
-              <div className="col-span-7">Description</div>
-              <div className="col-span-2 text-right">Scheduled Value</div>
+              <div className="col-span-6">Description</div>
+              <div className="col-span-2 text-center">Type</div>
+              <div className="col-span-1 text-right">Scheduled Value</div>
               <div className="col-span-1" />
             </div>
 
-            {displayItems.map((item, idx) => (
+            {/* CM Items */}
+            {cmItems.map((item, idx) => (
               <div key={item.id} className="grid grid-cols-12 gap-2 py-2.5 text-sm items-center px-1 border-b border-gray-50">
                 <div className="col-span-2 text-gray-500">{item.line_number || String(idx + 1).padStart(2, "0")}</div>
-                <div className="col-span-7 font-medium text-gray-800">{item.description}</div>
-                <div className="col-span-2 text-right text-[#0f2a5e] font-medium">
+                <div className="col-span-6 font-medium text-gray-800">{item.description}</div>
+                <div className="col-span-2 text-center">
+                  <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs">CM</Badge>
+                </div>
+                <div className="col-span-1 text-right text-[#0f2a5e] font-medium">
                   ${(item.scheduled_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </div>
-                <div className="col-span-1 flex justify-end gap-1">
+                <div className="col-span-1 flex justify-end">
+                  <button onClick={() => deleteSOVItem(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {/* GC Items */}
+            {gcItems.map((item, idx) => (
+              <div key={item.id} className="grid grid-cols-12 gap-2 py-2.5 text-sm items-center px-1 border-b border-gray-50 bg-amber-50/40">
+                <div className="col-span-2 text-gray-500">{item.line_number || String(cmItems.length + idx + 1).padStart(2, "0")}</div>
+                <div className="col-span-6 font-medium text-gray-800">{item.description}</div>
+                <div className="col-span-2 text-center">
+                  <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs">GC</Badge>
+                </div>
+                <div className="col-span-1 text-right text-[#0f2a5e] font-medium">
+                  ${(item.scheduled_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </div>
+                <div className="col-span-1 flex justify-end">
                   <button onClick={() => deleteSOVItem(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -244,9 +234,14 @@ export default function ProjectBilling() {
                   <Input className="h-7 text-xs" placeholder="#" value={newItem.item_number}
                     onChange={e => setNewItem(p => ({ ...p, item_number: e.target.value }))} />
                 </div>
-                <div className="col-span-7">
+                <div className="col-span-5">
                   <Input className="h-7 text-xs" placeholder="Description *" value={newItem.description}
                     onChange={e => setNewItem(p => ({ ...p, description: e.target.value }))} />
+                </div>
+                <div className="col-span-2 flex items-center gap-1 px-1">
+                  <input type="checkbox" id="is-gc" checked={newItem.is_general_conditions}
+                    onChange={e => setNewItem(p => ({ ...p, is_general_conditions: e.target.checked }))} />
+                  <label htmlFor="is-gc" className="text-xs text-gray-600 cursor-pointer">GC</label>
                 </div>
                 <div className="col-span-2">
                   <Input className="h-7 text-xs" type="number" placeholder="Value *" value={newItem.scheduled_value}
