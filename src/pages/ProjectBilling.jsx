@@ -133,10 +133,10 @@ export default function ProjectBilling() {
   const [gcExpanded, setGcExpanded] = useState(false);
 
   const gcItems = sovItems.filter(i => i.category === "General Conditions");
-  // Exclude any plain "General Conditions" lump sum row that may have been created with category != "General Conditions"
+  // Exclude any duplicate "General Conditions" lump-sum row that is NOT tagged as GC category
   const cmItems = sovItems.filter(i =>
     i.category !== "General Conditions" &&
-    !(i.description === "General Conditions" && gcItems.length > 0)
+    i.description !== "General Conditions"
   );
   const gcTotal = gcItems.reduce((s, i) => s + (i.scheduled_value || 0), 0);
   const totalScheduled = sovItems.reduce((s, i) => s + (i.scheduled_value || 0), 0);
