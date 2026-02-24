@@ -102,19 +102,25 @@ export default function ProjectBilling() {
       return obj;
     }).filter(r => r.description || r.desc);
 
-    for (const row of rows) {
-      const desc = row.description || row.desc || row.name || "";
-      const rawVal = row.scheduled_value || row.value || row.amount || "0";
-      const val = parseFloat(rawVal.replace(/[$,\s]/g, "")) || 0;
-      if (!desc) continue;
-      await base44.entities.ScheduleOfValues.create({
-        project_id: projectId,
-        line_number: row.item || row.line_number || row.item_number || "",
-        description: desc,
-        scheduled_value: val,
-        cost_code: row.cost_code || row.code || "",
-        category: isGC ? "General Conditions" : "Construction",
-      });
+    const toCreate = rows
+      .map(row => {
+        const desc = row.description || row.desc || row.name || "";
+        const rawVal = row.scheduled_value || row.value || row.amount || "0";
+        const val = parseFloat(rawVal.replace(/[$,\s]/g, "")) || 0;
+        if (!desc) return null;
+        return {
+          project_id: projectId,
+          line_number: row.item || row.line_number || row.item_number || "",
+          description: desc,
+          scheduled_value: val,
+          cost_code: row.cost_code || row.code || "",
+          category: isGC ? "General Conditions" : "Construction",
+          retainage_percent: 10,
+        };
+      })
+      .filter(Boolean);
+    if (toCreate.length > 0) {
+      await base44.entities.ScheduleOfValues.bulkCreate(toCreate);
     }
     setImporting(false);
     e.target.value = "";
