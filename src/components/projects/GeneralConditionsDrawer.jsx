@@ -132,6 +132,7 @@ function GCPhaseSection({ projectId, phase, sovTotal, label }) {
                 </>
               )}
 
+              {error && <p className="text-red-500 text-xs mt-3">{error}</p>}
               <div className="grid grid-cols-12 gap-2 mt-4">
                 <Input
                   className="col-span-4 text-sm"
