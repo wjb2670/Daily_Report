@@ -237,7 +237,8 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
       <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-400">
         <span className="flex items-center gap-1"><span className="w-2 h-2 bg-blue-100 rounded inline-block" /> Work this period (editable)</span>
         <span className="flex items-center gap-1"><span className="w-2 h-2 bg-green-100 rounded inline-block" /> Materials this period (editable)</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-amber-100 rounded inline-block" /> General Conditions (click to expand)</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-amber-100 rounded inline-block" /> GC — 8 Unit Garage (item 01)</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-blue-100 rounded inline-block" /> GC — 12 Unit Garage (item 20)</span>
         <span className="flex items-center gap-1"><span className="w-2 h-2 bg-orange-100 rounded inline-block" /> Retainage auto-calculated from SOV %</span>
       </div>
     </div>
