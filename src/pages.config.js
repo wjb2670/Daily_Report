@@ -55,6 +55,7 @@ import ProjectBilling from './pages/ProjectBilling';
 import ProjectDetail from './pages/ProjectDetail';
 import Projects from './pages/Projects';
 import Scopes from './pages/Scopes';
+import Subcontractors from './pages/Subcontractors';
 import __Layout from './Layout.jsx';
 
 
@@ -67,6 +68,7 @@ export const PAGES = {
     "ProjectDetail": ProjectDetail,
     "Projects": Projects,
     "Scopes": Scopes,
+    "Subcontractors": Subcontractors,
 }
 
 export const pagesConfig = {
