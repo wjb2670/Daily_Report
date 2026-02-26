@@ -24,18 +24,13 @@ export default function SOVSection({ projectId, projectType }) {
   };
 
   const addLine = async () => {
-    if (!newLine.description) {
-      alert("Please enter a description.");
-      return;
-    }
-    if (!newLine.scheduled_value && newLine.scheduled_value !== 0) {
-      alert("Please enter a scheduled value.");
-      return;
-    }
+    if (!newLine.description || !newLine.scheduled_value) return;
     await base44.entities.ScheduleOfValues.create({
       ...newLine,
       project_id: projectId,
       scheduled_value: Number(newLine.scheduled_value),
+      category: "Construction",
+      retainage_percent: 10,
     });
     setNewLine({ line_number: "", description: "", cost_code: "", scheduled_value: "" });
     loadLines();
