@@ -7,20 +7,27 @@ const fmt = (val) =>
 const pct = (val) => (val == null ? "0%" : `${Number(val).toFixed(1)}%`);
 
 export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
-  const [gcExpanded, setGcExpanded] = useState(false);
+  const [gc1Expanded, setGc1Expanded] = useState(false);
+  const [gc2Expanded, setGc2Expanded] = useState(false);
 
-  const cmItems = lineItems.filter(l => !l.is_general_conditions);
-  const gcItems = lineItems.filter(l => l.is_general_conditions);
+  const cmItems  = lineItems.filter(l => !l.is_general_conditions && l.gc_phase !== "phase2");
+  const gc1Items = lineItems.filter(l => l.is_general_conditions && l.gc_phase !== "phase2");
+  const gc2Items = lineItems.filter(l => l.gc_phase === "phase2");
 
-  // GC lump sum totals
-  const gcScheduled = gcItems.reduce((s, l) => s + (l.scheduled_value || 0), 0);
-  const gcPrevious  = gcItems.reduce((s, l) => s + (l.previous_applications || 0), 0);
-  const gcWork      = gcItems.reduce((s, l) => s + (l.work_this_period || 0), 0);
-  const gcMaterials = gcItems.reduce((s, l) => s + (l.materials_this_period || 0), 0);
-  const gcCompleted = gcPrevious + gcWork + gcMaterials;
-  const gcBalance   = gcScheduled - gcCompleted;
-  const gcRetainage = gcItems.reduce((s, l) => s + (l.retainage_amount || 0), 0);
-  const gcPct       = gcScheduled ? (gcCompleted / gcScheduled) * 100 : 0;
+  const gcTotals = (items) => {
+    const scheduled = items.reduce((s, l) => s + (l.scheduled_value || 0), 0);
+    const previous  = items.reduce((s, l) => s + (l.previous_applications || 0), 0);
+    const work      = items.reduce((s, l) => s + (l.work_this_period || 0), 0);
+    const materials = items.reduce((s, l) => s + (l.materials_this_period || 0), 0);
+    const completed = previous + work + materials;
+    const balance   = scheduled - completed;
+    const retainage = items.reduce((s, l) => s + (l.retainage_amount || 0), 0);
+    const pct       = scheduled ? (completed / scheduled) * 100 : 0;
+    return { scheduled, previous, work, materials, completed, balance, retainage, pct };
+  };
+
+  const t1 = gcTotals(gc1Items);
+  const t2 = gcTotals(gc2Items);
 
   // Grand totals
   const totalScheduled = lineItems.reduce((s, l) => s + (l.scheduled_value || 0), 0);
