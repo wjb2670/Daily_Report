@@ -263,15 +263,29 @@ export default function SOVSection({ projectId, projectType }) {
         <div className="divide-y">
           {lines.map(line => (
             <div key={line.id} className="grid grid-cols-12 gap-2 py-2.5 text-sm items-center px-1">
-              <div className="col-span-1 text-gray-400">{line.line_number}</div>
-              <div className="col-span-4 font-medium text-gray-800">{line.description}</div>
-              <div className="col-span-3 text-gray-500">{line.cost_code}</div>
-              <div className="col-span-3 text-right font-medium text-[#0f2a5e]">${(line.scheduled_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-              <div className="col-span-1 flex justify-end">
-                <button onClick={() => deleteLine(line.id)} className="text-gray-300 hover:text-red-500 transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+              {editingId === line.id ? (
+                <>
+                  <Input className="col-span-1 h-7 text-xs px-1" value={editValues.line_number} onChange={e => setEditValues(p => ({ ...p, line_number: e.target.value }))} />
+                  <Input className="col-span-4 h-7 text-xs px-1" value={editValues.description} onChange={e => setEditValues(p => ({ ...p, description: e.target.value }))} />
+                  <Input className="col-span-3 h-7 text-xs px-1" value={editValues.cost_code} onChange={e => setEditValues(p => ({ ...p, cost_code: e.target.value }))} />
+                  <Input className="col-span-2 h-7 text-xs px-1" type="number" value={editValues.scheduled_value} onChange={e => setEditValues(p => ({ ...p, scheduled_value: e.target.value }))} />
+                  <div className="col-span-2 flex justify-end gap-1">
+                    <button onClick={() => saveEdit(line.id)} className="text-green-600 hover:text-green-700"><Check className="w-4 h-4" /></button>
+                    <button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="col-span-1 text-gray-400">{line.line_number}</div>
+                  <div className="col-span-4 font-medium text-gray-800">{line.description}</div>
+                  <div className="col-span-3 text-gray-500">{line.cost_code}</div>
+                  <div className="col-span-3 text-right font-medium text-[#0f2a5e]">${(line.scheduled_value || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                  <div className="col-span-1 flex justify-end gap-2">
+                    <button onClick={() => startEdit(line)} className="text-gray-300 hover:text-blue-500 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => deleteLine(line.id)} className="text-gray-300 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
