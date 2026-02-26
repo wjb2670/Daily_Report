@@ -25,7 +25,9 @@ export default function SOVSection({ projectId, projectType }) {
   };
 
   const addLine = async () => {
-    if (!newLine.description || !newLine.scheduled_value) return;
+    setAddError("");
+    if (!newLine.description) { setAddError("Description is required."); return; }
+    if (!newLine.scheduled_value) { setAddError("Scheduled value is required."); return; }
     await base44.entities.ScheduleOfValues.create({
       ...newLine,
       project_id: projectId,
