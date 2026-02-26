@@ -33,6 +33,7 @@ function GCPhaseSection({ projectId, phase, sovTotal, label }) {
   const loadItems = async () => {
     setLoading(true);
     const data = await base44.entities.GeneralConditionsItem.filter({ project_id: projectId, phase });
+    data.sort((a, b) => (a.cost_code || "").localeCompare(b.cost_code || ""));
     setItems(data);
     setLoading(false);
   };
