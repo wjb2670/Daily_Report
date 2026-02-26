@@ -127,41 +127,34 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
             </tr>
           </thead>
           <tbody>
-            {/* General Conditions — lump sum row as item 01 */}
-            {gcItems.length > 0 && (
+            {/* GC Phase 1 — item 01, lump sum expandable */}
+            {gc1Items.length > 0 && (
               <>
-                <tr
-                  className="bg-amber-50 hover:bg-amber-100 cursor-pointer border-b border-gray-200"
-                  onClick={() => setGcExpanded(v => !v)}
-                >
+                <tr className="bg-amber-50 hover:bg-amber-100 cursor-pointer border-b border-gray-200" onClick={() => setGc1Expanded(v => !v)}>
                   <td className="py-2 px-1 text-center font-bold text-gray-700 border border-gray-300">01</td>
                   <td className="py-2 px-2 border border-gray-300">
                     <span className="flex items-center gap-1 font-bold text-amber-900">
-                      {gcExpanded ? <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />}
-                      General Conditions
+                      {gc1Expanded ? <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />}
+                      General Conditions — 8 Unit Garage
                     </span>
                   </td>
-                  <td className="py-2 px-1 text-right font-semibold text-gray-700 border border-gray-300">{fmt(gcScheduled)}</td>
-                  <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{fmt(gcPrevious)}</td>
-                  <td className="py-2 px-1 text-right text-blue-700 font-semibold border border-gray-300">{fmt(gcWork)}</td>
-                  <td className="py-2 px-1 text-right text-green-700 font-semibold border border-gray-300">{fmt(gcMaterials)}</td>
-                  <td className="py-2 px-1 text-right font-semibold text-gray-800 border border-gray-300">{fmt(gcCompleted)}</td>
-                  <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{pct(gcPct)}</td>
-                  <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{fmt(gcBalance)}</td>
-                  <td className="py-2 px-1 text-right text-orange-600 font-semibold border border-gray-300">{fmt(gcRetainage)}</td>
+                  <td className="py-2 px-1 text-right font-semibold text-gray-700 border border-gray-300">{fmt(t1.scheduled)}</td>
+                  <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{fmt(t1.previous)}</td>
+                  <td className="py-2 px-1 text-right text-blue-700 font-semibold border border-gray-300">{fmt(t1.work)}</td>
+                  <td className="py-2 px-1 text-right text-green-700 font-semibold border border-gray-300">{fmt(t1.materials)}</td>
+                  <td className="py-2 px-1 text-right font-semibold text-gray-800 border border-gray-300">{fmt(t1.completed)}</td>
+                  <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{pct(t1.pct)}</td>
+                  <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{fmt(t1.balance)}</td>
+                  <td className="py-2 px-1 text-right text-orange-600 font-semibold border border-gray-300">{fmt(t1.retainage)}</td>
                 </tr>
-
-                {/* Expanded GC breakdown — read-only detail rows */}
-                {gcExpanded && gcItems.map((item, idx) => {
+                {gc1Expanded && gc1Items.map((item) => {
                   const c = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
                   const itemPct = item.scheduled_value ? (c / item.scheduled_value) * 100 : 0;
                   const bal = (item.scheduled_value || 0) - c;
                   return (
                     <tr key={item.id} className="bg-amber-50/40 text-gray-500 italic border-b border-amber-100">
                       <td className="py-1.5 px-1 text-center border border-gray-200 text-gray-400">—</td>
-                      <td className="py-1.5 px-2 border border-gray-200 pl-6 max-w-[160px]">
-                        <span className="block truncate" title={item.description}>{item.description}</span>
-                      </td>
+                      <td className="py-1.5 px-2 border border-gray-200 pl-6 max-w-[160px]"><span className="block truncate" title={item.description}>{item.description}</span></td>
                       <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(item.scheduled_value)}</td>
                       <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(item.previous_applications)}</td>
                       <td className="py-1.5 px-1 text-right text-blue-400 border border-gray-200">{fmt(item.work_this_period)}</td>
@@ -176,9 +169,51 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
               </>
             )}
 
-            {/* CM line items — editable */}
+            {/* CM line items — editable, numbered 02 onward */}
             {cmItems.map((item, idx) =>
-              renderEditableRow(item, String((gcItems.length > 0 ? 1 : 0) + idx + 2).padStart(2, "0"))
+              renderEditableRow(item, String((gc1Items.length > 0 ? 1 : 0) + idx + 2).padStart(2, "0"))
+            )}
+
+            {/* GC Phase 2 — item 20, lump sum expandable */}
+            {gc2Items.length > 0 && (
+              <>
+                <tr className="bg-blue-50 hover:bg-blue-100 cursor-pointer border-b border-gray-200" onClick={() => setGc2Expanded(v => !v)}>
+                  <td className="py-2 px-1 text-center font-bold text-gray-700 border border-gray-300">20</td>
+                  <td className="py-2 px-2 border border-gray-300">
+                    <span className="flex items-center gap-1 font-bold text-blue-900">
+                      {gc2Expanded ? <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />}
+                      General Conditions — 12 Unit Garage
+                    </span>
+                  </td>
+                  <td className="py-2 px-1 text-right font-semibold text-gray-700 border border-gray-300">{fmt(t2.scheduled)}</td>
+                  <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{fmt(t2.previous)}</td>
+                  <td className="py-2 px-1 text-right text-blue-700 font-semibold border border-gray-300">{fmt(t2.work)}</td>
+                  <td className="py-2 px-1 text-right text-green-700 font-semibold border border-gray-300">{fmt(t2.materials)}</td>
+                  <td className="py-2 px-1 text-right font-semibold text-gray-800 border border-gray-300">{fmt(t2.completed)}</td>
+                  <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{pct(t2.pct)}</td>
+                  <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{fmt(t2.balance)}</td>
+                  <td className="py-2 px-1 text-right text-orange-600 font-semibold border border-gray-300">{fmt(t2.retainage)}</td>
+                </tr>
+                {gc2Expanded && gc2Items.map((item) => {
+                  const c = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
+                  const itemPct = item.scheduled_value ? (c / item.scheduled_value) * 100 : 0;
+                  const bal = (item.scheduled_value || 0) - c;
+                  return (
+                    <tr key={item.id} className="bg-blue-50/40 text-gray-500 italic border-b border-blue-100">
+                      <td className="py-1.5 px-1 text-center border border-gray-200 text-gray-400">—</td>
+                      <td className="py-1.5 px-2 border border-gray-200 pl-6 max-w-[160px]"><span className="block truncate" title={item.description}>{item.description}</span></td>
+                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(item.scheduled_value)}</td>
+                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(item.previous_applications)}</td>
+                      <td className="py-1.5 px-1 text-right text-blue-400 border border-gray-200">{fmt(item.work_this_period)}</td>
+                      <td className="py-1.5 px-1 text-right text-green-400 border border-gray-200">{fmt(item.materials_this_period)}</td>
+                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(c)}</td>
+                      <td className="py-1.5 px-1 text-right border border-gray-200">{pct(itemPct)}</td>
+                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(bal)}</td>
+                      <td className="py-1.5 px-1 text-right text-orange-400 border border-gray-200">{fmt(item.retainage_amount)}</td>
+                    </tr>
+                  );
+                })}
+              </>
             )}
           </tbody>
           <tfoot>
