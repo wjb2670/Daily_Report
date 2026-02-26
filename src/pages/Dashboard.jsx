@@ -64,22 +64,21 @@ export default function Dashboard() {
             <p>No projects yet. <Link to={createPageUrl("Projects")} className="text-[#1e3a8a] hover:underline">Create your first project</Link></p>
           </div>
         ) : (
-          <div className="divide-y">
+          <div className="grid gap-3">
             {projects.slice(0, 5).map(p => (
-              <div key={p.id} className="py-3 flex items-center justify-between">
+              <Link key={p.id} to={createPageUrl(`ProjectDetail?id=${p.id}`)}
+                className="flex items-center justify-between px-4 py-3.5 rounded-lg border border-gray-200 bg-gray-50 hover:bg-[#0f2a5e] hover:border-[#0f2a5e] hover:text-white transition-all group shadow-sm cursor-pointer">
                 <div>
-                  <div className="font-medium text-[#0f2a5e]">{p.name}</div>
-                  <div className="text-sm text-gray-500">#{p.job_number} · {p.status?.replace("_", " ")}</div>
+                  <div className="font-semibold text-[#0f2a5e] group-hover:text-white">{p.name}</div>
+                  <div className="text-sm text-gray-500 group-hover:text-blue-200">#{p.job_number} · {p.status?.replace("_", " ")}</div>
                 </div>
-                <div className="text-right">
+                <div className="flex items-center gap-3">
                   {p.contract_value && (
-                    <div className="text-sm font-semibold text-[#0f2a5e]">${p.contract_value.toLocaleString()}</div>
+                    <div className="text-sm font-semibold text-[#0f2a5e] group-hover:text-white">${p.contract_value.toLocaleString()}</div>
                   )}
-                  <Link to={createPageUrl(`ProjectDetail?id=${p.id}`)} className="text-xs text-[#1e3a8a] hover:underline">
-                    Open →
-                  </Link>
+                  <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-white" />
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
