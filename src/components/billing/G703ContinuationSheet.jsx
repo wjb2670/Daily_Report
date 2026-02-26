@@ -175,8 +175,8 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
               renderEditableRow(item, String((gc1Items.length > 0 ? 1 : 0) + idx + 2).padStart(2, "0"))
             )}
 
-            {/* GC Phase 2 — item 20, lump sum expandable */}
-            {gc2Items.length > 0 && (
+            {/* GC Phase 2 — item 20, lump sum expandable — only shown when project has phase2 items */}
+            {hasPhase2 && gc2Items.length > 0 && (
               <>
                 <tr className="bg-blue-50 hover:bg-blue-100 cursor-pointer border-b border-gray-200" onClick={() => setGc2Expanded(v => !v)}>
                   <td className="py-2 px-1 text-center font-bold text-gray-700 border border-gray-300">20</td>
