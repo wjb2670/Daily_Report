@@ -9,6 +9,7 @@ export default function SOVSection({ projectId, projectType }) {
   const [lines, setLines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newLine, setNewLine] = useState({ line_number: "", description: "", cost_code: "", scheduled_value: "" });
+  const [addError, setAddError] = useState("");
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
   const fileRef = useRef();
