@@ -22,6 +22,8 @@ function GCPhaseSection({ projectId, phase, sovTotal, label }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [newItem, setNewItem] = useState({ description: "", cost_code: "", amount: "", allocation_method: "fixed" });
 
   useEffect(() => {
