@@ -160,7 +160,7 @@ function GCPhaseSection({ projectId, phase, sovTotal, label }) {
                   value={newItem.amount}
                   onChange={e => setNewItem(p => ({ ...p, amount: e.target.value }))}
                 />
-                <Button onClick={addItem} className="col-span-1 bg-[#1e3a8a] hover:bg-[#0f2a5e] text-white px-2">
+                <Button onClick={addItem} disabled={saving} className="col-span-1 bg-[#1e3a8a] hover:bg-[#0f2a5e] text-white px-2">
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
