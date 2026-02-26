@@ -175,10 +175,25 @@ function GCPhaseSection({ projectId, phase, sovTotal, label }) {
 }
 
 export default function GeneralConditionsDrawer({ projectId, sovTotal }) {
+  const [hasPhase2, setHasPhase2] = React.useState(false);
+  const [checked, setChecked] = React.useState(false);
+
+  React.useEffect(() => {
+    base44.entities.GeneralConditionsItem.filter({ project_id: projectId, phase: "phase2" })
+      .then(items => {
+        setHasPhase2(items.length > 0);
+        setChecked(true);
+      });
+  }, [projectId]);
+
+  if (!checked) return null;
+
   return (
     <div className="space-y-3">
-      <GCPhaseSection projectId={projectId} phase="phase1" sovTotal={sovTotal} label={PHASE_LABELS.phase1} />
-      <GCPhaseSection projectId={projectId} phase="phase2" sovTotal={sovTotal} label={PHASE_LABELS.phase2} />
+      <GCPhaseSection projectId={projectId} phase="phase1" sovTotal={sovTotal} label="General Conditions" />
+      {hasPhase2 && (
+        <GCPhaseSection projectId={projectId} phase="phase2" sovTotal={sovTotal} label={PHASE_LABELS.phase2} />
+      )}
     </div>
   );
 }
