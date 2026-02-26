@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, DollarSign, Upload, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, Trash2, DollarSign, Upload, CheckCircle, AlertCircle, Pencil, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import GeneralConditionsDrawer from "./GeneralConditionsDrawer";
