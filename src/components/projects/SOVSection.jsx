@@ -217,15 +217,17 @@ export default function SOVSection({ projectId, projectType }) {
 
 
       {/* Add new line */}
-      <div className="grid grid-cols-12 gap-2 mb-4 text-sm">
+      <div className="grid grid-cols-12 gap-2 mb-1 text-sm">
         <Input className="col-span-1" placeholder="#" value={newLine.line_number} onChange={e => setNewLine(p => ({ ...p, line_number: e.target.value }))} />
-        <Input className="col-span-4" placeholder="Description *" value={newLine.description} onChange={e => setNewLine(p => ({ ...p, description: e.target.value }))} />
+        <Input className="col-span-4" placeholder="Description *" value={newLine.description} onChange={e => { setAddError(""); setNewLine(p => ({ ...p, description: e.target.value })); }} />
         <Input className="col-span-3" placeholder="Cost Code" value={newLine.cost_code} onChange={e => setNewLine(p => ({ ...p, cost_code: e.target.value }))} />
-        <Input className="col-span-3" type="number" placeholder="Value *" value={newLine.scheduled_value} onChange={e => setNewLine(p => ({ ...p, scheduled_value: e.target.value }))} />
+        <Input className="col-span-3" type="number" placeholder="Value *" value={newLine.scheduled_value} onChange={e => { setAddError(""); setNewLine(p => ({ ...p, scheduled_value: e.target.value })); }} onKeyDown={e => { if (e.key === "Enter") addLine(); }} />
         <Button type="button" onClick={addLine} className="col-span-1 bg-[#1e3a8a] hover:bg-[#0f2a5e] text-white px-2">
           <Plus className="w-4 h-4" />
         </Button>
       </div>
+      {addError && <p className="text-red-500 text-xs mb-3">{addError}</p>}
+      {!addError && <div className="mb-3" />}
 
       {/* Table header */}
       {lines.length > 0 && (
