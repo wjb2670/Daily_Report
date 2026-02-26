@@ -39,14 +39,22 @@ function GCPhaseSection({ projectId, phase, sovTotal, label }) {
 
   const addItem = async () => {
     if (!newItem.description) return;
-    await base44.entities.GeneralConditionsItem.create({
-      ...newItem,
-      project_id: projectId,
-      phase,
-      amount: newItem.amount ? Number(newItem.amount) : 0,
-    });
-    setNewItem({ description: "", cost_code: "", amount: "", allocation_method: "fixed" });
-    loadItems();
+    setSaving(true);
+    setError("");
+    try {
+      await base44.entities.GeneralConditionsItem.create({
+        ...newItem,
+        project_id: projectId,
+        phase,
+        amount: newItem.amount ? Number(newItem.amount) : 0,
+      });
+      setNewItem({ description: "", cost_code: "", amount: "", allocation_method: "fixed" });
+      loadItems();
+    } catch (e) {
+      setError("Failed to save. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const deleteItem = async (id) => {
