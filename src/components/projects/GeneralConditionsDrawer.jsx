@@ -13,30 +13,24 @@ const ALLOCATION_LABELS = {
   percentage_of_cost_code: "% of Cost Code",
 };
 
-const DEFAULT_GC_ITEMS = [
-  { description: "Project Manager", cost_code: "01-1000", allocation_method: "fixed" },
-  { description: "Superintendent", cost_code: "01-1000", allocation_method: "fixed" },
-  { description: "Site Trailer / Office", cost_code: "01-5000", allocation_method: "fixed" },
-  { description: "Temporary Utilities", cost_code: "01-5100", allocation_method: "fixed" },
-  { description: "Dumpsters / Waste Removal", cost_code: "01-7400", allocation_method: "fixed" },
-  { description: "Safety & Signage", cost_code: "01-5500", allocation_method: "fixed" },
-  { description: "Insurance (Builder's Risk)", cost_code: "01-5200", allocation_method: "percentage_of_contract" },
-  { description: "Permits & Fees", cost_code: "01-4000", allocation_method: "fixed" },
-];
+const PHASE_LABELS = {
+  phase1: "8 Unit Garage",
+  phase2: "12 Unit Garage",
+};
 
-export default function GeneralConditionsDrawer({ projectId, sovTotal }) {
+function GCPhaseSection({ projectId, phase, sovTotal, label }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newItem, setNewItem] = useState({ description: "", cost_code: "", amount: "", allocation_method: "fixed" });
 
   useEffect(() => {
-    if (open && items.length === 0) loadItems();
+    if (open) loadItems();
   }, [open]);
 
   const loadItems = async () => {
     setLoading(true);
-    const data = await base44.entities.GeneralConditionsItem.filter({ project_id: projectId });
+    const data = await base44.entities.GeneralConditionsItem.filter({ project_id: projectId, phase });
     setItems(data);
     setLoading(false);
   };
@@ -46,6 +40,7 @@ export default function GeneralConditionsDrawer({ projectId, sovTotal }) {
     await base44.entities.GeneralConditionsItem.create({
       ...newItem,
       project_id: projectId,
+      phase,
       amount: newItem.amount ? Number(newItem.amount) : 0,
     });
     setNewItem({ description: "", cost_code: "", amount: "", allocation_method: "fixed" });
@@ -57,14 +52,7 @@ export default function GeneralConditionsDrawer({ projectId, sovTotal }) {
     loadItems();
   };
 
-  const seedDefaults = async () => {
-    for (const item of DEFAULT_GC_ITEMS) {
-      await base44.entities.GeneralConditionsItem.create({ ...item, project_id: projectId, amount: 0 });
-    }
-    loadItems();
-  };
-
-  const totalGC = items.reduce((sum, item) => {
+  const total = items.reduce((sum, item) => {
     if (item.allocation_method === "percentage_of_contract" || item.allocation_method === "percentage_of_cost_code") {
       return sum + ((item.amount || 0) / 100) * (sovTotal || 0);
     }
@@ -73,18 +61,17 @@ export default function GeneralConditionsDrawer({ projectId, sovTotal }) {
 
   return (
     <div className="border border-blue-200 rounded-xl bg-blue-50/50 overflow-hidden">
-      {/* Toggle Header */}
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-blue-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="font-semibold text-[#0f2a5e] text-sm">General Conditions Breakdown</span>
+          <span className="font-semibold text-[#0f2a5e] text-sm">General Conditions Breakdown — {label}</span>
           <span className="text-xs text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full">{items.length} items</span>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm font-semibold text-[#0f2a5e]">
-            Total: ${totalGC.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            Total: ${total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           {open ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
         </div>
@@ -98,16 +85,12 @@ export default function GeneralConditionsDrawer({ projectId, sovTotal }) {
             <>
               {items.length === 0 && (
                 <div className="text-center py-5">
-                  <p className="text-gray-400 text-sm italic mb-3">No General Conditions items yet.</p>
-                  <Button variant="outline" size="sm" className="text-[#1e3a8a] border-[#1e3a8a]" onClick={seedDefaults}>
-                    Load Default GC Items
-                  </Button>
+                  <p className="text-gray-400 text-sm italic mb-3">No items yet for {label}.</p>
                 </div>
               )}
 
               {items.length > 0 && (
                 <>
-                  {/* Header */}
                   <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-gray-400 uppercase mt-4 mb-1 px-1">
                     <div className="col-span-4">Description</div>
                     <div className="col-span-3">Cost Code</div>
@@ -139,7 +122,6 @@ export default function GeneralConditionsDrawer({ projectId, sovTotal }) {
                 </>
               )}
 
-              {/* Add new item */}
               <div className="grid grid-cols-12 gap-2 mt-4">
                 <Input
                   className="col-span-4 text-sm"
@@ -176,6 +158,15 @@ export default function GeneralConditionsDrawer({ projectId, sovTotal }) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+export default function GeneralConditionsDrawer({ projectId, sovTotal }) {
+  return (
+    <div className="space-y-3">
+      <GCPhaseSection projectId={projectId} phase="phase1" sovTotal={sovTotal} label={PHASE_LABELS.phase1} />
+      <GCPhaseSection projectId={projectId} phase="phase2" sovTotal={sovTotal} label={PHASE_LABELS.phase2} />
     </div>
   );
 }
