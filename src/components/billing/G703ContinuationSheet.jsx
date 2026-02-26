@@ -9,6 +9,7 @@ const pct = (val) => (val == null ? "0%" : `${Number(val).toFixed(1)}%`);
 export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
   const [gc1Expanded, setGc1Expanded] = useState(false);
   const [gc2Expanded, setGc2Expanded] = useState(false);
+  const hasPhase2 = lineItems.some(l => l.gc_phase === "phase2");
 
   const cmItems  = lineItems.filter(l => !l.is_general_conditions && l.gc_phase !== "phase2");
   const gc1Items = lineItems.filter(l => l.is_general_conditions && l.gc_phase !== "phase2");
