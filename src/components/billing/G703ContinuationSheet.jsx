@@ -136,7 +136,7 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                   <td className="py-2 px-2 border border-gray-300">
                     <span className="flex items-center gap-1 font-bold text-amber-900">
                       {gc1Expanded ? <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />}
-                      General Conditions — 8 Unit Garage
+                      {hasPhase2 ? "General Conditions — 8 Unit Garage" : "General Conditions"}
                     </span>
                   </td>
                   <td className="py-2 px-1 text-right font-semibold text-gray-700 border border-gray-300">{fmt(t1.scheduled)}</td>
