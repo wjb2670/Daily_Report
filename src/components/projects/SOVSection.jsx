@@ -12,6 +12,8 @@ export default function SOVSection({ projectId, projectType }) {
   const [addError, setAddError] = useState("");
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editValues, setEditValues] = useState({});
   const fileRef = useRef();
 
   useEffect(() => {
