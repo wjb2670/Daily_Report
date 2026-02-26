@@ -46,6 +46,20 @@ export default function SOVSection({ projectId, projectType }) {
     loadLines();
   };
 
+  const startEdit = (line) => {
+    setEditingId(line.id);
+    setEditValues({ line_number: line.line_number || "", description: line.description || "", cost_code: line.cost_code || "", scheduled_value: line.scheduled_value || "" });
+  };
+
+  const saveEdit = async (id) => {
+    await base44.entities.ScheduleOfValues.update(id, {
+      ...editValues,
+      scheduled_value: Number(editValues.scheduled_value),
+    });
+    setEditingId(null);
+    loadLines();
+  };
+
   const total = lines.reduce((sum, l) => sum + (l.scheduled_value || 0), 0);
 
   const downloadTemplate = () => {
