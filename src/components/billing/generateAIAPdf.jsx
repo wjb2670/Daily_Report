@@ -41,7 +41,7 @@ export async function generateAIAPdf({ project, period, lineItems, summaryValues
   const nonGcItems = lineItems.filter(l => !l.is_general_conditions);
 
   const gcCollapsed = gcItems.length > 0 ? [{
-    item_number: gcItems[0].item_number || "GC",
+    item_number: "01",
     description: "General Conditions",
     scheduled_value: gcItems.reduce((s, l) => s + (l.scheduled_value || 0), 0),
     previous_applications: gcItems.reduce((s, l) => s + (l.previous_applications || 0), 0),
