@@ -130,7 +130,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.text(project.owner_contact || "—", pCol + 62, fromY);
 
   // Col 3 – Application #, Period Thru, Date of Contract
-  const aCol = 500;
+  const aCol = 540;
   doc.setFont("helvetica", "bold");
   doc.text("APPLICATION #:", aCol, hY);
   doc.setFont("helvetica", "normal");
