@@ -350,7 +350,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.text("Notary Public:", rCol + 4, notaryY + 36);
-  doc.line(rCol + 4 + 56, notaryY + 36, rCol + rW - 4, notaryY + 36);
+  doc.line(rCol + 4 + 40, notaryY + 36, rCol + rW - 4, notaryY + 36);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
