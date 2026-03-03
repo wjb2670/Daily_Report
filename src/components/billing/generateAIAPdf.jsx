@@ -87,7 +87,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   }
 
   // Title & top rule
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text("PAYMENT APPLICATION", M, M + 20);
 
@@ -107,9 +107,9 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.setFontSize(8.5);
 
   // Col 1 – TO
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("TO:", M, hY);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   const toLines = [
     project.owner_company || project.owner_name || "",
     project.owner_address || "",
@@ -119,43 +119,43 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
 
   // Col 1 – FROM (inline with architect row)
   const fromY = hY + 44;
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("FROM:", M, fromY);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   ["The Whayland Company, LLC, Const Manager", "100 West 10th Street", "Laurel, DE 19956"].forEach(
     (line, i) => doc.text(line, M + 36, fromY + i * 11)
   );
 
   // Col 2 – PROJECT NAME & LOCATION
   const pCol = 310;
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("PROJECT NAME", pCol, hY);
   doc.text("AND LOCATION:", pCol, hY + 9);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text(project.name || "", pCol + 85, hY);
   doc.text(`${project.address || ""} ${project.city || ""} ${project.state || ""}`.trim(), pCol + 85, hY + 9);
 
   // Col 2 – ARCHITECT (same Y as FROM)
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("ARCHITECT:", pCol, fromY);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text(project.owner_contact || "—", pCol + 62, fromY);
 
   // Col 3 – Application #, Period Thru, Date of Contract
   const aCol = 540;
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("APPLICATION #:", aCol, hY);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text(String(period.period_number), aCol + 90, hY);
 
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("PERIOD THRU:", aCol, hY + 14);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text(period.period_end_date || "—", aCol + 80, hY + 14);
 
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("DATE OF CONTRACT:", aCol, hY + 28);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text(project.start_date || "—", aCol + 102, hY + 28);
 
   // ── DIVIDER between header and body ──────────────────────────────────────
@@ -184,11 +184,11 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
     doc.setLineWidth(0.4);
     doc.rect(M, y, leftW, h, "S");
     doc.setFontSize(8);
-    doc.setFont("Calibri", bold ? "bold" : "normal");
+    doc.setFont("helvetica", bold ? "bold" : "normal");
     const labelLines = doc.splitTextToSize(label, leftW - 80);
     const textY = y + h / 2 + 3;
     labelLines.forEach((l, i) => doc.text(l, labelX, textY + (i - (labelLines.length - 1) / 2) * 9));
-    doc.setFont("Calibri", "bold");
+    doc.setFont("helvetica", "bold");
     doc.text(val, overrideValX !== null ? overrideValX : valX, textY, { align: "right" });
   };
 
@@ -197,7 +197,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   // Section header
   doc.setFillColor(15, 42, 94);
   doc.rect(M, rY, leftW, 14, "F");
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(255, 255, 255);
   doc.text("CONTRACTOR'S APPLICATION FOR PAYMENT", labelX, rY + 10);
@@ -242,7 +242,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.rect(M, rY, leftW, 13, "S");
   doc.line(M + coColLabel, rY, M + coColLabel, rY + 13);
   doc.line(M + coColLabel + coColAdd, rY, M + coColLabel + coColAdd, rY + 13);
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.text("CHANGE ORDER SUMMARY", M + coColLabel / 2, rY + 9, { align: "center" });
   doc.text("ADDITIONS", M + coColLabel + coColAdd / 2, rY + 9, { align: "center" });
@@ -268,12 +268,12 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
     doc.rect(M, rY, leftW, ch, "S");
     doc.line(M + coColLabel, rY, M + coColLabel, rY + ch);
     doc.line(M + coColLabel + coColAdd, rY, M + coColLabel + coColAdd, rY + ch);
-    doc.setFont("Calibri", isTotal ? "bold" : "normal");
+    doc.setFont("helvetica", isTotal ? "bold" : "normal");
     doc.setFontSize(7.5);
     const labelLines = doc.splitTextToSize(label, coColLabel - 4);
     const textStartY = ch > 14 ? rY + 8 : rY + 9;
     labelLines.forEach((l, i) => doc.text(l, M + 3, textStartY + i * 8));
-    doc.setFont("Calibri", "bold");
+    doc.setFont("helvetica", "bold");
     doc.text($(add), M + coColLabel + coColAdd - 3, rY + 9, { align: "right" });
     if (ded !== null) {
       doc.text($(ded), M + coColLabel + coColAdd + coColDed - 3, rY + 9, { align: "right" });
@@ -294,7 +294,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   // Contractor certification block
   doc.setFillColor(15, 42, 94);
   doc.rect(rCol, cY, rW, headerH, "F");
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(255, 255, 255);
   doc.text("CONTRACTOR'S CERTIFICATION", rCol + 4, cY + 10);
@@ -305,7 +305,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.setLineWidth(0.4);
   doc.rect(rCol, cY, rW, contBoxH, "S");
 
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(6.5);
   const certText = "The undersigned Contractor certifies that to the best of the Contractor's knowledge, information and belief the Work covered by this Application for Payment has been completed in accordance with the Contract Documents, that all amounts have been paid by the Contractor for Work for which previous Certificates for Payment were issued and payments received from the Owner, and that current payment shown herein is now due.";
   const certLines = doc.splitTextToSize(certText, rW - 8);
@@ -313,16 +313,16 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
 
   // Place sig block just below the cert text
   const contSigY = cY + 11 + certLines.length * 7.5 + 8;
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.text("CONTRACTOR:", rCol + 4, contSigY);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text("The Whayland Company, LLC, Const Manager", rCol + 58, contSigY);
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("Address:", rCol + 4, contSigY + 13);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text("100 West 10th Street, Laurel, DE 19956", rCol + 42, contSigY + 13);
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("By:", rCol + 4, contSigY + 26);
   doc.setLineWidth(0.5);
   doc.line(rCol + 18, contSigY + 26, rCol + rW * 0.55, contSigY + 26);
@@ -335,7 +335,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
 
   // Notary Public section
   const notaryY = contSigY + 86;
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.text("State of:", rCol + 4, notaryY);
   doc.line(rCol + 4 + 28, notaryY, rCol + rW - 4, notaryY);
@@ -348,12 +348,12 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.text(",", rCol + 4 + 282, notaryY + 24);
   doc.line(rCol + 4 + 290, notaryY + 24, rCol + rW - 4, notaryY + 24); // blank for year
 
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.text("Notary Public:", rCol + 4, notaryY + 36);
   doc.line(rCol + 4 + 40, notaryY + 36, rCol + rW - 4, notaryY + 36);
 
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.text("My Commission Expires:", rCol + 4, notaryY + 48);
   doc.line(rCol + 4 + 70, notaryY + 48, rCol + rW / 2 + 20, notaryY + 48);
@@ -363,7 +363,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   // Architect certification block
   doc.setFillColor(15, 42, 94);
   doc.rect(rCol, cY, rW, headerH, "F");
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(255, 255, 255);
   doc.text("ARCHITECT'S CERTIFICATE FOR PAYMENT", rCol + 4, cY + 10);
@@ -374,36 +374,36 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.setLineWidth(0.4);
   doc.rect(rCol, cY, rW, archBoxH, "S");
 
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(6.5);
   const archText = "In accordance with the Contract Documents, based on on-site observations and the data comprising this application, the Architect certifies to the Owner that to the best of the Architect's knowledge, information and belief the Work has progressed as indicated, the quality of the Work is in accordance with the Contract Documents, and the Contractor is entitled to payment of the AMOUNT CERTIFIED.";
   const archLines = doc.splitTextToSize(archText, rW - 8);
   doc.text(archLines, rCol + 4, cY + 11);
 
   const archSigY = cY + archBoxH - 68;
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.text("AMOUNT CERTIFIED: $", rCol + 4, archSigY);
   doc.setLineWidth(0.5);
   doc.line(rCol + 100, archSigY, rCol + rW - 4, archSigY);
 
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(6.5);
   const noteText = "(Attach explanation if amount certified differs from the amount applied. Initial all figures on this Application and on the Continuation Sheet that are changed to conform with the amount certified.)";
   doc.text(doc.splitTextToSize(noteText, rW - 8), rCol + 4, archSigY + 11);
 
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.text("ARCHITECT:", rCol + 4, archSigY + 28);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text(project.owner_contact || "—", rCol + 50, archSigY + 28);
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("By:", rCol + 4, archSigY + 41);
   doc.setLineWidth(0.5);
   doc.line(rCol + 18, archSigY + 41, rCol + rW * 0.55, archSigY + 41);
   doc.text("Date:", rCol + rW * 0.57, archSigY + 41);
   doc.line(rCol + rW * 0.57 + 26, archSigY + 41, rCol + rW - 4, archSigY + 41);
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(6.5);
   doc.text("This Certificate is not negotiable. The AMOUNT CERTIFIED is payable only to the Contractor named herein.", rCol + 4, archSigY + 55, { maxWidth: rW - 8 });
 }
@@ -425,7 +425,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
     doc.addImage(logoData, "PNG", PW - M - lW - 4, M + 2, lW, lH);
   }
 
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.text("PAYMENT APPLICATION DETAILS", PW / 2, M + 22, { align: "center" });
 
@@ -437,25 +437,25 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
 
   // Info row below rule
   const shY = ruleY + 12;
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.text("Customer:", M + 4, shY);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text((project.owner_company || project.owner_name || "").toUpperCase(), M + 52, shY);
 
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("Project:", M + 4, shY + 12);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text(project.name.toUpperCase(), M + 44, shY + 12);
 
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("Application Number:", PW / 2 + 20, shY);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text(String(period.period_number), PW / 2 + 115, shY);
 
-  doc.setFont("Calibri", "bold");
+  doc.setFont("helvetica", "bold");
   doc.text("For Period Ending:", PW / 2 + 20, shY + 12);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text(period.period_end_date || "—", PW / 2 + 108, shY + 12);
 
   const tY = shY + 26;
@@ -479,7 +479,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
 
   cols.forEach((col, i) => {
     doc.rect(col.x, tY, col.w, 28);
-    doc.setFont("Calibri", "bold");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(6.5);
     const lines = colLabels[i].split("\n");
     lines.forEach((l, li) => doc.text(l, col.x + col.w / 2, tY + 8 + li * 8, { align: "center" }));
@@ -487,7 +487,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
 
   // Sub-header row for Work Completed spanning D+E
   doc.setFontSize(5.5);
-  doc.setFont("Calibri", "normal");
+  doc.setFont("helvetica", "normal");
   doc.text("Work Completed", cols[3].x + (cols[3].w + cols[4].w) / 2, tY + 20, { align: "center" });
   doc.text("Scheduled Value", cols[2].x + cols[2].w / 2, tY + 22, { align: "center" });
   doc.text("From Previous", cols[3].x + cols[3].w / 2, tY + 22, { align: "center" });
@@ -517,7 +517,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
       doc.line(col.x, rowY, col.x, rowY + rowH);
     });
 
-    doc.setFont("Calibri", "normal");
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(0);
 
@@ -562,7 +562,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
     });
 
     const tMid = rowY + rowH / 2 + 2.5;
-    doc.setFont("Calibri", "bold");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(7);
     doc.text("TOTAL:", cols[1].x + cols[1].w - 2, tMid, { align: "right" });
     doc.text($(totalScheduled), cols[2].x + cols[2].w - 2, tMid, { align: "right" });
