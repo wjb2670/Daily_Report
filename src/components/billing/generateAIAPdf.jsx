@@ -190,22 +190,24 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   rY += 14;
 
   const retPct = s.totalCompletedStored ? ((s.totalRetainage / s.totalCompletedStored) * 100).toFixed(1) : "0.0";
+  const indentedValX = valX - 40; // indented value X for 5a/5b
+
   const summaryRows = [
-    ["1.  Original Contract Sum", s.originalContractSum, false],
-    ["2.  Net Change by Change Orders", s.changeOrderNet, false],
-    ["3.  Contract Sum to Date (1 + 2)", s.contractSumToDate, false],
-    ["4.  Total Completed & Stored to Date", s.totalCompletedStored, false],
-    [`5a. Retainage: ${retPct}% of Completed Work`, s.totalRetainage, false],
-    ["5b. Retainage: 0% of Stored Material", 0, false],
-    ["5.  Total Retainage (5a + 5b)", s.totalRetainage, false],
-    ["6.  Total Earned Less Retainage (4 – 5)", s.totalEarnedLessRetainage, false],
-    ["7.  Less Previous Certificates for Payment", s.previousCertificates, false],
-    ["8.  Current Payment Due", s.currentPaymentDue, true],
-    ["9.  Balance to Finish, Including Retainage (3 – 6)", s.balanceToFinish, false],
+    ["1.  Original Contract Sum", s.originalContractSum, false, false],
+    ["2.  Net Change by Change Orders", s.changeOrderNet, false, false],
+    ["3.  Contract Sum to Date (1 + 2)", s.contractSumToDate, false, false],
+    ["4.  Total Completed & Stored to Date", s.totalCompletedStored, false, false],
+    [`5a. Retainage: ${retPct}% of Completed Work`, s.totalRetainage, false, true],
+    ["5b. Retainage: 0% of Stored Material", 0, false, true],
+    ["5.  Total Retainage (5a + 5b)", s.totalRetainage, false, false],
+    ["6.  Total Earned Less Retainage (4 – 5)", s.totalEarnedLessRetainage, false, false],
+    ["7.  Less Previous Certificates for Payment", s.previousCertificates, false, false],
+    ["8.  Current Payment Due", s.currentPaymentDue, true, false],
+    ["9.  Balance to Finish, Including Retainage (3 – 6)", s.balanceToFinish, false, false],
   ];
 
-  summaryRows.forEach(([label, val, hl]) => {
-    drawRow(label, $(val), rY, rowH, hl, hl);
+  summaryRows.forEach(([label, val, hl, indented]) => {
+    drawRow(label, $(val), rY, rowH, hl, hl, indented ? indentedValX : null);
     rY += rowH;
   });
 
