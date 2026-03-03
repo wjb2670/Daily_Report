@@ -353,7 +353,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
   doc.setFont("helvetica", "normal");
   doc.text(period.period_end_date || "—", PW / 2 + 108, shY + 12);
 
-  const tY = shY + 20;
+  const tY = shY + 26;
   const cols = [
     { x: M,       w: 36  },
     { x: M + 36,  w: 160 },
