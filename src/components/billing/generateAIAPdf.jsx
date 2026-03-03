@@ -36,10 +36,16 @@ export async function generateAIAPdf({ project, period, lineItems, summaryValues
 
   drawG702(doc, PW, PH, project, period, summaryValues, logoData);
 
+  const sortedItems = [...lineItems].sort((a, b) => {
+    const numA = parseFloat(a.item_number) || 9999;
+    const numB = parseFloat(b.item_number) || 9999;
+    return numA - numB;
+  });
+
   const rowsPerPage = 22;
   const chunks = [];
-  for (let i = 0; i < lineItems.length; i += rowsPerPage) {
-    chunks.push(lineItems.slice(i, i + rowsPerPage));
+  for (let i = 0; i < sortedItems.length; i += rowsPerPage) {
+    chunks.push(sortedItems.slice(i, i + rowsPerPage));
   }
   chunks.forEach((chunk, idx) => {
     doc.addPage();
