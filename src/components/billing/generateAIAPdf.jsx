@@ -536,7 +536,8 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
       [5, $(item.materials_this_period)],
       [6, $(completedToDate)],
       [7, pct(totalPct) + "%"],
-      [8, $(balance)],
+      [8, $(item.retainage_amount || 0)],
+      [9, $(balance)],
     ].forEach(([ci, val]) => {
       doc.text(val, cols[ci].x + cols[ci].w - 2, rMid, { align: "right" });
     });
