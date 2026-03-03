@@ -35,16 +35,34 @@ export default function ChangeOrderModal({ open, onClose, period, onSaved }) {
     setSaving(true);
     const newAdditions = (period.change_order_additions || 0) + totalAdditions;
     const newDeductions = (period.change_order_deductions || 0) + totalDeductions;
+
+    // Update period totals
     await base44.entities.BillingPeriod.update(period.id, {
       change_order_additions: newAdditions,
       change_order_deductions: newDeductions,
-      notes: [
-        period.notes || "",
-        ...rows
-          .filter(r => r.description)
-          .map(r => `CO ${r.type === "addition" ? "+" : "-"}$${parseFloat(r.amount || 0).toFixed(2)}: ${r.description}`)
-      ].filter(Boolean).join("\n"),
     });
+
+    // Create a BillingLineItem for each CO row so it appears in the G703
+    const validRows = rows.filter(r => r.description && parseFloat(r.amount) > 0);
+    for (const row of validRows) {
+      const amount = parseFloat(row.amount) || 0;
+      const signedAmount = row.type === "addition" ? amount : -amount;
+      await base44.entities.BillingLineItem.create({
+        billing_period_id: period.id,
+        project_id: period.project_id,
+        description: `CO: ${row.description}`,
+        scheduled_value: signedAmount,
+        work_this_period: signedAmount,
+        previous_applications: 0,
+        materials_this_period: 0,
+        retainage_percent: 0,
+        retainage_amount: 0,
+        is_general_conditions: false,
+        is_change_order: true,
+        co_type: row.type,
+      });
+    }
+
     setSaving(false);
     setRows([emptyRow()]);
     onSaved();
