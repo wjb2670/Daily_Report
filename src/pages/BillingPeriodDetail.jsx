@@ -48,8 +48,9 @@ export default function BillingPeriodDetail() {
     const lineMap = {};
     existingLines.forEach(l => { lineMap[l.sov_item_id] = l; });
 
-    // Get previous period's completed totals for carry-forward
+    // Get previous period's completed totals and retainage for carry-forward
     let previousPeriodTotals = {};
+    let previousPeriodRetainage = {};
     if (per.period_number > 1) {
       const prevPeriods = await base44.entities.BillingPeriod.filter({ project_id: per.project_id, period_number: per.period_number - 1 });
       if (prevPeriods.length > 0) {
@@ -58,6 +59,7 @@ export default function BillingPeriodDetail() {
         prevLines.forEach(line => {
           const completed = (line.previous_applications || 0) + (line.work_this_period || 0) + (line.materials_this_period || 0);
           previousPeriodTotals[line.sov_item_id] = completed;
+          previousPeriodRetainage[line.sov_item_id] = line.retainage_amount || 0;
         });
       }
     }
@@ -66,7 +68,8 @@ export default function BillingPeriodDetail() {
     for (const sovItem of allSov) {
       if (lineMap[sovItem.id] && lineMap[sovItem.id].previous_applications === 0 && previousPeriodTotals[sovItem.id]) {
         lineMap[sovItem.id] = await base44.entities.BillingLineItem.update(lineMap[sovItem.id].id, {
-          previous_applications: previousPeriodTotals[sovItem.id]
+          previous_applications: previousPeriodTotals[sovItem.id],
+          retainage_amount: previousPeriodRetainage[sovItem.id] || 0
         });
       }
     }
@@ -89,7 +92,7 @@ export default function BillingPeriodDetail() {
           work_this_period: 0,
           materials_this_period: 0,
           retainage_percent: sovItem.retainage_percent ?? 10,
-          retainage_amount: 0,
+          retainage_amount: previousPeriodRetainage[sovItem.id] || 0,
           is_general_conditions: isGCItem,
         });
         mergedLines.push(created);
