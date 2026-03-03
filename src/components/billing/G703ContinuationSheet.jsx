@@ -220,6 +220,31 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
               renderEditableRow(item, String((gc1Items.length > 0 ? 1 : 0) + idx + 2).padStart(2, "0"))
             )}
 
+            {/* Change Order line items */}
+            {coItems.map((item, idx) => {
+              const amount = item.work_this_period || 0;
+              const isAddition = item.co_type === "addition" || amount >= 0;
+              return (
+                <tr key={item.id} className={`border-b border-gray-100 ${isAddition ? "bg-green-50/40" : "bg-red-50/40"}`}>
+                  <td className="py-2 px-1 text-center text-gray-400 border border-gray-200 text-xs">CO{idx + 1}</td>
+                  <td className="py-2 px-2 font-medium max-w-[160px] border border-gray-200">
+                    <span className={`block truncate text-xs ${isAddition ? "text-green-700" : "text-red-600"}`} title={item.description}>
+                      {item.description}
+                    </span>
+                  </td>
+                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-600">{fmt(item.scheduled_value)}</td>
+                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">{fmt(item.previous_applications)}</td>
+                  <td className={`py-2 px-1 text-right border border-gray-200 text-xs font-semibold ${isAddition ? "text-green-700" : "text-red-600"}`}>{fmt(amount)}</td>
+                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">—</td>
+                  <td className={`py-2 px-1 text-right border border-gray-200 text-xs font-semibold ${isAddition ? "text-green-700" : "text-red-600"}`}>{fmt(amount)}</td>
+                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">—</td>
+                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">—</td>
+                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">0%</td>
+                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">$0.00</td>
+                </tr>
+              );
+            })}
+
             {/* GC Phase 2 — item 20, lump sum expandable — only shown when project has phase2 items */}
             {hasPhase2 && gc2Items.length > 0 && (
               <>
