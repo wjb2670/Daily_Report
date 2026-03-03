@@ -47,16 +47,20 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
   const handleWorkChange = (item, val) => {
     const work = parseFloat(val) || 0;
     const materials = item.materials_this_period || 0;
+    const previous = item.previous_applications || 0;
     const retainagePct = item.retainage_percent || 0;
-    const retainageAmt = (work + materials) * (retainagePct / 100);
+    const completedToDate = previous + work + materials;
+    const retainageAmt = completedToDate * (retainagePct / 100);
     onUpdate(item.id, { work_this_period: work, retainage_amount: retainageAmt });
   };
 
   const handleMaterialsChange = (item, val) => {
     const materials = parseFloat(val) || 0;
     const work = item.work_this_period || 0;
+    const previous = item.previous_applications || 0;
     const retainagePct = item.retainage_percent || 0;
-    const retainageAmt = (work + materials) * (retainagePct / 100);
+    const completedToDate = previous + work + materials;
+    const retainageAmt = completedToDate * (retainagePct / 100);
     onUpdate(item.id, { materials_this_period: materials, retainage_amount: retainageAmt });
   };
 
