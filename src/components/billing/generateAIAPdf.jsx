@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 
-const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69986966442e93bb8f52d310/42d90ce33_6671BlueandGrayLogo.png";
+const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69986966442e93bb8f52d310/1658511e8_image.png";
 
 const $ = (v) =>
   v == null
