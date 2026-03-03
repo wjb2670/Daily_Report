@@ -54,9 +54,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.rect(0, 0, PW, PH, "F");
 
   if (logoData) {
-    doc.setFillColor(15, 42, 94);
-    doc.rect(PW - 180, M - 10, 148, 52, "F");
-    doc.addImage(logoData, "PNG", PW - 175, M - 5, 138, 42);
+    doc.addImage(logoData, "PNG", PW - 178, M - 8, 142, 48);
   }
 
   doc.setFont("helvetica", "bold");
