@@ -160,7 +160,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   const valX = M + leftW - 4;
 
   // Helper: draw a bordered row with label and value
-  const drawRow = (label, val, y, h = rowH, bold = false, highlight = false) => {
+  const drawRow = (label, val, y, h = rowH, bold = false, highlight = false, overrideValX = null) => {
     if (highlight) {
       doc.setFillColor(235, 240, 250);
       doc.rect(M, y, leftW, h, "F");
@@ -170,11 +170,10 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
     doc.rect(M, y, leftW, h, "S");
     doc.setFontSize(8);
     doc.setFont("helvetica", bold ? "bold" : "normal");
-    // wrap label
     const labelLines = doc.splitTextToSize(label, leftW - 80);
     labelLines.forEach((l, i) => doc.text(l, labelX, y + 10 + i * 9));
     doc.setFont("helvetica", "bold");
-    doc.text(val, valX, y + 10, { align: "right" });
+    doc.text(val, overrideValX !== null ? overrideValX : valX, y + 10, { align: "right" });
   };
 
   let rY = bodyY;
