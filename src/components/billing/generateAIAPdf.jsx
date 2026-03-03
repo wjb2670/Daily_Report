@@ -61,20 +61,38 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, PW, PH, "F");
 
+  // ── LOGO above the top rule, preserving aspect ratio ──────────────────────
+  const logoH = 44;
+  const logoW = logoData ? logoH * (2.5) : 0; // will be overridden after image load measurement
   if (logoData) {
-    doc.addImage(logoData, "PNG", PW - 178, M - 8, 142, 48);
+    // measure natural size via a temp canvas trick is not available here;
+    // we know from the uploaded image it is roughly 3:1 wide
+    const lH = 44;
+    const lW = lH * 3.2;
+    doc.addImage(logoData, "PNG", PW - M - lW, M - 10, lW, lH);
   }
 
+  // Title & top rule
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("PAYMENT APPLICATION", M, M + 10);
+  doc.setFontSize(16);
+  doc.text("PAYMENT APPLICATION", M, M + 20);
 
   doc.setDrawColor(0);
   doc.setLineWidth(1.5);
-  doc.line(M, M + 16, PW - M, M + 16);
+  const lineY = M + 30;
+  doc.line(M, lineY, PW - M, lineY);
 
-  const hY = M + 24;
-  doc.setFontSize(8);
+  // ── HEADER ROW: To/From | Project+Architect | App#/Period/Date ─────────────
+  // Column positions (landscape 792pt wide, margins 36pt each side = 720pt usable)
+  // Col 1: TO/FROM  x=36, w=190
+  // Col 2: PROJECT NAME / ARCHITECT  x=240, w=240
+  // Col 3: APP# / PERIOD / DATE  x=495, w=180
+  // (logo sits on right)
+
+  const hY = lineY + 12;
+  doc.setFontSize(8.5);
+
+  // Col 1 – TO
   doc.setFont("helvetica", "bold");
   doc.text("TO:", M, hY);
   doc.setFont("helvetica", "normal");
@@ -83,53 +101,69 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
     project.owner_address || "",
     `${project.city || ""} ${project.state || ""} ${project.zip || ""}`.trim(),
   ].filter(Boolean);
-  toLines.forEach((line, i) => doc.text(line, M + 22, hY + i * 10));
+  toLines.forEach((line, i) => doc.text(line, M + 22, hY + i * 11));
 
+  // Col 1 – FROM (inline with architect row)
+  const fromY = hY + 44;
   doc.setFont("helvetica", "bold");
-  doc.text("FROM:", M, hY + 42);
+  doc.text("FROM:", M, fromY);
   doc.setFont("helvetica", "normal");
   ["THE WHAYLAND COMPANY, LLC, CONST MANAGER", "100 WEST 10TH STREET", "LAUREL DE 19956"].forEach(
-    (line, i) => doc.text(line, M + 32, hY + 42 + i * 10)
+    (line, i) => doc.text(line, M + 36, fromY + i * 11)
   );
 
-  const pCol = M + 200;
+  // Col 2 – PROJECT NAME & LOCATION
+  const pCol = 245;
   doc.setFont("helvetica", "bold");
   doc.text("PROJECT NAME", pCol, hY);
   doc.text("AND LOCATION:", pCol, hY + 9);
   doc.setFont("helvetica", "normal");
-  doc.text(project.name || "", pCol + 80, hY);
-  doc.text(`${project.address || ""} ${project.city || ""} ${project.state || ""}`.trim(), pCol + 80, hY + 9);
+  doc.text(project.name || "", pCol + 85, hY);
+  doc.text(`${project.address || ""} ${project.city || ""} ${project.state || ""}`.trim(), pCol + 85, hY + 9);
 
+  // Col 2 – ARCHITECT (same Y as FROM)
   doc.setFont("helvetica", "bold");
-  doc.text("ARCHITECT:", pCol, hY + 24);
+  doc.text("ARCHITECT:", pCol, fromY);
   doc.setFont("helvetica", "normal");
-  doc.text(project.owner_contact || "—", pCol + 58, hY + 24);
+  doc.text(project.owner_contact || "—", pCol + 62, fromY);
 
-  const aCol = pCol + 220;
+  // Col 3 – Application #, Period Thru, Date of Contract
+  const aCol = 500;
   doc.setFont("helvetica", "bold");
-  doc.text("APPLICATION #", aCol, hY);
+  doc.text("APPLICATION #:", aCol, hY);
   doc.setFont("helvetica", "normal");
-  doc.text(String(period.period_number), aCol + 80, hY);
+  doc.text(String(period.period_number), aCol + 90, hY);
+
   doc.setFont("helvetica", "bold");
   doc.text("PERIOD THRU:", aCol, hY + 14);
   doc.setFont("helvetica", "normal");
-  doc.text(period.period_end_date || "—", aCol + 70, hY + 14);
+  doc.text(period.period_end_date || "—", aCol + 80, hY + 14);
+
   doc.setFont("helvetica", "bold");
   doc.text("DATE OF CONTRACT:", aCol, hY + 28);
   doc.setFont("helvetica", "normal");
-  doc.text(project.start_date || "—", aCol + 90, hY + 28);
+  doc.text(project.start_date || "—", aCol + 102, hY + 28);
 
-  const sumY = hY + 80;
+  // ── DIVIDER between header and body ──────────────────────────────────────
+  const divY = fromY + 36;
   doc.setLineWidth(0.5);
-  doc.line(M, sumY, M + 280, sumY);
+  doc.line(M, divY, PW - M, divY);
 
+  // ── LEFT HALF: Contractor's Summary of Work ───────────────────────────────
+  // Left column runs from M to midpoint (~396pt); right column from 410 to PW-M
+  const leftW = 360;
+  const sumColW = leftW - 10; // width for label + value
+
+  const sumY = divY + 14;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("CONTRACTOR'S SUMMARY OF WORK", M, sumY + 14);
+  doc.setFontSize(10);
+  doc.text("CONTRACTOR'S SUMMARY OF WORK", M, sumY);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
-  doc.text("Application is made for payment as shown below.", M, sumY + 26);
-  doc.text("Continuation Page is attached.", M, sumY + 35);
+  doc.setFontSize(8.5);
+  doc.text("Application is made for payment as shown below.", M, sumY + 14);
+  doc.text("Continuation Page is attached.", M, sumY + 24);
+
+  const valX = M + sumColW; // right-align values here
 
   const summaryRows = [
     ["1. CONTRACT AMOUNT", s.originalContractSum],
@@ -138,31 +172,31 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
     ["4. TOTAL COMPLETED AND STORED\n    (Column G on Continuation Page)", s.totalCompletedStored],
   ];
 
-  let rY = sumY + 48;
+  let rY = sumY + 38;
+  doc.setFontSize(8.5);
   summaryRows.forEach(([label, val]) => {
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
     const lines = label.split("\n");
-    lines.forEach((l, i) => doc.text(l, M, rY + i * 9));
+    lines.forEach((l, i) => doc.text(l, M, rY + i * 10));
     doc.setFont("helvetica", "normal");
-    doc.text($(val), M + 265, rY, { align: "right" });
-    rY += lines.length > 1 ? 20 : 13;
+    doc.text($(val), valX, rY, { align: "right" });
+    rY += lines.length > 1 ? 22 : 14;
   });
 
   doc.setFont("helvetica", "bold");
   doc.text("5. RETAINAGE:", M, rY);
-  rY += 11;
+  rY += 12;
   const retPct = s.totalCompletedStored ? ((s.totalRetainage / s.totalCompletedStored) * 100).toFixed(1) : "0.0";
   doc.setFont("helvetica", "normal");
   doc.text(`   A. ${retPct}% Of Completed Work`, M, rY);
-  doc.text($(s.totalRetainage), M + 265, rY, { align: "right" });
-  rY += 11;
+  doc.text($(s.totalRetainage), valX, rY, { align: "right" });
+  rY += 12;
   doc.text("   B. 0% of Material Stored", M, rY);
-  doc.text("0.00", M + 265, rY, { align: "right" });
-  rY += 11;
+  doc.text("0.00", valX, rY, { align: "right" });
+  rY += 12;
   doc.text("   Total Retainage (Line 5a + 5b or Column I)", M, rY);
-  doc.text($(s.totalRetainage), M + 265, rY, { align: "right" });
-  rY += 13;
+  doc.text($(s.totalRetainage), valX, rY, { align: "right" });
+  rY += 14;
 
   [
     ["6. TOTAL COMPLETED AND STORED LESS RETAINAGE:\n    (Line 4 minus Line 5 Total)", s.totalEarnedLessRetainage],
@@ -171,99 +205,102 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   ].forEach(([label, val]) => {
     doc.setFont("helvetica", "bold");
     const lines = label.split("\n");
-    lines.forEach((l, i) => doc.text(l, M, rY + i * 9));
-    doc.text($(val), M + 265, rY, { align: "right" });
-    rY += lines.length > 1 ? 20 : 13;
+    lines.forEach((l, i) => doc.text(l, M, rY + i * 10));
+    doc.text($(val), valX, rY, { align: "right" });
+    rY += lines.length > 1 ? 22 : 14;
   });
 
   doc.setFont("helvetica", "bold");
   doc.text("9. BALANCE TO FINISH:", M, rY);
-  doc.text($(s.balanceToFinish), M + 265, rY, { align: "right" });
-  rY += 13;
+  doc.text($(s.balanceToFinish), valX, rY, { align: "right" });
+  rY += 14;
 
   // Change order table
+  const coW = leftW;
   doc.setLineWidth(0.5);
-  doc.rect(M, rY, 280, 10, "S");
-  doc.setFontSize(7);
+  doc.rect(M, rY, coW, 11, "S");
+  doc.setFontSize(7.5);
   doc.setFont("helvetica", "bold");
-  doc.text("SUMMARY OF CHANGE ORDERS", M + 2, rY + 7);
-  doc.text("ADDITIONS", M + 185, rY + 7);
-  doc.text("DEDUCTIONS", M + 240, rY + 7);
-  rY += 10;
+  doc.text("SUMMARY OF CHANGE ORDERS", M + 3, rY + 8);
+  doc.text("ADDITIONS", M + coW - 110, rY + 8);
+  doc.text("DEDUCTIONS", M + coW - 55, rY + 8);
+  rY += 11;
 
   [
     ["Total changes approved in previous months", 0, 0],
     ["Total approved this month", period.change_order_additions || 0, period.change_order_deductions || 0],
   ].forEach(([label, add, ded]) => {
-    doc.rect(M, rY, 280, 10, "S");
+    doc.rect(M, rY, coW, 11, "S");
     doc.setFont("helvetica", "normal");
-    doc.text(label, M + 2, rY + 7);
-    doc.text($(add), M + 215, rY + 7, { align: "right" });
-    doc.text($(ded), M + 278, rY + 7, { align: "right" });
-    rY += 10;
+    doc.text(label, M + 3, rY + 8);
+    doc.text($(add), M + coW - 65, rY + 8, { align: "right" });
+    doc.text($(ded), M + coW - 3, rY + 8, { align: "right" });
+    rY += 11;
   });
 
-  doc.rect(M, rY, 280, 10, "S");
+  doc.rect(M, rY, coW, 11, "S");
   doc.setFont("helvetica", "bold");
-  doc.text("TOTALS", M + 140, rY + 7, { align: "right" });
-  doc.text($(period.change_order_additions || 0), M + 215, rY + 7, { align: "right" });
-  doc.text($(period.change_order_deductions || 0), M + 278, rY + 7, { align: "right" });
-  rY += 10;
+  doc.text("TOTALS", M + coW / 2, rY + 8, { align: "center" });
+  doc.text($(period.change_order_additions || 0), M + coW - 65, rY + 8, { align: "right" });
+  doc.text($(period.change_order_deductions || 0), M + coW - 3, rY + 8, { align: "right" });
+  rY += 11;
 
-  doc.rect(M, rY, 280, 10, "S");
-  doc.text("NET CHANGES", M + 140, rY + 7, { align: "right" });
+  doc.rect(M, rY, coW, 11, "S");
+  doc.text("NET CHANGES", M + coW / 2, rY + 8, { align: "center" });
   doc.setFont("helvetica", "normal");
-  doc.text($((period.change_order_additions || 0) - (period.change_order_deductions || 0)), M + 215, rY + 7, { align: "right" });
+  doc.text($((period.change_order_additions || 0) - (period.change_order_deductions || 0)), M + coW - 65, rY + 8, { align: "right" });
 
-  // Right column certification
-  const rCol = M + 300;
-  const certY = sumY + 14;
-  doc.setFontSize(6.5);
+  // ── RIGHT HALF: Certification ─────────────────────────────────────────────
+  const rCol = M + leftW + 20;
+  const rW = PW - M - rCol;
+  let cY = sumY;
+
+  doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   const certText = "Contractor's signature below is his assurance to Owner, concerning the payment herein applied for, that: (1) the Work has been performed as required in the Contract Documents, (2) all sums previously paid to Contractor under the Contract have been used to pay Contractor's costs for labor, materials and other obligations under the Contract for Work previously paid for, and (3) Contractor is legally entitled to this payment.";
-  doc.text(doc.splitTextToSize(certText, PW - rCol - M), rCol, certY);
+  doc.text(doc.splitTextToSize(certText, rW), rCol, cY);
 
-  let cY = certY + 42;
+  cY += 48;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(8);
   doc.text("CONTRACTOR:  THE WHAYLAND COMPANY, LLC, CONST MANAGER", rCol, cY);
   cY += 14;
   doc.text("By:", rCol, cY);
-  doc.line(rCol + 12, cY, rCol + 160, cY);
-  doc.text("Date:", rCol + 165, cY);
-  doc.line(rCol + 182, cY, PW - M, cY);
-  cY += 10;
+  doc.line(rCol + 14, cY, rCol + rW * 0.6, cY);
+  doc.text("Date:", rCol + rW * 0.6 + 5, cY);
+  doc.line(rCol + rW * 0.6 + 30, cY, PW - M, cY);
+  cY += 11;
   doc.setFont("helvetica", "normal");
   doc.text("State of: Delaware", rCol, cY);
-  cY += 10;
+  cY += 11;
   doc.text("County of: Sussex", rCol, cY);
-  cY += 18;
+  cY += 20;
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
+  doc.setFontSize(10);
   doc.text("ARCHITECT'S CERTIFICATION", rCol, cY);
-  cY += 10;
+  cY += 12;
 
-  doc.setFontSize(6.5);
+  doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   const archText = "Architect's signature below is his assurance to Owner, concerning the payment herein applied for, that: (1) Architect has inspected the Work represented by this Application, (2) such Work has been completed to the extent indicated, and the quality of workmanship and materials conforms with the Contract Documents, (3) this Application for Payment accurately states the amount of Work completed and payment due therefor, and (4) Architect knows of no reason why payment should not be made.";
-  doc.text(doc.splitTextToSize(archText, PW - rCol - M), rCol, cY);
-  cY += 44;
+  doc.text(doc.splitTextToSize(archText, rW), rCol, cY);
+  cY += 50;
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(8);
   doc.text("CERTIFIED AMOUNT:", rCol, cY);
-  doc.line(rCol + 85, cY, PW - M, cY);
+  doc.line(rCol + 95, cY, PW - M, cY);
   cY += 14;
   doc.text("ARCHITECT:", rCol, cY);
   doc.setFont("helvetica", "normal");
-  doc.text(project.owner_contact || "—", rCol + 55, cY);
-  cY += 12;
+  doc.text(project.owner_contact || "—", rCol + 60, cY);
+  cY += 14;
   doc.setFont("helvetica", "bold");
   doc.text("By:", rCol, cY);
-  doc.line(rCol + 12, cY, rCol + 160, cY);
-  doc.text("Date:", rCol + 165, cY);
-  doc.line(rCol + 182, cY, PW - M, cY);
+  doc.line(rCol + 14, cY, rCol + rW * 0.6, cY);
+  doc.text("Date:", rCol + rW * 0.6 + 5, cY);
+  doc.line(rCol + rW * 0.6 + 30, cY, PW - M, cY);
 }
 
 function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoData) {
