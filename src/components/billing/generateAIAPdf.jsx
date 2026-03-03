@@ -57,7 +57,7 @@ export async function generateAIAPdf({ project, period, lineItems, summaryValues
     return numA - numB;
   });
 
-  const rowsPerPage = 28;
+  const rowsPerPage = 26;
   const chunks = [];
   for (let i = 0; i < sortedItems.length; i += rowsPerPage) {
     chunks.push(sortedItems.slice(i, i + rowsPerPage));
