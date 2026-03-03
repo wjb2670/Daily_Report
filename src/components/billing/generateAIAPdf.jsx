@@ -189,7 +189,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   rY += 14;
 
   const retPct = s.totalCompletedStored ? ((s.totalRetainage / s.totalCompletedStored) * 100).toFixed(1) : "0.0";
-  const indentedValX = valX - 40; // indented value X for 5a/5b
+  const indentedValX = valX - 72; // indented value X for 5a/5b (1" = 72pt)
 
   const summaryRows = [
     ["1.  Original Contract Sum", s.originalContractSum, false, false],
