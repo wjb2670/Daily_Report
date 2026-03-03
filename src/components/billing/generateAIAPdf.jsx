@@ -67,8 +67,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   if (logoData) {
     const lH = 32;
     const lW = lH * 3.2;
-    const ruleYTemp = M + 30;
-    const logoY = M + (ruleYTemp - M) / 2 - lH / 2;
+    const logoY = M + (55 / 2) - lH / 2;
     doc.addImage(logoData, "PNG", PW - M - lW, logoY, lW, lH);
   }
 
