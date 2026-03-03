@@ -9,7 +9,7 @@ import { createPageUrl } from "@/utils";
 import G702Summary from "@/components/billing/G702Summary.jsx";
 import G703ContinuationSheet from "@/components/billing/G703ContinuationSheet.jsx";
 import ChangeOrderModal from "@/components/billing/ChangeOrderModal.jsx";
-import { generateAIAPdf } from "@/components/billing/generateAIAPdf.js";
+import { generateAIAPdf } from "@/components/billing/generateAIAPdf.jsx";
 
 export default function BillingPeriodDetail() {
   const params = new URLSearchParams(window.location.search);
