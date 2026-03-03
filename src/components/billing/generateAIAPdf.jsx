@@ -281,7 +281,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
 
   // ── RIGHT: Certification Blocks ───────────────────────────────────────────
   // Calculate total available height for the right column
-  const totalRightH = PH - M - bodyY - M; // from bodyY to bottom margin
+  const totalRightH = PH - M - bodyY - 14; // from bodyY to near bottom margin
   const headerH = 14;
   const gap = 10;
   const contBoxH = Math.floor((totalRightH - headerH * 2 - gap) * 0.60);
