@@ -172,33 +172,33 @@ export default function BillingPeriodDetail() {
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-500 block mb-1">Change Order Additions</label>
-                <div className="flex items-center border rounded-md px-2 h-9 bg-white">
-                  <span className="text-gray-400 text-sm mr-1">$</span>
-                  <input
-                    type="number"
-                    className="flex-1 text-sm outline-none"
-                    value={period.change_order_additions || 0}
-                    disabled={period.locked}
-                    onChange={e => updatePeriod({ change_order_additions: parseFloat(e.target.value) || 0 })}
-                  />
-                  <span className="text-gray-300 text-xs ml-1">▲</span>
+                <div className="flex items-center border rounded-md px-3 h-9 bg-gray-50 text-sm text-green-700 font-medium gap-1">
+                  <span className="text-gray-400">$</span>
+                  {(period.change_order_additions || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <span className="ml-auto text-xs text-gray-300 font-normal">via CO button ▲</span>
                 </div>
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-500 block mb-1">Change Order Deductions</label>
-                <div className="flex items-center border rounded-md px-2 h-9 bg-white">
-                  <span className="text-gray-400 text-sm mr-1">$</span>
-                  <input
-                    type="number"
-                    className="flex-1 text-sm outline-none"
-                    value={period.change_order_deductions || 0}
-                    disabled={period.locked}
-                    onChange={e => updatePeriod({ change_order_deductions: parseFloat(e.target.value) || 0 })}
-                  />
-                  <span className="text-gray-300 text-xs ml-1">▲</span>
+                <div className="flex items-center border rounded-md px-3 h-9 bg-gray-50 text-sm text-red-600 font-medium gap-1">
+                  <span className="text-gray-400">$</span>
+                  {(period.change_order_deductions || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <span className="ml-auto text-xs text-gray-300 font-normal">via CO button ▲</span>
                 </div>
               </div>
             </div>
+            {(changeOrderNet !== 0) && (
+              <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-3 text-xs text-gray-500">
+                <span>Net Change Orders:</span>
+                <span className={`font-semibold text-sm ${changeOrderNet >= 0 ? "text-green-700" : "text-red-600"}`}>
+                  {changeOrderNet >= 0 ? "+" : ""}${Math.abs(changeOrderNet).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <span className="text-gray-400">→ Contract Sum to Date:</span>
+                <span className="font-semibold text-sm text-[#0f2a5e]">
+                  ${contractSumToDate.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* G703 Continuation Sheet */}
