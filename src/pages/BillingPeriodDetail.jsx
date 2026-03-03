@@ -112,7 +112,10 @@ export default function BillingPeriodDetail() {
     setLineItems(prev => prev.map(l => l.id === id ? updated : l));
   };
 
-  const toggleLock = () => updatePeriod({ locked: !period.locked });
+  const toggleLock = () => updatePeriod({ 
+    locked: !period.locked,
+    status: !period.locked ? "submitted" : "draft"
+  });
 
   const handleGeneratePdf = async () => {
     setGeneratingPdf(true);
