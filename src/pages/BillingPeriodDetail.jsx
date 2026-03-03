@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Lock, Unlock, FileText, Users, Download } from "lucide-react";
+import { ArrowLeft, Lock, Unlock, FileText, Users, Download, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import G702Summary from "@/components/billing/G702Summary.jsx";
 import G703ContinuationSheet from "@/components/billing/G703ContinuationSheet.jsx";
+import ChangeOrderModal from "@/components/billing/ChangeOrderModal.jsx";
 
 export default function BillingPeriodDetail() {
   const params = new URLSearchParams(window.location.search);
