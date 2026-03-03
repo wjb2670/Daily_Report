@@ -48,6 +48,20 @@ export default function BillingPeriodDetail() {
     const lineMap = {};
     existingLines.forEach(l => { lineMap[l.sov_item_id] = l; });
 
+    // Get previous period's completed totals for carry-forward
+    let previousPeriodTotals = {};
+    if (per.period_number > 1) {
+      const prevPeriods = await base44.entities.BillingPeriod.filter({ project_id: per.project_id, period_number: per.period_number - 1 });
+      if (prevPeriods.length > 0) {
+        const prevPeriod = prevPeriods[0];
+        const prevLines = await base44.entities.BillingLineItem.filter({ billing_period_id: prevPeriod.id });
+        prevLines.forEach(line => {
+          const completed = (line.previous_applications || 0) + (line.work_this_period || 0) + (line.materials_this_period || 0);
+          previousPeriodTotals[line.sov_item_id] = completed;
+        });
+      }
+    }
+
     // Create line items for all SOV items that don't have one yet
     const mergedLines = [];
     for (const sovItem of allSov) {
@@ -62,7 +76,7 @@ export default function BillingPeriodDetail() {
           item_number: sovItem.line_number || "",
           description: sovItem.description,
           scheduled_value: sovItem.scheduled_value || 0,
-          previous_applications: 0,
+          previous_applications: previousPeriodTotals[sovItem.id] || 0,
           work_this_period: 0,
           materials_this_period: 0,
           retainage_percent: sovItem.retainage_percent ?? 10,
