@@ -311,8 +311,10 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.line(rCol + 18, contSigY + 26, rCol + rW * 0.55, contSigY + 26);
   doc.text("Date:", rCol + rW * 0.57, contSigY + 26);
   doc.line(rCol + rW * 0.57 + 26, contSigY + 26, rCol + rW - 4, contSigY + 26);
-  doc.text("Title:", rCol + 4, contSigY + 39);
-  doc.line(rCol + 24, contSigY + 39, rCol + rW - 4, contSigY + 39);
+  doc.text("Name:", rCol + 4, contSigY + 39);
+  doc.line(rCol + 26, contSigY + 39, rCol + rW - 4, contSigY + 39);
+  doc.text("Title:", rCol + 4, contSigY + 52);
+  doc.line(rCol + 24, contSigY + 52, rCol + rW - 4, contSigY + 52);
 
   cY += contBoxH + gap;
 
