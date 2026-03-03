@@ -334,8 +334,8 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
 
   // Notary Public section
   const notaryY = contSigY + 86;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
   doc.text("State of:", rCol + 4, notaryY);
   doc.line(rCol + 4 + 28, notaryY, rCol + rW - 4, notaryY);
   doc.text("County of:", rCol + 4, notaryY + 12);
@@ -347,13 +347,13 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.text(",", rCol + 4 + 247, notaryY + 24);
   doc.line(rCol + 4 + 252, notaryY + 24, rCol + rW - 4, notaryY + 24); // blank for year
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
   doc.text("Notary Public:", rCol + 4, notaryY + 36);
   doc.line(rCol + 4 + 40, notaryY + 36, rCol + rW - 4, notaryY + 36);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
   doc.text("My Commission Expires:", rCol + 4, notaryY + 48);
   doc.line(rCol + 4 + 70, notaryY + 48, rCol + rW / 2 + 20, notaryY + 48);
 
