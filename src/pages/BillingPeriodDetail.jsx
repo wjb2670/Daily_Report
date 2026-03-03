@@ -154,9 +154,9 @@ export default function BillingPeriodDetail() {
                 <label className="text-xs font-medium text-gray-500 block mb-1">Period End Date</label>
                 <Input
                   type="date"
-                  value={period.period_end_date || ""}
+                  defaultValue={period.period_end_date || ""}
                   disabled={period.locked}
-                  onChange={e => updatePeriod({ period_end_date: e.target.value })}
+                  onBlur={e => updatePeriod({ period_end_date: e.target.value })}
                   className="text-sm"
                 />
               </div>
