@@ -294,7 +294,8 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   const certLines = doc.splitTextToSize(certText, rW - 8);
   doc.text(certLines, rCol + 4, cY + 11);
 
-  const contSigY = cY + contBoxH - 52;
+  // Place sig block just below the cert text
+  const contSigY = cY + 11 + certLines.length * 7.5 + 8;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.text("CONTRACTOR:", rCol + 4, contSigY);
