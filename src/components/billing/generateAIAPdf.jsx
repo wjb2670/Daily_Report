@@ -302,17 +302,16 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
   const tY = shY + 20;
   const cols = [
     { x: M,       w: 36  },
-    { x: M + 36,  w: 145 },
-    { x: M + 181, w: 72  },
-    { x: M + 253, w: 72  },
-    { x: M + 325, w: 72  },
-    { x: M + 397, w: 60  },
-    { x: M + 457, w: 72  },
-    { x: M + 529, w: 36  },
-    { x: M + 565, w: 80  },
-    { x: M + 645, w: PW - M - 645 - M },
+    { x: M + 36,  w: 160 },
+    { x: M + 196, w: 78  },
+    { x: M + 274, w: 78  },
+    { x: M + 352, w: 78  },
+    { x: M + 430, w: 64  },
+    { x: M + 494, w: 80  },
+    { x: M + 574, w: 44  },
+    { x: M + 618, w: PW - M - 618 - M },
   ];
-  const colLabels = ["A", "B", "C", "D", "E", "F", "G", "H\n(G÷C)", "Balance\nTo Finish", "I\nRetainage"];
+  const colLabels = ["A", "B", "C", "D", "E", "F", "G", "H\n(G÷C)", "Balance\nTo Finish"];
 
   doc.setFillColor(210, 215, 220);
   doc.rect(M, tY, PW - M * 2, 28, "F");
