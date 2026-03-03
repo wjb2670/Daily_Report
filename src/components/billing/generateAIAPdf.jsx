@@ -65,7 +65,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
 
   // ── LOGO above the top rule, vertically centered in the space above the rule ──
   if (logoData) {
-    const lH = 32;
+    const lH = 42;
     const lW = lH * 3.2;
     const logoY = M + (55 / 2) - lH / 2;
     doc.addImage(logoData, "PNG", PW - M - lW, logoY, lW, lH);
