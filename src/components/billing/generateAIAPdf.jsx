@@ -333,7 +333,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.line(rCol + 24, contSigY + 52, rCol + rW - 4, contSigY + 52);
 
   // Notary Public section
-  const notaryY = contSigY + 66;
+  const notaryY = contSigY + 76;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.text("State of:", rCol + 4, notaryY);
