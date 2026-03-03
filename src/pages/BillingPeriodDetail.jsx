@@ -163,8 +163,8 @@ export default function BillingPeriodDetail() {
           >
             <PlusCircle className="w-3.5 h-3.5" /> Change Order
           </Button>
-          <Button variant="outline" size="sm" className="gap-1 text-blue-700 border-blue-300">
-            <Download className="w-3.5 h-3.5" /> Generate PDF
+          <Button variant="outline" size="sm" className="gap-1 text-blue-700 border-blue-300" onClick={handleGeneratePdf} disabled={generatingPdf}>
+            <Download className="w-3.5 h-3.5" /> {generatingPdf ? "Generating..." : "Generate PDF"}
           </Button>
           <Button
             size="sm"
