@@ -79,7 +79,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
 
   doc.setDrawColor(0);
   doc.setLineWidth(1.5);
-  const lineY = M + 30;
+  const lineY = M + 55;
   doc.line(M, lineY, PW - M, lineY);
 
   // ── HEADER ROW: To/From | Project+Architect | App#/Period/Date ─────────────
