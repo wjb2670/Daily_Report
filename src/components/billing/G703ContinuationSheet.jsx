@@ -90,9 +90,11 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
             <input
               type="number"
               className="w-24 text-right text-xs border border-blue-200 rounded px-1 py-0.5 text-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-300"
-              value={item.work_this_period || ""}
+              defaultValue={item.work_this_period != null ? Number(item.work_this_period).toFixed(2) : "0.00"}
+              key={item.id + "-work"}
               placeholder="0.00"
-              onChange={e => handleWorkChange(item, e.target.value)}
+              step="0.01"
+              onBlur={e => handleWorkChange(item, e.target.value)}
             />
           )}
         </td>
@@ -101,9 +103,11 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
             <input
               type="number"
               className="w-24 text-right text-xs border border-green-200 rounded px-1 py-0.5 text-green-600 focus:outline-none focus:ring-1 focus:ring-green-300"
-              value={item.materials_this_period || ""}
+              defaultValue={item.materials_this_period != null ? Number(item.materials_this_period).toFixed(2) : "0.00"}
+              key={item.id + "-mat"}
               placeholder="0.00"
-              onChange={e => handleMaterialsChange(item, e.target.value)}
+              step="0.01"
+              onBlur={e => handleMaterialsChange(item, e.target.value)}
             />
           )}
         </td>
