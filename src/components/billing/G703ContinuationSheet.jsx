@@ -110,8 +110,31 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
         <td className="py-2 px-1 text-right font-medium text-gray-800">{fmt(completedToDate)}</td>
         <td className="py-2 px-1 text-right text-gray-600">{pct(totalPctItem)}</td>
         <td className="py-2 px-1 text-right text-gray-500">{fmt(balanceToFinish)}</td>
-        {/* Retainage Amount — prints on AIA */}
-        <td className="py-2 px-1 text-right text-orange-600 font-medium">{fmt(retainageAmt)}</td>
+        <td className="py-2 px-1 text-right text-orange-600">
+          {locked ? `${item.retainage_percent ?? 0}%` : (
+            <div className="flex items-center justify-end gap-0.5">
+              <input
+                type="number"
+                className="w-14 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-300"
+                value={item.retainage_percent ?? ""}
+                placeholder="0"
+                onChange={e => handleRetainagePctChange(item, e.target.value)}
+              />
+              <span className="text-orange-400 text-xs">%</span>
+            </div>
+          )}
+        </td>
+        <td className="py-2 px-1 text-right text-orange-600 font-medium">
+          {locked ? fmt(retainageAmt) : (
+            <input
+              type="number"
+              className="w-24 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-300"
+              value={retainageAmt || ""}
+              placeholder="0.00"
+              onChange={e => handleRetainageAmtChange(item, e.target.value)}
+            />
+          )}
+        </td>
       </tr>
     );
   };
