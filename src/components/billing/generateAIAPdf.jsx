@@ -491,7 +491,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
     });
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.5);
+    doc.setFontSize(8);
     doc.setTextColor(0);
 
     const rMid = rowY + rowH / 2 + 2.5;
