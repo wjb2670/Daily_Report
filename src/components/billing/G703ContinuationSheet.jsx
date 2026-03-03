@@ -136,7 +136,8 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
               <th className="text-right py-2 px-1 font-bold text-gray-700 border border-gray-300">Total<br/>Completed<br/>& Stored</th>
               <th className="text-right py-2 px-1 font-bold text-gray-700 border border-gray-300">%<br/>(G÷C)</th>
               <th className="text-right py-2 px-1 font-bold text-gray-700 border border-gray-300">Balance<br/>to Finish</th>
-              <th className="text-right py-2 px-1 font-bold text-orange-700 border border-gray-300">Retainage</th>
+              <th className="text-right py-2 px-1 font-bold text-orange-700 border border-gray-300">Ret.<br/>%</th>
+              <th className="text-right py-2 px-1 font-bold text-orange-700 border border-gray-300">Ret.<br/>$</th>
             </tr>
           </thead>
           <tbody>
