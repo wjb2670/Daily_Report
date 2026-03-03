@@ -313,36 +313,45 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
   doc.setLineWidth(1);
   doc.rect(M, M, PW - M * 2, PH - M * 2);
 
+  // Logo above the rule, preserving ~3.2:1 aspect ratio
   if (logoData) {
-    doc.addImage(logoData, "PNG", PW - M - 145, M + 2, 141, 38);
+    const lH = 38;
+    const lW = lH * 3.2;
+    doc.addImage(logoData, "PNG", PW - M - lW - 4, M + 2, lW, lH);
   }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.text("PAYMENT APPLICATION DETAILS", PW / 2, M + 20, { align: "center" });
+  doc.text("PAYMENT APPLICATION DETAILS", PW / 2, M + 22, { align: "center" });
 
+  // Rule below title/logo
   doc.setDrawColor(0);
   doc.setLineWidth(0.5);
-  doc.line(M, M + 26, PW - M, M + 26);
+  const ruleY = M + 46;
+  doc.line(M, ruleY, PW - M, ruleY);
 
-  const shY = M + 35;
+  // Info row below rule
+  const shY = ruleY + 12;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(8);
   doc.text("Customer:", M + 4, shY);
   doc.setFont("helvetica", "normal");
-  doc.text((project.owner_company || project.owner_name || "").toUpperCase(), M + 38, shY);
+  doc.text((project.owner_company || project.owner_name || "").toUpperCase(), M + 52, shY);
+
   doc.setFont("helvetica", "bold");
-  doc.text("Project:", M + 4, shY + 10);
+  doc.text("Project:", M + 4, shY + 12);
   doc.setFont("helvetica", "normal");
-  doc.text(project.name.toUpperCase(), M + 28, shY + 10);
+  doc.text(project.name.toUpperCase(), M + 44, shY + 12);
+
   doc.setFont("helvetica", "bold");
   doc.text("Application Number:", PW / 2 + 20, shY);
   doc.setFont("helvetica", "normal");
-  doc.text(String(period.period_number), PW / 2 + 100, shY);
+  doc.text(String(period.period_number), PW / 2 + 115, shY);
+
   doc.setFont("helvetica", "bold");
-  doc.text("For Period Ending:", PW / 2 + 20, shY + 10);
+  doc.text("For Period Ending:", PW / 2 + 20, shY + 12);
   doc.setFont("helvetica", "normal");
-  doc.text(period.period_end_date || "—", PW / 2 + 100, shY + 10);
+  doc.text(period.period_end_date || "—", PW / 2 + 108, shY + 12);
 
   const tY = shY + 20;
   const cols = [
