@@ -166,6 +166,43 @@ export default function ProjectBilling() {
         </div>
       </div>
 
+      {/* Billing Periods */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-[#0f2a5e] text-base">Billing Periods</h2>
+          <Button size="sm" className="bg-[#0f2a5e] hover:bg-[#1e3a8a] text-white" onClick={createNewPeriod}>
+            <Plus className="w-3.5 h-3.5 mr-1" /> New Period
+          </Button>
+        </div>
+
+        {periods.length === 0 ? (
+          <p className="text-gray-400 text-sm text-center py-6">No billing periods yet.</p>
+        ) : (
+          <div className="divide-y">
+            {periods.map(period => (
+              <Link key={period.id} to={createPageUrl(`BillingPeriodDetail?period_id=${period.id}`)}>
+                <div className="flex items-center justify-between py-3 px-1 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-[#0f2a5e] text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      {period.period_number}
+                    </div>
+                    <div>
+                      <div className="font-medium text-sm text-[#0f2a5e]">Period {period.period_number}</div>
+                      {period.period_end_date && (
+                        <div className="text-xs text-gray-400">{period.period_end_date}</div>
+                      )}
+                    </div>
+                  </div>
+                  <Badge className={statusColors[period.status] || "bg-gray-100 text-gray-700"}>
+                    {period.status}
+                  </Badge>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Schedule of Values */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
