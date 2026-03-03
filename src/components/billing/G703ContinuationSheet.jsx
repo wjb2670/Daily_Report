@@ -120,9 +120,11 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
               <input
                 type="number"
                 className="w-14 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-300"
-                value={item.retainage_percent ?? ""}
-                placeholder="0"
-                onChange={e => handleRetainagePctChange(item, e.target.value)}
+                defaultValue={item.retainage_percent != null ? Number(item.retainage_percent).toFixed(2) : "0.00"}
+                key={item.id + "-rpct"}
+                placeholder="0.00"
+                step="0.01"
+                onBlur={e => handleRetainagePctChange(item, e.target.value)}
               />
               <span className="text-orange-400 text-xs">%</span>
             </div>
@@ -133,9 +135,11 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
             <input
               type="number"
               className="w-24 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-300"
-              value={retainageAmt || ""}
+              defaultValue={retainageAmt != null ? Number(retainageAmt).toFixed(2) : "0.00"}
+              key={item.id + "-ramt"}
               placeholder="0.00"
-              onChange={e => handleRetainageAmtChange(item, e.target.value)}
+              step="0.01"
+              onBlur={e => handleRetainageAmtChange(item, e.target.value)}
             />
           )}
         </td>
