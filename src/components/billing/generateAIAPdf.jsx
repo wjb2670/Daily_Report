@@ -133,7 +133,8 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.text("AND LOCATION:", pCol, hY + 9);
   doc.setFont("helvetica", "normal");
   doc.text(project.name || "", pCol + 85, hY);
-  doc.text(`${project.address || ""} ${project.city || ""} ${project.state || ""}`.trim(), pCol + 85, hY + 9);
+  doc.text(project.address || "", pCol + 85, hY + 9);
+  doc.text(`${project.city || ""}, ${project.state || ""} ${project.zip || ""}`.trim(), pCol + 85, hY + 18);
 
   // Col 2 – ARCHITECT (same Y as FROM)
   doc.setFont("helvetica", "bold");
