@@ -148,158 +148,220 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.setLineWidth(0.5);
   doc.line(M, divY, PW - M, divY);
 
-  // ── LEFT HALF: Contractor's Summary of Work ───────────────────────────────
-  // Left column runs from M to midpoint (~396pt); right column from 410 to PW-M
-  const leftW = 360;
-  const sumColW = leftW - 10; // width for label + value
+  // ── TWO-COLUMN BODY ───────────────────────────────────────────────────────
+  const leftW = 370;
+  const rCol = M + leftW + 14;
+  const rW = PW - M - rCol;
+  const bodyY = divY + 10;
 
-  const sumY = divY + 14;
+  // ── LEFT: Contractor's Summary of Work ───────────────────────────────────
+  const rowH = 16;
+  const labelX = M + 4;
+  const valX = M + leftW - 4;
+
+  // Helper: draw a bordered row with label and value
+  const drawRow = (label, val, y, h = rowH, bold = false, highlight = false) => {
+    if (highlight) {
+      doc.setFillColor(235, 240, 250);
+      doc.rect(M, y, leftW, h, "F");
+    }
+    doc.setDrawColor(150);
+    doc.setLineWidth(0.4);
+    doc.rect(M, y, leftW, h, "S");
+    doc.setFontSize(8);
+    doc.setFont("helvetica", bold ? "bold" : "normal");
+    // wrap label
+    const labelLines = doc.splitTextToSize(label, leftW - 80);
+    labelLines.forEach((l, i) => doc.text(l, labelX, y + 10 + i * 9));
+    doc.setFont("helvetica", "bold");
+    doc.text(val, valX, y + 10, { align: "right" });
+  };
+
+  let rY = bodyY;
+
+  // Section header
+  doc.setFillColor(15, 42, 94);
+  doc.rect(M, rY, leftW, 14, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("CONTRACTOR'S SUMMARY OF WORK", M, sumY);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
-  doc.text("Application is made for payment as shown below.", M, sumY + 14);
-  doc.text("Continuation Page is attached.", M, sumY + 24);
+  doc.setFontSize(8);
+  doc.setTextColor(255, 255, 255);
+  doc.text("CONTRACTOR'S APPLICATION FOR PAYMENT", labelX, rY + 10);
+  doc.setTextColor(0);
+  rY += 14;
 
-  const valX = M + sumColW; // right-align values here
-
+  const retPct = s.totalCompletedStored ? ((s.totalRetainage / s.totalCompletedStored) * 100).toFixed(1) : "0.0";
   const summaryRows = [
-    ["1. CONTRACT AMOUNT", s.originalContractSum],
-    ["2. SUM OF ALL CHANGE ORDERS", s.changeOrderNet],
-    ["3. CURRENT CONTRACT AMOUNT (Line 1 + 2)", s.contractSumToDate],
-    ["4. TOTAL COMPLETED AND STORED\n    (Column G on Continuation Page)", s.totalCompletedStored],
+    ["1.  Original Contract Sum", s.originalContractSum, false],
+    ["2.  Net Change by Change Orders", s.changeOrderNet, false],
+    ["3.  Contract Sum to Date (1 + 2)", s.contractSumToDate, false],
+    ["4.  Total Completed & Stored to Date", s.totalCompletedStored, false],
+    [`5a. Retainage: ${retPct}% of Completed Work`, s.totalRetainage, false],
+    ["5b. Retainage: 0% of Stored Material", 0, false],
+    ["5.  Total Retainage (5a + 5b)", s.totalRetainage, false],
+    ["6.  Total Earned Less Retainage (4 – 5)", s.totalEarnedLessRetainage, false],
+    ["7.  Less Previous Certificates for Payment", s.previousCertificates, false],
+    ["8.  Current Payment Due", s.currentPaymentDue, true],
+    ["9.  Balance to Finish, Including Retainage (3 – 6)", s.balanceToFinish, false],
   ];
 
-  let rY = sumY + 38;
-  doc.setFontSize(8.5);
-  summaryRows.forEach(([label, val]) => {
-    doc.setFont("helvetica", "bold");
-    const lines = label.split("\n");
-    lines.forEach((l, i) => doc.text(l, M, rY + i * 10));
-    doc.setFont("helvetica", "normal");
-    doc.text($(val), valX, rY, { align: "right" });
-    rY += lines.length > 1 ? 22 : 14;
+  summaryRows.forEach(([label, val, hl]) => {
+    drawRow(label, $(val), rY, rowH, hl, hl);
+    rY += rowH;
   });
 
+  rY += 8;
+
+  // Change Order Summary table
+  const coColLabel = leftW * 0.44;
+  const coColAdd = leftW * 0.27;
+  const coColDed = leftW * 0.29;
+
+  // Header
+  doc.setFillColor(200, 210, 225);
+  doc.rect(M, rY, leftW, 13, "F");
+  doc.setDrawColor(120);
+  doc.setLineWidth(0.4);
+  doc.rect(M, rY, leftW, 13, "S");
+  doc.line(M + coColLabel, rY, M + coColLabel, rY + 13);
+  doc.line(M + coColLabel + coColAdd, rY, M + coColLabel + coColAdd, rY + 13);
   doc.setFont("helvetica", "bold");
-  doc.text("5. RETAINAGE:", M, rY);
-  rY += 12;
-  const retPct = s.totalCompletedStored ? ((s.totalRetainage / s.totalCompletedStored) * 100).toFixed(1) : "0.0";
-  doc.setFont("helvetica", "normal");
-  doc.text(`   A. ${retPct}% Of Completed Work`, M, rY);
-  doc.text($(s.totalRetainage), valX, rY, { align: "right" });
-  rY += 12;
-  doc.text("   B. 0% of Material Stored", M, rY);
-  doc.text("0.00", valX, rY, { align: "right" });
-  rY += 12;
-  doc.text("   Total Retainage (Line 5a + 5b or Column I)", M, rY);
-  doc.text($(s.totalRetainage), valX, rY, { align: "right" });
-  rY += 14;
-
-  [
-    ["6. TOTAL COMPLETED AND STORED LESS RETAINAGE:\n    (Line 4 minus Line 5 Total)", s.totalEarnedLessRetainage],
-    ["7. LESS PREVIOUS CERTIFICATES FOR PAYMENT:", s.previousCertificates],
-    ["8. CURRENT PAYMENT DUE:", s.currentPaymentDue],
-  ].forEach(([label, val]) => {
-    doc.setFont("helvetica", "bold");
-    const lines = label.split("\n");
-    lines.forEach((l, i) => doc.text(l, M, rY + i * 10));
-    doc.text($(val), valX, rY, { align: "right" });
-    rY += lines.length > 1 ? 22 : 14;
-  });
-
-  doc.setFont("helvetica", "bold");
-  doc.text("9. BALANCE TO FINISH:", M, rY);
-  doc.text($(s.balanceToFinish), valX, rY, { align: "right" });
-  rY += 14;
-
-  // Change order table
-  const coW = leftW;
-  doc.setLineWidth(0.5);
-  doc.rect(M, rY, coW, 11, "S");
   doc.setFontSize(7.5);
-  doc.setFont("helvetica", "bold");
-  doc.text("SUMMARY OF CHANGE ORDERS", M + 3, rY + 8);
-  doc.text("ADDITIONS", M + coW - 110, rY + 8);
-  doc.text("DEDUCTIONS", M + coW - 55, rY + 8);
-  rY += 11;
+  doc.text("CHANGE ORDER SUMMARY", M + coColLabel / 2, rY + 9, { align: "center" });
+  doc.text("ADDITIONS", M + coColLabel + coColAdd / 2, rY + 9, { align: "center" });
+  doc.text("DEDUCTIONS", M + coColLabel + coColAdd + coColDed / 2, rY + 9, { align: "center" });
+  rY += 13;
 
-  [
-    ["Total changes approved in previous months", 0, 0],
+  const coRows = [
+    ["Total changes approved\nin previous months", 0, 0],
     ["Total approved this month", period.change_order_additions || 0, period.change_order_deductions || 0],
-  ].forEach(([label, add, ded]) => {
-    doc.rect(M, rY, coW, 11, "S");
-    doc.setFont("helvetica", "normal");
-    doc.text(label, M + 3, rY + 8);
-    doc.text($(add), M + coW - 65, rY + 8, { align: "right" });
-    doc.text($(ded), M + coW - 3, rY + 8, { align: "right" });
-    rY += 11;
+    ["TOTALS", period.change_order_additions || 0, period.change_order_deductions || 0],
+    ["NET CHANGES by Change Orders", (period.change_order_additions || 0) - (period.change_order_deductions || 0), null],
+  ];
+
+  coRows.forEach(([label, add, ded], idx) => {
+    const ch = idx === 0 ? 18 : 13;
+    const isTotal = label === "TOTALS" || label.startsWith("NET");
+    if (isTotal) {
+      doc.setFillColor(230, 235, 245);
+      doc.rect(M, rY, leftW, ch, "F");
+    }
+    doc.setDrawColor(120);
+    doc.setLineWidth(0.4);
+    doc.rect(M, rY, leftW, ch, "S");
+    doc.line(M + coColLabel, rY, M + coColLabel, rY + ch);
+    doc.line(M + coColLabel + coColAdd, rY, M + coColLabel + coColAdd, rY + ch);
+    doc.setFont("helvetica", isTotal ? "bold" : "normal");
+    doc.setFontSize(7.5);
+    const labelLines = doc.splitTextToSize(label, coColLabel - 4);
+    const textStartY = ch > 14 ? rY + 8 : rY + 9;
+    labelLines.forEach((l, i) => doc.text(l, M + 3, textStartY + i * 8));
+    doc.setFont("helvetica", "bold");
+    doc.text($(add), M + coColLabel + coColAdd - 3, rY + 9, { align: "right" });
+    if (ded !== null) {
+      doc.text($(ded), M + coColLabel + coColAdd + coColDed - 3, rY + 9, { align: "right" });
+    }
+    rY += ch;
   });
 
-  doc.rect(M, rY, coW, 11, "S");
-  doc.setFont("helvetica", "bold");
-  doc.text("TOTALS", M + coW / 2, rY + 8, { align: "center" });
-  doc.text($(period.change_order_additions || 0), M + coW - 65, rY + 8, { align: "right" });
-  doc.text($(period.change_order_deductions || 0), M + coW - 3, rY + 8, { align: "right" });
-  rY += 11;
+  // ── RIGHT: Certification Blocks ───────────────────────────────────────────
+  let cY = bodyY;
 
-  doc.rect(M, rY, coW, 11, "S");
-  doc.text("NET CHANGES", M + coW / 2, rY + 8, { align: "center" });
-  doc.setFont("helvetica", "normal");
-  doc.text($((period.change_order_additions || 0) - (period.change_order_deductions || 0)), M + coW - 65, rY + 8, { align: "right" });
-
-  // ── RIGHT HALF: Certification ─────────────────────────────────────────────
-  const rCol = M + leftW + 20;
-  const rW = PW - M - rCol;
-  let cY = sumY;
-
-  doc.setFontSize(7);
-  doc.setFont("helvetica", "normal");
-  const certText = "Contractor's signature below is his assurance to Owner, concerning the payment herein applied for, that: (1) the Work has been performed as required in the Contract Documents, (2) all sums previously paid to Contractor under the Contract have been used to pay Contractor's costs for labor, materials and other obligations under the Contract for Work previously paid for, and (3) Contractor is legally entitled to this payment.";
-  doc.text(doc.splitTextToSize(certText, rW), rCol, cY);
-
-  cY += 48;
+  // Contractor certification block
+  doc.setFillColor(15, 42, 94);
+  doc.rect(rCol, cY, rW, 14, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
-  doc.text("CONTRACTOR:  THE WHAYLAND COMPANY, LLC, CONST MANAGER", rCol, cY);
+  doc.setTextColor(255, 255, 255);
+  doc.text("CONTRACTOR'S CERTIFICATION", rCol + 4, cY + 10);
+  doc.setTextColor(0);
   cY += 14;
-  doc.text("By:", rCol, cY);
-  doc.line(rCol + 14, cY, rCol + rW * 0.6, cY);
-  doc.text("Date:", rCol + rW * 0.6 + 5, cY);
-  doc.line(rCol + rW * 0.6 + 30, cY, PW - M, cY);
-  cY += 11;
-  doc.setFont("helvetica", "normal");
-  doc.text("State of: Delaware", rCol, cY);
-  cY += 11;
-  doc.text("County of: Sussex", rCol, cY);
-  cY += 20;
 
+  doc.setDrawColor(150);
+  doc.setLineWidth(0.4);
+  const contBoxH = 88;
+  doc.rect(rCol, cY, rW, contBoxH, "S");
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.5);
+  const certText = "The undersigned Contractor certifies that to the best of the Contractor's knowledge, information and belief the Work covered by this Application for Payment has been completed in accordance with the Contract Documents, that all amounts have been paid by the Contractor for Work for which previous Certificates for Payment were issued and payments received from the Owner, and that current payment shown herein is now due.";
+  const certLines = doc.splitTextToSize(certText, rW - 8);
+  doc.text(certLines, rCol + 4, cY + 10);
+
+  cY += 38;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("ARCHITECT'S CERTIFICATION", rCol, cY);
-  cY += 12;
-
-  doc.setFontSize(7);
+  doc.setFontSize(7.5);
+  doc.text("CONTRACTOR:", rCol + 4, cY);
   doc.setFont("helvetica", "normal");
-  const archText = "Architect's signature below is his assurance to Owner, concerning the payment herein applied for, that: (1) Architect has inspected the Work represented by this Application, (2) such Work has been completed to the extent indicated, and the quality of workmanship and materials conforms with the Contract Documents, (3) this Application for Payment accurately states the amount of Work completed and payment due therefor, and (4) Architect knows of no reason why payment should not be made.";
-  doc.text(doc.splitTextToSize(archText, rW), rCol, cY);
-  cY += 50;
+  doc.text("The Whayland Company, LLC, Const Manager", rCol + 58, cY);
+  cY += 13;
+  doc.setFont("helvetica", "bold");
+  doc.text("Address:", rCol + 4, cY);
+  doc.setFont("helvetica", "normal");
+  doc.text("100 West 10th Street, Laurel, DE 19956", rCol + 42, cY);
+  cY += 13;
+  doc.setFont("helvetica", "bold");
+  doc.text("By:", rCol + 4, cY);
+  doc.setLineWidth(0.5);
+  doc.line(rCol + 18, cY, rCol + rW * 0.55, cY);
+  doc.text("Date:", rCol + rW * 0.57, cY);
+  doc.line(rCol + rW * 0.57 + 26, cY, rCol + rW - 4, cY);
+  cY += 13;
+  doc.setFont("helvetica", "bold");
+  doc.text("Title:", rCol + 4, cY);
+  doc.line(rCol + 24, cY, rCol + rW - 4, cY);
+  cY += 4; // bottom of contractor box
+
+  cY = bodyY + 14 + contBoxH + 10;
+
+  // Architect certification block
+  doc.setFillColor(15, 42, 94);
+  doc.rect(rCol, cY, rW, 14, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(255, 255, 255);
+  doc.text("ARCHITECT'S CERTIFICATE FOR PAYMENT", rCol + 4, cY + 10);
+  doc.setTextColor(0);
+  cY += 14;
+
+  doc.setDrawColor(150);
+  doc.setLineWidth(0.4);
+  const archBoxH = 105;
+  doc.rect(rCol, cY, rW, archBoxH, "S");
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.5);
+  const archText = "In accordance with the Contract Documents, based on on-site observations and the data comprising this application, the Architect certifies to the Owner that to the best of the Architect's knowledge, information and belief the Work has progressed as indicated, the quality of the Work is in accordance with the Contract Documents, and the Contractor is entitled to payment of the AMOUNT CERTIFIED.";
+  const archLines = doc.splitTextToSize(archText, rW - 8);
+  doc.text(archLines, rCol + 4, cY + 10);
+  cY += 36;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
-  doc.text("CERTIFIED AMOUNT:", rCol, cY);
-  doc.line(rCol + 95, cY, PW - M, cY);
-  cY += 14;
-  doc.text("ARCHITECT:", rCol, cY);
+  doc.text("AMOUNT CERTIFIED: $", rCol + 4, cY);
+  doc.setLineWidth(0.5);
+  doc.line(rCol + 98, cY, rCol + rW - 4, cY);
+  cY += 13;
+
   doc.setFont("helvetica", "normal");
-  doc.text(project.owner_contact || "—", rCol + 60, cY);
-  cY += 14;
+  doc.setFontSize(6.5);
+  doc.text("(Attach explanation if amount certified differs from the amount applied. Initial all figures on this Application and on the Continuation Sheet that are changed to conform with the amount certified.)", rCol + 4, cY, { maxWidth: rW - 8 });
+  cY += 16;
+
   doc.setFont("helvetica", "bold");
-  doc.text("By:", rCol, cY);
-  doc.line(rCol + 14, cY, rCol + rW * 0.6, cY);
-  doc.text("Date:", rCol + rW * 0.6 + 5, cY);
-  doc.line(rCol + rW * 0.6 + 30, cY, PW - M, cY);
+  doc.setFontSize(7.5);
+  doc.text("ARCHITECT:", rCol + 4, cY);
+  doc.setFont("helvetica", "normal");
+  doc.text(project.owner_contact || "—", rCol + 50, cY);
+  cY += 13;
+  doc.setFont("helvetica", "bold");
+  doc.text("By:", rCol + 4, cY);
+  doc.setLineWidth(0.5);
+  doc.line(rCol + 18, cY, rCol + rW * 0.55, cY);
+  doc.text("Date:", rCol + rW * 0.57, cY);
+  doc.line(rCol + rW * 0.57 + 26, cY, rCol + rW - 4, cY);
+  cY += 13;
+  doc.setFont("helvetica", "bold");
+  doc.text("This Certificate is not negotiable. The AMOUNT CERTIFIED is payable only to the Contractor named herein.", rCol + 4, cY, { maxWidth: rW - 8 });
 }
 
 function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoData) {
