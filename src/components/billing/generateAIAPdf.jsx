@@ -205,6 +205,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
 
   const retPct = s.totalCompletedStored ? ((s.totalRetainage / s.totalCompletedStored) * 100).toFixed(1) : "0.0";
   const indentedValX = valX - 72; // indented value X for 5a/5b (1" = 72pt)
+  const summaryRowH = 20; // increased height for better spacing
 
   const summaryRows = [
     ["1.  Original Contract Sum", s.originalContractSum, false, false],
