@@ -347,8 +347,6 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.text("Notary Public:", rCol + 4, notaryY + 14);
   doc.line(rCol + 4 + 56, notaryY + 14, rCol + rW - 4, notaryY + 14);
 
-  doc.line(rCol + 4, notaryY + 26, rCol + rW / 2, notaryY + 26); // signature line
-
   doc.setFont("helvetica", "bold");
   doc.text("My Commission Expires:", rCol + 4, notaryY + 38);
   doc.line(rCol + 4 + 96, notaryY + 38, rCol + rW / 2 + 20, notaryY + 38);
