@@ -224,6 +224,14 @@ export default function BillingPeriodDetail() {
           />
         </div>
       </div>
+      {showCOModal && (
+        <ChangeOrderModal
+          open={showCOModal}
+          onClose={() => setShowCOModal(false)}
+          period={period}
+          onSaved={loadAll}
+        />
+      )}
     </div>
   );
 }
