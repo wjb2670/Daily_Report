@@ -115,7 +115,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   );
 
   // Col 2 – PROJECT NAME & LOCATION
-  const pCol = 245;
+  const pCol = 310;
   doc.setFont("helvetica", "bold");
   doc.text("PROJECT NAME", pCol, hY);
   doc.text("AND LOCATION:", pCol, hY + 9);
