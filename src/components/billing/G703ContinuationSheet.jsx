@@ -194,24 +194,77 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                   <td className="py-2 px-1 text-right text-orange-600 font-semibold border border-gray-300">{fmt(t1.retainage)}</td>
                 </tr>
                 {gc1Expanded && gc1Items.map((item) => {
-                  const c = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
-                  const itemPct = item.scheduled_value ? (c / item.scheduled_value) * 100 : 0;
-                  const bal = (item.scheduled_value || 0) - c;
-                  return (
-                    <tr key={item.id} className="bg-amber-50/40 text-gray-500 italic border-b border-amber-100">
-                      <td className="py-1.5 px-1 text-center border border-gray-200 text-gray-400">—</td>
-                      <td className="py-1.5 px-2 border border-gray-200 pl-6 max-w-[160px]"><span className="block truncate" title={item.description}>{item.description}</span></td>
-                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(item.scheduled_value)}</td>
-                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(item.previous_applications)}</td>
-                      <td className="py-1.5 px-1 text-right text-blue-400 border border-gray-200">{fmt(item.work_this_period)}</td>
-                      <td className="py-1.5 px-1 text-right text-green-400 border border-gray-200">{fmt(item.materials_this_period)}</td>
-                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(c)}</td>
-                      <td className="py-1.5 px-1 text-right border border-gray-200">{pct(itemPct)}</td>
-                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(bal)}</td>
-                      <td className="py-1.5 px-1 text-right text-orange-400 border border-gray-200">{fmt(item.retainage_amount)}</td>
-                    </tr>
-                  );
-                })}
+                   const completedToDate  = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
+                   const totalPctItem     = item.scheduled_value ? (completedToDate / item.scheduled_value) * 100 : 0;
+                   const balanceToFinish  = (item.scheduled_value || 0) - completedToDate;
+                   const retainageAmt     = item.retainage_amount || 0;
+                   return (
+                     <tr key={item.id} className="bg-amber-50/40 hover:bg-amber-50 border-b border-amber-100">
+                       <td className="py-1.5 px-1 text-center border border-gray-200 text-gray-400 text-xs">—</td>
+                       <td className="py-1.5 px-2 border border-gray-200 pl-6 max-w-[160px]"><span className="block truncate text-xs" title={item.description}>{item.description}</span></td>
+                       <td className="py-1.5 px-1 text-right border border-gray-200 text-xs">{fmt(item.scheduled_value)}</td>
+                       <td className="py-1.5 px-1 text-right border border-gray-200 text-xs text-gray-500">{fmt(item.previous_applications)}</td>
+                       <td className="py-1.5 px-1 text-right text-amber-600 border border-gray-200 text-xs">
+                         {locked ? fmt(item.work_this_period) : (
+                           <input
+                             type="number"
+                             className="w-20 text-right text-xs border border-amber-200 rounded px-1 py-0.5 text-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-300"
+                             defaultValue={item.work_this_period != null ? Number(item.work_this_period).toFixed(2) : "0.00"}
+                             key={item.id + "-work"}
+                             placeholder="0.00"
+                             step="0.01"
+                             onBlur={e => handleWorkChange(item, e.target.value)}
+                           />
+                         )}
+                       </td>
+                       <td className="py-1.5 px-1 text-right text-amber-600 border border-gray-200 text-xs">
+                         {locked ? fmt(item.materials_this_period) : (
+                           <input
+                             type="number"
+                             className="w-20 text-right text-xs border border-amber-200 rounded px-1 py-0.5 text-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-300"
+                             defaultValue={item.materials_this_period != null ? Number(item.materials_this_period).toFixed(2) : "0.00"}
+                             key={item.id + "-mat"}
+                             placeholder="0.00"
+                             step="0.01"
+                             onBlur={e => handleMaterialsChange(item, e.target.value)}
+                           />
+                         )}
+                       </td>
+                       <td className="py-1.5 px-1 text-right border border-gray-200 text-xs font-medium">{fmt(completedToDate)}</td>
+                       <td className="py-1.5 px-1 text-right border border-gray-200 text-xs text-gray-500">{pct(totalPctItem)}</td>
+                       <td className="py-1.5 px-1 text-right border border-gray-200 text-xs text-gray-500">{fmt(balanceToFinish)}</td>
+                       <td className="py-1.5 px-1 text-right text-amber-600 border border-gray-200 text-xs">
+                         {locked ? `${item.retainage_percent ?? 0}%` : (
+                           <div className="flex items-center justify-end gap-0.5">
+                             <input
+                               type="number"
+                               className="w-12 text-right text-xs border border-amber-200 rounded px-1 py-0.5 text-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-300"
+                               defaultValue={item.retainage_percent != null ? Number(item.retainage_percent).toFixed(2) : "0.00"}
+                               key={item.id + "-rpct"}
+                               placeholder="0.00"
+                               step="0.01"
+                               onBlur={e => handleRetainagePctChange(item, e.target.value)}
+                             />
+                             <span className="text-amber-400 text-xs">%</span>
+                           </div>
+                         )}
+                       </td>
+                       <td className="py-1.5 px-1 text-right text-amber-600 border border-gray-200 text-xs">
+                         {locked ? fmt(retainageAmt) : (
+                           <input
+                             type="number"
+                             className="w-20 text-right text-xs border border-amber-200 rounded px-1 py-0.5 text-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-300"
+                             defaultValue={retainageAmt != null ? Number(retainageAmt).toFixed(2) : "0.00"}
+                             key={item.id + "-ramt"}
+                             placeholder="0.00"
+                             step="0.01"
+                             onBlur={e => handleRetainageAmtChange(item, e.target.value)}
+                           />
+                         )}
+                       </td>
+                     </tr>
+                   );
+                 })}
               </>
             )}
 
@@ -266,24 +319,77 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                   <td className="py-2 px-1 text-right text-orange-600 font-semibold border border-gray-300">{fmt(t2.retainage)}</td>
                 </tr>
                 {gc2Expanded && gc2Items.map((item) => {
-                  const c = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
-                  const itemPct = item.scheduled_value ? (c / item.scheduled_value) * 100 : 0;
-                  const bal = (item.scheduled_value || 0) - c;
-                  return (
-                    <tr key={item.id} className="bg-blue-50/40 text-gray-500 italic border-b border-blue-100">
-                      <td className="py-1.5 px-1 text-center border border-gray-200 text-gray-400">—</td>
-                      <td className="py-1.5 px-2 border border-gray-200 pl-6 max-w-[160px]"><span className="block truncate" title={item.description}>{item.description}</span></td>
-                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(item.scheduled_value)}</td>
-                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(item.previous_applications)}</td>
-                      <td className="py-1.5 px-1 text-right text-blue-400 border border-gray-200">{fmt(item.work_this_period)}</td>
-                      <td className="py-1.5 px-1 text-right text-green-400 border border-gray-200">{fmt(item.materials_this_period)}</td>
-                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(c)}</td>
-                      <td className="py-1.5 px-1 text-right border border-gray-200">{pct(itemPct)}</td>
-                      <td className="py-1.5 px-1 text-right border border-gray-200">{fmt(bal)}</td>
-                      <td className="py-1.5 px-1 text-right text-orange-400 border border-gray-200">{fmt(item.retainage_amount)}</td>
-                    </tr>
-                  );
-                })}
+                   const completedToDate  = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
+                   const totalPctItem     = item.scheduled_value ? (completedToDate / item.scheduled_value) * 100 : 0;
+                   const balanceToFinish  = (item.scheduled_value || 0) - completedToDate;
+                   const retainageAmt     = item.retainage_amount || 0;
+                   return (
+                     <tr key={item.id} className="bg-blue-50/40 hover:bg-blue-50 border-b border-blue-100">
+                       <td className="py-1.5 px-1 text-center border border-gray-200 text-gray-400 text-xs">—</td>
+                       <td className="py-1.5 px-2 border border-gray-200 pl-6 max-w-[160px]"><span className="block truncate text-xs" title={item.description}>{item.description}</span></td>
+                       <td className="py-1.5 px-1 text-right border border-gray-200 text-xs">{fmt(item.scheduled_value)}</td>
+                       <td className="py-1.5 px-1 text-right border border-gray-200 text-xs text-gray-500">{fmt(item.previous_applications)}</td>
+                       <td className="py-1.5 px-1 text-right text-blue-600 border border-gray-200 text-xs">
+                         {locked ? fmt(item.work_this_period) : (
+                           <input
+                             type="number"
+                             className="w-20 text-right text-xs border border-blue-200 rounded px-1 py-0.5 text-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-300"
+                             defaultValue={item.work_this_period != null ? Number(item.work_this_period).toFixed(2) : "0.00"}
+                             key={item.id + "-work"}
+                             placeholder="0.00"
+                             step="0.01"
+                             onBlur={e => handleWorkChange(item, e.target.value)}
+                           />
+                         )}
+                       </td>
+                       <td className="py-1.5 px-1 text-right text-green-600 border border-gray-200 text-xs">
+                         {locked ? fmt(item.materials_this_period) : (
+                           <input
+                             type="number"
+                             className="w-20 text-right text-xs border border-green-200 rounded px-1 py-0.5 text-green-600 focus:outline-none focus:ring-1 focus:ring-green-300"
+                             defaultValue={item.materials_this_period != null ? Number(item.materials_this_period).toFixed(2) : "0.00"}
+                             key={item.id + "-mat"}
+                             placeholder="0.00"
+                             step="0.01"
+                             onBlur={e => handleMaterialsChange(item, e.target.value)}
+                           />
+                         )}
+                       </td>
+                       <td className="py-1.5 px-1 text-right border border-gray-200 text-xs font-medium">{fmt(completedToDate)}</td>
+                       <td className="py-1.5 px-1 text-right border border-gray-200 text-xs text-gray-500">{pct(totalPctItem)}</td>
+                       <td className="py-1.5 px-1 text-right border border-gray-200 text-xs text-gray-500">{fmt(balanceToFinish)}</td>
+                       <td className="py-1.5 px-1 text-right text-orange-600 border border-gray-200 text-xs">
+                         {locked ? `${item.retainage_percent ?? 0}%` : (
+                           <div className="flex items-center justify-end gap-0.5">
+                             <input
+                               type="number"
+                               className="w-12 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-300"
+                               defaultValue={item.retainage_percent != null ? Number(item.retainage_percent).toFixed(2) : "0.00"}
+                               key={item.id + "-rpct"}
+                               placeholder="0.00"
+                               step="0.01"
+                               onBlur={e => handleRetainagePctChange(item, e.target.value)}
+                             />
+                             <span className="text-orange-400 text-xs">%</span>
+                           </div>
+                         )}
+                       </td>
+                       <td className="py-1.5 px-1 text-right text-orange-600 border border-gray-200 text-xs">
+                         {locked ? fmt(retainageAmt) : (
+                           <input
+                             type="number"
+                             className="w-20 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-300"
+                             defaultValue={retainageAmt != null ? Number(retainageAmt).toFixed(2) : "0.00"}
+                             key={item.id + "-ramt"}
+                             placeholder="0.00"
+                             step="0.01"
+                             onBlur={e => handleRetainageAmtChange(item, e.target.value)}
+                           />
+                         )}
+                       </td>
+                     </tr>
+                   );
+                 })}
               </>
             )}
           </tbody>
