@@ -458,8 +458,9 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
     const workThisPeriod = lineItems => lineItems.reduce((sum, l) => sum + (l.work_this_period || 0), 0);
     const matThisPeriod  = lineItems => lineItems.reduce((sum, l) => sum + (l.materials_this_period || 0), 0);
 
-    // We only have `items` (last page chunk), but totals should be from s
-    doc.text($(totalCompleted - s.previousCertificates - (s.totalCompletedStored - s.previousCertificates - (s.currentPaymentDue + s.totalRetainage - 0))), cols[4].x + cols[4].w - 2, tMid, { align: "right" });
+    // Work this period = total completed - previous
+    const workThisPeriodTotal = totalCompleted - s.previousCertificates;
+    doc.text($(workThisPeriodTotal), cols[4].x + cols[4].w - 2, tMid, { align: "right" });
     doc.text("0.00", cols[5].x + cols[5].w - 2, tMid, { align: "right" });
     doc.text($(totalCompleted), cols[6].x + cols[6].w - 2, tMid, { align: "right" });
     doc.text(pct(totalPct) + "%", cols[7].x + cols[7].w - 2, tMid, { align: "right" });
