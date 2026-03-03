@@ -264,104 +264,102 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   });
 
   // ── RIGHT: Certification Blocks ───────────────────────────────────────────
+  // Calculate total available height for the right column
+  const totalRightH = PH - M - bodyY - M; // from bodyY to bottom margin
+  const headerH = 14;
+  const gap = 10;
+  const contBoxH = Math.floor((totalRightH - headerH * 2 - gap) * 0.45);
+  const archBoxH = totalRightH - headerH * 2 - gap - contBoxH;
+
   let cY = bodyY;
 
   // Contractor certification block
   doc.setFillColor(15, 42, 94);
-  doc.rect(rCol, cY, rW, 14, "F");
+  doc.rect(rCol, cY, rW, headerH, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(255, 255, 255);
   doc.text("CONTRACTOR'S CERTIFICATION", rCol + 4, cY + 10);
   doc.setTextColor(0);
-  cY += 14;
+  cY += headerH;
 
   doc.setDrawColor(150);
   doc.setLineWidth(0.4);
-  const contBoxH = 88;
   doc.rect(rCol, cY, rW, contBoxH, "S");
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.5);
   const certText = "The undersigned Contractor certifies that to the best of the Contractor's knowledge, information and belief the Work covered by this Application for Payment has been completed in accordance with the Contract Documents, that all amounts have been paid by the Contractor for Work for which previous Certificates for Payment were issued and payments received from the Owner, and that current payment shown herein is now due.";
   const certLines = doc.splitTextToSize(certText, rW - 8);
-  doc.text(certLines, rCol + 4, cY + 10);
+  doc.text(certLines, rCol + 4, cY + 11);
 
-  cY += 38;
+  const contSigY = cY + contBoxH - 52;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
-  doc.text("CONTRACTOR:", rCol + 4, cY);
+  doc.text("CONTRACTOR:", rCol + 4, contSigY);
   doc.setFont("helvetica", "normal");
-  doc.text("The Whayland Company, LLC, Const Manager", rCol + 58, cY);
-  cY += 13;
+  doc.text("The Whayland Company, LLC, Const Manager", rCol + 58, contSigY);
   doc.setFont("helvetica", "bold");
-  doc.text("Address:", rCol + 4, cY);
+  doc.text("Address:", rCol + 4, contSigY + 13);
   doc.setFont("helvetica", "normal");
-  doc.text("100 West 10th Street, Laurel, DE 19956", rCol + 42, cY);
-  cY += 13;
+  doc.text("100 West 10th Street, Laurel, DE 19956", rCol + 42, contSigY + 13);
   doc.setFont("helvetica", "bold");
-  doc.text("By:", rCol + 4, cY);
+  doc.text("By:", rCol + 4, contSigY + 26);
   doc.setLineWidth(0.5);
-  doc.line(rCol + 18, cY, rCol + rW * 0.55, cY);
-  doc.text("Date:", rCol + rW * 0.57, cY);
-  doc.line(rCol + rW * 0.57 + 26, cY, rCol + rW - 4, cY);
-  cY += 13;
-  doc.setFont("helvetica", "bold");
-  doc.text("Title:", rCol + 4, cY);
-  doc.line(rCol + 24, cY, rCol + rW - 4, cY);
-  cY += 4; // bottom of contractor box
+  doc.line(rCol + 18, contSigY + 26, rCol + rW * 0.55, contSigY + 26);
+  doc.text("Date:", rCol + rW * 0.57, contSigY + 26);
+  doc.line(rCol + rW * 0.57 + 26, contSigY + 26, rCol + rW - 4, contSigY + 26);
+  doc.text("Title:", rCol + 4, contSigY + 39);
+  doc.line(rCol + 24, contSigY + 39, rCol + rW - 4, contSigY + 39);
 
-  cY = bodyY + 14 + contBoxH + 10;
+  cY += contBoxH + gap;
 
   // Architect certification block
   doc.setFillColor(15, 42, 94);
-  doc.rect(rCol, cY, rW, 14, "F");
+  doc.rect(rCol, cY, rW, headerH, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(255, 255, 255);
   doc.text("ARCHITECT'S CERTIFICATE FOR PAYMENT", rCol + 4, cY + 10);
   doc.setTextColor(0);
-  cY += 14;
+  cY += headerH;
 
   doc.setDrawColor(150);
   doc.setLineWidth(0.4);
-  const archBoxH = 105;
   doc.rect(rCol, cY, rW, archBoxH, "S");
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.5);
   const archText = "In accordance with the Contract Documents, based on on-site observations and the data comprising this application, the Architect certifies to the Owner that to the best of the Architect's knowledge, information and belief the Work has progressed as indicated, the quality of the Work is in accordance with the Contract Documents, and the Contractor is entitled to payment of the AMOUNT CERTIFIED.";
   const archLines = doc.splitTextToSize(archText, rW - 8);
-  doc.text(archLines, rCol + 4, cY + 10);
-  cY += 36;
+  doc.text(archLines, rCol + 4, cY + 11);
 
+  const archSigY = cY + archBoxH - 68;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
-  doc.text("AMOUNT CERTIFIED: $", rCol + 4, cY);
+  doc.text("AMOUNT CERTIFIED: $", rCol + 4, archSigY);
   doc.setLineWidth(0.5);
-  doc.line(rCol + 98, cY, rCol + rW - 4, cY);
-  cY += 13;
+  doc.line(rCol + 100, archSigY, rCol + rW - 4, archSigY);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.5);
-  doc.text("(Attach explanation if amount certified differs from the amount applied. Initial all figures on this Application and on the Continuation Sheet that are changed to conform with the amount certified.)", rCol + 4, cY, { maxWidth: rW - 8 });
-  cY += 16;
+  const noteText = "(Attach explanation if amount certified differs from the amount applied. Initial all figures on this Application and on the Continuation Sheet that are changed to conform with the amount certified.)";
+  doc.text(doc.splitTextToSize(noteText, rW - 8), rCol + 4, archSigY + 11);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
-  doc.text("ARCHITECT:", rCol + 4, cY);
+  doc.text("ARCHITECT:", rCol + 4, archSigY + 28);
   doc.setFont("helvetica", "normal");
-  doc.text(project.owner_contact || "—", rCol + 50, cY);
-  cY += 13;
+  doc.text(project.owner_contact || "—", rCol + 50, archSigY + 28);
   doc.setFont("helvetica", "bold");
-  doc.text("By:", rCol + 4, cY);
+  doc.text("By:", rCol + 4, archSigY + 41);
   doc.setLineWidth(0.5);
-  doc.line(rCol + 18, cY, rCol + rW * 0.55, cY);
-  doc.text("Date:", rCol + rW * 0.57, cY);
-  doc.line(rCol + rW * 0.57 + 26, cY, rCol + rW - 4, cY);
-  cY += 13;
+  doc.line(rCol + 18, archSigY + 41, rCol + rW * 0.55, archSigY + 41);
+  doc.text("Date:", rCol + rW * 0.57, archSigY + 41);
+  doc.line(rCol + rW * 0.57 + 26, archSigY + 41, rCol + rW - 4, archSigY + 41);
   doc.setFont("helvetica", "bold");
-  doc.text("This Certificate is not negotiable. The AMOUNT CERTIFIED is payable only to the Contractor named herein.", rCol + 4, cY, { maxWidth: rW - 8 });
+  doc.setFontSize(6.5);
+  doc.text("This Certificate is not negotiable. The AMOUNT CERTIFIED is payable only to the Contractor named herein.", rCol + 4, archSigY + 55, { maxWidth: rW - 8 });
 }
 
 function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoData) {
