@@ -113,7 +113,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   const toLines = [
     project.owner_company || project.owner_name || "",
     project.owner_address || "",
-    `${project.city || ""} ${project.state || ""} ${project.zip || ""}`.trim(),
+    `${project.owner_city || ""} ${project.owner_state || ""} ${project.owner_zip || ""}`.trim(),
   ].filter(Boolean);
   toLines.forEach((line, i) => doc.text(line, M + 22, hY + i * 11));
 
