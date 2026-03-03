@@ -269,9 +269,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
   doc.rect(M, M, PW - M * 2, PH - M * 2);
 
   if (logoData) {
-    doc.setFillColor(15, 42, 94);
-    doc.rect(PW - M - 145, M + 4, 141, 38, "F");
-    doc.addImage(logoData, "PNG", PW - M - 140, M + 6, 132, 34);
+    doc.addImage(logoData, "PNG", PW - M - 145, M + 2, 141, 38);
   }
 
   doc.setFont("helvetica", "bold");
