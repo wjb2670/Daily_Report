@@ -62,6 +62,15 @@ export default function BillingPeriodDetail() {
       }
     }
 
+    // Update existing line items with carry-forward if previous_applications is 0
+    for (const sovItem of allSov) {
+      if (lineMap[sovItem.id] && lineMap[sovItem.id].previous_applications === 0 && previousPeriodTotals[sovItem.id]) {
+        lineMap[sovItem.id] = await base44.entities.BillingLineItem.update(lineMap[sovItem.id].id, {
+          previous_applications: previousPeriodTotals[sovItem.id]
+        });
+      }
+    }
+
     // Create line items for all SOV items that don't have one yet
     const mergedLines = [];
     for (const sovItem of allSov) {
