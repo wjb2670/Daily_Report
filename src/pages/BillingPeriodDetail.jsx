@@ -88,6 +88,27 @@ export default function BillingPeriodDetail() {
 
   const toggleLock = () => updatePeriod({ locked: !period.locked });
 
+  const handleGeneratePdf = async () => {
+    setGeneratingPdf(true);
+    await generateAIAPdf({
+      project,
+      period,
+      lineItems,
+      summaryValues: {
+        originalContractSum,
+        changeOrderNet,
+        contractSumToDate,
+        totalCompletedStored,
+        totalRetainage,
+        totalEarnedLessRetainage,
+        previousCertificates,
+        currentPaymentDue,
+        balanceToFinish,
+      },
+    });
+    setGeneratingPdf(false);
+  };
+
   if (loading) return <div className="text-center py-16 text-gray-400">Loading...</div>;
   if (!period || !project) return <div className="text-center py-16 text-gray-400">Period not found.</div>;
 
