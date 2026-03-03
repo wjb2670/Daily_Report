@@ -63,15 +63,13 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, PW, PH, "F");
 
-  // ── LOGO above the top rule, preserving aspect ratio ──────────────────────
-  const logoH = 44;
-  const logoW = logoData ? logoH * (2.5) : 0; // will be overridden after image load measurement
+  // ── LOGO above the top rule, vertically centered in the space above the rule ──
   if (logoData) {
-    // measure natural size via a temp canvas trick is not available here;
-    // we know from the uploaded image it is roughly 3:1 wide
-    const lH = 44;
+    const lH = 32;
     const lW = lH * 3.2;
-    doc.addImage(logoData, "PNG", PW - M - lW, M - 10, lW, lH);
+    const ruleYTemp = M + 30;
+    const logoY = M + (ruleYTemp - M) / 2 - lH / 2;
+    doc.addImage(logoData, "PNG", PW - M - lW, logoY, lW, lH);
   }
 
   // Title & top rule
