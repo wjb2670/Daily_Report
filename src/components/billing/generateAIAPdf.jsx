@@ -318,7 +318,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.setFontSize(7.5);
   doc.text("CONTRACTOR:", rCol + 4, contSigY);
   doc.setFont("helvetica", "normal");
-  doc.text("The Whayland Company, LLC, Const Manager", rCol + 58, contSigY);
+  doc.text("The Whayland Company, LLC", rCol + 58, contSigY);
   doc.setFont("helvetica", "bold");
   doc.text("Address:", rCol + 4, contSigY + 13);
   doc.setFont("helvetica", "normal");
