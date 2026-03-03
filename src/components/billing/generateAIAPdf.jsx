@@ -17,7 +17,9 @@ function loadImage(url) {
       const canvas = document.createElement("canvas");
       canvas.width = img.width;
       canvas.height = img.height;
-      canvas.getContext("2d").drawImage(img, 0, 0);
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
       resolve(canvas.toDataURL("image/png"));
     };
     img.onerror = () => resolve(null);
