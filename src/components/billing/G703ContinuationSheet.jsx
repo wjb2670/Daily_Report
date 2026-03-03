@@ -11,9 +11,10 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
   const [gc2Expanded, setGc2Expanded] = useState(false);
   const hasPhase2 = lineItems.some(l => l.gc_phase === "phase2");
 
-  const cmItems  = lineItems.filter(l => !l.is_general_conditions && l.gc_phase !== "phase2");
+  const cmItems  = lineItems.filter(l => !l.is_general_conditions && l.gc_phase !== "phase2" && !l.is_change_order);
   const gc1Items = lineItems.filter(l => l.is_general_conditions && l.gc_phase !== "phase2");
   const gc2Items = lineItems.filter(l => l.gc_phase === "phase2");
+  const coItems  = lineItems.filter(l => l.is_change_order);
 
   const gcTotals = (items) => {
     const scheduled = items.reduce((s, l) => s + (l.scheduled_value || 0), 0);
