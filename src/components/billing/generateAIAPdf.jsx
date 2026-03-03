@@ -352,8 +352,8 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.line(rCol + 4 + 56, notaryY + 30, rCol + rW - 4, notaryY + 30);
 
   doc.setFont("helvetica", "bold");
-  doc.text("My Commission Expires:", rCol + 4, notaryY + 49);
-  doc.line(rCol + 4 + 96, notaryY + 49, rCol + rW / 2 + 20, notaryY + 49);
+  doc.text("My Commission Expires:", rCol + 4, notaryY + 43);
+  doc.line(rCol + 4 + 96, notaryY + 43, rCol + rW / 2 + 20, notaryY + 43);
 
   cY += contBoxH + gap;
 
