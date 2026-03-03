@@ -122,7 +122,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.setFont("helvetica", "bold");
   doc.text("FROM:", M, fromY);
   doc.setFont("helvetica", "normal");
-  ["THE WHAYLAND COMPANY, LLC, CONST MANAGER", "100 WEST 10TH STREET", "LAUREL DE 19956"].forEach(
+  ["The Whayland Company, LLC, Const Manager", "100 West 10th Street", "Laurel, DE 19956"].forEach(
     (line, i) => doc.text(line, M + 36, fromY + i * 11)
   );
 
