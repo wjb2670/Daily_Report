@@ -36,7 +36,22 @@ export async function generateAIAPdf({ project, period, lineItems, summaryValues
 
   drawG702(doc, PW, PH, project, period, summaryValues, logoData);
 
-  const sortedItems = [...lineItems].sort((a, b) => {
+  // Collapse all GC sub-items into a single "General Conditions" summary row
+  const gcItems = lineItems.filter(l => l.is_general_conditions);
+  const nonGcItems = lineItems.filter(l => !l.is_general_conditions);
+
+  const gcCollapsed = gcItems.length > 0 ? [{
+    item_number: gcItems[0].item_number || "GC",
+    description: "General Conditions",
+    scheduled_value: gcItems.reduce((s, l) => s + (l.scheduled_value || 0), 0),
+    previous_applications: gcItems.reduce((s, l) => s + (l.previous_applications || 0), 0),
+    work_this_period: gcItems.reduce((s, l) => s + (l.work_this_period || 0), 0),
+    materials_this_period: gcItems.reduce((s, l) => s + (l.materials_this_period || 0), 0),
+    retainage_amount: gcItems.reduce((s, l) => s + (l.retainage_amount || 0), 0),
+    is_general_conditions: true,
+  }] : [];
+
+  const sortedItems = [...nonGcItems, ...gcCollapsed].sort((a, b) => {
     const numA = parseFloat(a.item_number) || 9999;
     const numB = parseFloat(b.item_number) || 9999;
     return numA - numB;
