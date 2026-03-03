@@ -472,7 +472,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
     { x: M + 618, w: 60  },
     { x: M + 678, w: PW - M - 678 - M },
   ];
-  const colLabels = ["A", "B", "C", "D", "E", "F", "G", "H\n(G÷C)", "Retainage\nHeld", "Balance\nTo Finish"];
+  const colLabels = ["A", "B", "C", "D", "E", "F", "G", "H\n(G÷C)", "Balance\nTo Finish", "Retainage\nHeld"];
 
   doc.setFillColor(210, 215, 220);
   doc.rect(M, tY, PW - M * 2, 28, "F");
@@ -536,8 +536,8 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
       [5, $(item.materials_this_period)],
       [6, $(completedToDate)],
       [7, pct(totalPct) + "%"],
-      [8, $(item.retainage_amount || 0)],
-      [9, $(balance)],
+      [8, $(balance)],
+      [9, $(item.retainage_amount || 0)],
     ].forEach(([ci, val]) => {
       doc.text(val, cols[ci].x + cols[ci].w - 2, rMid, { align: "right" });
     });
@@ -574,7 +574,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
     doc.text("0.00", cols[5].x + cols[5].w - 2, tMid, { align: "right" });
     doc.text($(totalCompleted), cols[6].x + cols[6].w - 2, tMid, { align: "right" });
     doc.text(pct(totalPct) + "%", cols[7].x + cols[7].w - 2, tMid, { align: "right" });
-    doc.text($(s.totalRetainage), cols[8].x + cols[8].w - 2, tMid, { align: "right" });
-    doc.text($(totalBalance), cols[9].x + cols[9].w - 2, tMid, { align: "right" });
+    doc.text($(totalBalance), cols[8].x + cols[8].w - 2, tMid, { align: "right" });
+    doc.text($(s.totalRetainage), cols[9].x + cols[9].w - 2, tMid, { align: "right" });
   }
 }
