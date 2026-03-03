@@ -341,11 +341,11 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.text("County of:", rCol + 4, notaryY + 12);
   doc.line(rCol + 4 + 32, notaryY + 12, rCol + rW - 4, notaryY + 12);
   doc.text("Subscribed and Sworn before me this", rCol + 4, notaryY + 24);
-  doc.line(rCol + 4 + 144, notaryY + 24, rCol + 4 + 178, notaryY + 24); // blank for day number
-  doc.text("day of", rCol + 4 + 182, notaryY + 24);
-  doc.line(rCol + 4 + 207, notaryY + 24, rCol + 4 + 245, notaryY + 24); // blank for month
-  doc.text(",", rCol + 4 + 247, notaryY + 24);
-  doc.line(rCol + 4 + 252, notaryY + 24, rCol + rW - 4, notaryY + 24); // blank for year
+  doc.line(rCol + 4 + 144, notaryY + 24, rCol + 4 + 188, notaryY + 24); // blank for day number
+  doc.text("day of", rCol + 4 + 192, notaryY + 24);
+  doc.line(rCol + 4 + 225, notaryY + 24, rCol + 4 + 280, notaryY + 24); // blank for month
+  doc.text(",", rCol + 4 + 282, notaryY + 24);
+  doc.line(rCol + 4 + 290, notaryY + 24, rCol + rW - 4, notaryY + 24); // blank for year
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
