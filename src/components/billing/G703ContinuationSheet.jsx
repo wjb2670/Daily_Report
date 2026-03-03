@@ -265,6 +265,7 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                 {totalScheduled ? pct((totalCompleted / totalScheduled) * 100) : "0%"}
               </td>
               <td className="py-2 px-1 text-right border border-gray-300">{fmt(totalBalance)}</td>
+              <td className="py-2 px-1 border border-gray-300" />
               <td className="py-2 px-1 text-right text-orange-600 border border-gray-300">{fmt(totalRetainage)}</td>
             </tr>
           </tfoot>
