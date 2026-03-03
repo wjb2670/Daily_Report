@@ -186,9 +186,10 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
     doc.setFontSize(8);
     doc.setFont("helvetica", bold ? "bold" : "normal");
     const labelLines = doc.splitTextToSize(label, leftW - 80);
-    labelLines.forEach((l, i) => doc.text(l, labelX, y + 10 + i * 9));
+    const textY = y + h / 2 + 3;
+    labelLines.forEach((l, i) => doc.text(l, labelX, textY + (i - (labelLines.length - 1) / 2) * 9));
     doc.setFont("helvetica", "bold");
-    doc.text(val, overrideValX !== null ? overrideValX : valX, y + 10, { align: "right" });
+    doc.text(val, overrideValX !== null ? overrideValX : valX, textY, { align: "right" });
   };
 
   let rY = bodyY;
