@@ -277,7 +277,7 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
         <span className="flex items-center gap-1"><span className="w-2 h-2 bg-green-100 rounded inline-block" /> Materials this period (editable)</span>
         <span className="flex items-center gap-1"><span className="w-2 h-2 bg-amber-100 rounded inline-block" /> {hasPhase2 ? "GC — 8 Unit Garage (item 01)" : "General Conditions (item 01)"}</span>
         {hasPhase2 && <span className="flex items-center gap-1"><span className="w-2 h-2 bg-blue-100 rounded inline-block" /> GC — 12 Unit Garage (item 20)</span>}
-        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-orange-100 rounded inline-block" /> Retainage auto-calculated from SOV %</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-orange-100 rounded inline-block" /> Retainage % auto-calculates $ — override $ directly if needed</span>
       </div>
     </div>
   );
