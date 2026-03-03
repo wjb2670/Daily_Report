@@ -284,7 +284,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   const totalRightH = PH - M - bodyY - M; // from bodyY to bottom margin
   const headerH = 14;
   const gap = 10;
-  const contBoxH = Math.floor((totalRightH - headerH * 2 - gap) * 0.45);
+  const contBoxH = Math.floor((totalRightH - headerH * 2 - gap) * 0.60);
   const archBoxH = totalRightH - headerH * 2 - gap - contBoxH;
 
   let cY = bodyY;
