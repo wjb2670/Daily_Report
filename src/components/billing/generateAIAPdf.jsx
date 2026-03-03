@@ -222,8 +222,8 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   ];
 
   summaryRows.forEach(([label, val, hl, indented]) => {
-    drawRow(label, $(val), rY, rowH, hl, hl, indented ? indentedValX : null);
-    rY += rowH;
+    drawRow(label, $(val), rY, summaryRowH, hl, hl, indented ? indentedValX : null);
+    rY += summaryRowH;
   });
 
   rY += 8;
