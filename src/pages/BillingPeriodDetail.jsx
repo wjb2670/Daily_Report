@@ -132,6 +132,14 @@ export default function BillingPeriodDetail() {
           <Button variant="outline" size="sm" className="gap-1">
             <FileText className="w-3.5 h-3.5" /> Lien Waiver
           </Button>
+          <Button
+            variant="outline" size="sm"
+            className="gap-1 text-purple-700 border-purple-300 hover:bg-purple-50"
+            onClick={() => setShowCOModal(true)}
+            disabled={period.locked}
+          >
+            <PlusCircle className="w-3.5 h-3.5" /> Change Order
+          </Button>
           <Button variant="outline" size="sm" className="gap-1 text-blue-700 border-blue-300">
             <Download className="w-3.5 h-3.5" /> Generate PDF
           </Button>
