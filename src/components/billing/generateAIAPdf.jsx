@@ -338,18 +338,18 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   doc.setFontSize(7);
   doc.text("State of:", rCol + 4, notaryY);
   doc.line(rCol + 4 + 42, notaryY, rCol + rW - 4, notaryY);
-  doc.text("County of:", rCol + 4, notaryY + 11);
-  doc.line(rCol + 4 + 54, notaryY + 11, rCol + rW - 4, notaryY + 11);
-  doc.text("Subscribed and Sworn before me this", rCol + 4, notaryY + 22);
-  doc.line(rCol + 4 + 144, notaryY + 22, rCol + 4 + 178, notaryY + 22); // blank for day number
-  doc.text("day of", rCol + 4 + 182, notaryY + 22);
-  doc.line(rCol + 4 + 207, notaryY + 22, rCol + 4 + 245, notaryY + 22); // blank for month
-  doc.text(",", rCol + 4 + 247, notaryY + 22);
-  doc.line(rCol + 4 + 252, notaryY + 22, rCol + rW - 4, notaryY + 22); // blank for year
+  doc.text("County of:", rCol + 4, notaryY + 9);
+  doc.line(rCol + 4 + 54, notaryY + 9, rCol + rW - 4, notaryY + 9);
+  doc.text("Subscribed and Sworn before me this", rCol + 4, notaryY + 19);
+  doc.line(rCol + 4 + 144, notaryY + 19, rCol + 4 + 178, notaryY + 19); // blank for day number
+  doc.text("day of", rCol + 4 + 182, notaryY + 19);
+  doc.line(rCol + 4 + 207, notaryY + 19, rCol + 4 + 245, notaryY + 19); // blank for month
+  doc.text(",", rCol + 4 + 247, notaryY + 19);
+  doc.line(rCol + 4 + 252, notaryY + 19, rCol + rW - 4, notaryY + 19); // blank for year
 
   doc.setFont("helvetica", "bold");
-  doc.text("Notary Public:", rCol + 4, notaryY + 14);
-  doc.line(rCol + 4 + 56, notaryY + 14, rCol + rW - 4, notaryY + 14);
+  doc.text("Notary Public:", rCol + 4, notaryY + 30);
+  doc.line(rCol + 4 + 56, notaryY + 30, rCol + rW - 4, notaryY + 30);
 
   doc.setFont("helvetica", "bold");
   doc.text("My Commission Expires:", rCol + 4, notaryY + 49);
