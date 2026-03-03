@@ -566,7 +566,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
 
     const tMid = rowY + rowH / 2 + 2.5;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(7);
+    doc.setFontSize(8.5);
     doc.text("TOTAL:", cols[1].x + cols[1].w - 2, tMid, { align: "right" });
     doc.text($(totalScheduled), cols[2].x + cols[2].w - 2, tMid, { align: "right" });
     doc.text($(s.previousCertificates), cols[3].x + cols[3].w - 2, tMid, { align: "right" });
