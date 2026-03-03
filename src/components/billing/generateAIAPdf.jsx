@@ -336,7 +336,11 @@ function drawG702(doc, PW, PH, project, period, s, logoData) {
   const notaryY = contSigY + 66;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
-  doc.text("Subscribed and Sworn before me this", rCol + 4, notaryY);
+  doc.text("State of:", rCol + 4, notaryY);
+  doc.line(rCol + 4 + 42, notaryY, rCol + rW - 4, notaryY);
+  doc.text("County of:", rCol + 4, notaryY + 11);
+  doc.line(rCol + 4 + 54, notaryY + 11, rCol + rW - 4, notaryY + 11);
+  doc.text("Subscribed and Sworn before me this", rCol + 4, notaryY + 22);
   doc.line(rCol + 4 + 144, notaryY, rCol + 4 + 178, notaryY); // blank for day number
   doc.text("day of", rCol + 4 + 182, notaryY);
   doc.line(rCol + 4 + 207, notaryY, rCol + 4 + 245, notaryY); // blank for month
