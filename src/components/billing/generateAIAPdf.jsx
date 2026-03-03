@@ -574,6 +574,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
     doc.text("0.00", cols[5].x + cols[5].w - 2, tMid, { align: "right" });
     doc.text($(totalCompleted), cols[6].x + cols[6].w - 2, tMid, { align: "right" });
     doc.text(pct(totalPct) + "%", cols[7].x + cols[7].w - 2, tMid, { align: "right" });
-    doc.text($(totalBalance), cols[8].x + cols[8].w - 2, tMid, { align: "right" });
+    doc.text($(s.totalRetainage), cols[8].x + cols[8].w - 2, tMid, { align: "right" });
+    doc.text($(totalBalance), cols[9].x + cols[9].w - 2, tMid, { align: "right" });
   }
 }
