@@ -470,7 +470,7 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
   doc.text("To Date", cols[6].x + cols[6].w / 2, tY + 26, { align: "center" });
 
   let rowY = tY + 28;
-  const rowH = 14;
+  const rowH = 17;
 
   items.forEach((item, idx) => {
     const completedToDate = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
