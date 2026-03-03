@@ -4,8 +4,8 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 
 const $ = (v) =>
   v == null
-    ? "0.00"
-    : Math.abs(Number(v)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    ? "$0.00"
+    : "$" + Math.abs(Number(v)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const pct = (v) => (v == null ? "0.00" : Number(v).toFixed(2));
 
