@@ -52,7 +52,9 @@ export async function generateAIAPdf({ project, period, lineItems, summaryValues
     drawG703Page(doc, PW, PH, project, period, chunk, idx === chunks.length - 1 ? summaryValues : null, logoData);
   });
 
-  doc.save(`PaymentApplication_${project.name.replace(/\s+/g, "_")}_Period${period.period_number}.pdf`);
+  const blob = doc.output("blob");
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
 }
 
 function drawG702(doc, PW, PH, project, period, s, logoData) {
