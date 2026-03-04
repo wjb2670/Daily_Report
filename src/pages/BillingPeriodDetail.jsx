@@ -70,10 +70,10 @@ export default function BillingPeriodDetail() {
             previousPeriodTotals[line.sov_item_id] = completed;
             previousPeriodRetainage[line.sov_item_id] = line.retainage_amount || 0;
           }
-          // Include ALL line items (including COs) so prevTotalCompleted mirrors
-          // exactly how Line 4 (totalCompletedStored) is computed on the prior period.
-          prevTotalCompleted += completed;
-          prevTotalRetainage += (line.retainage_amount || 0);
+          if (!line.is_change_order) {
+            prevTotalCompleted += completed;
+            prevTotalRetainage += (line.retainage_amount || 0);
+          }
         });
         // Line 7 = previous period's Line 6 = Line 4 - Line 5 of prior period
         prevEarnedLessRetainage = prevTotalCompleted - prevTotalRetainage;
