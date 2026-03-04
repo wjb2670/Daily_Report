@@ -62,10 +62,18 @@ export default function BillingPeriodDetail() {
       if (prevPeriods.length > 0) {
         prevPeriodData = prevPeriods[0];
         const prevLines = await base44.entities.BillingLineItem.filter({ billing_period_id: prevPeriodData.id });
+        // Deduplicate by sov_item_id — keep the most recently updated record per SOV item
+        const prevLineMap = {};
+        prevLines.forEach(line => {
+          if (line.is_change_order || !line.sov_item_id) return;
+          const existing = prevLineMap[line.sov_item_id];
+          if (!existing || new Date(line.updated_date) > new Date(existing.updated_date)) {
+            prevLineMap[line.sov_item_id] = line;
+          }
+        });
         let prevTotalCompleted = 0;
         let prevTotalRetainage = 0;
-        prevLines.forEach(line => {
-          if (line.is_change_order) return; // exclude COs — same rule as current period's Line 4 & Line 5
+        Object.values(prevLineMap).forEach(line => {
           const completed = (line.previous_applications || 0) + (line.work_this_period || 0) + (line.materials_this_period || 0);
           previousPeriodTotals[line.sov_item_id] = completed;
           previousPeriodRetainage[line.sov_item_id] = line.retainage_amount || 0;
