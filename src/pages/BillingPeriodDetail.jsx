@@ -174,7 +174,7 @@ export default function BillingPeriodDetail() {
   const totalRetainage = lineItems.reduce((s, l) => s + (l.retainage_amount || 0), 0);
   const totalEarnedLessRetainage = totalCompletedStored - totalRetainage;
 
-  const previousCertificates = lineItems.reduce((s, l) => s + (l.previous_applications || 0), 0);
+  const previousCertificates = prevPeriodEarnedLessRetainage;
   const currentPaymentDue = totalEarnedLessRetainage - previousCertificates;
   const balanceToFinish = contractSumToDate - totalCompletedStored;
 
