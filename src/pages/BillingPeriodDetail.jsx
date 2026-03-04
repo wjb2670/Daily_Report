@@ -64,13 +64,18 @@ export default function BillingPeriodDetail() {
       }
     }
 
-    // Update existing line items with carry-forward if previous_applications is 0
+    // Always sync previous_applications for existing line items from prior period's Total Completed & Stored
     for (const sovItem of allSov) {
-      if (lineMap[sovItem.id] && lineMap[sovItem.id].previous_applications === 0 && previousPeriodTotals[sovItem.id]) {
-        lineMap[sovItem.id] = await base44.entities.BillingLineItem.update(lineMap[sovItem.id].id, {
-          previous_applications: previousPeriodTotals[sovItem.id],
-          retainage_amount: previousPeriodRetainage[sovItem.id] || 0
-        });
+      const existing = lineMap[sovItem.id];
+      if (existing && per.period_number > 1) {
+        const correctPrev = previousPeriodTotals[sovItem.id] || 0;
+        const correctRetainage = previousPeriodRetainage[sovItem.id] || 0;
+        if (existing.previous_applications !== correctPrev || existing.retainage_amount !== correctRetainage) {
+          lineMap[sovItem.id] = await base44.entities.BillingLineItem.update(existing.id, {
+            previous_applications: correctPrev,
+            retainage_amount: correctRetainage,
+          });
+        }
       }
     }
 
