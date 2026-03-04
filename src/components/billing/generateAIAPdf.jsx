@@ -34,7 +34,7 @@ export async function generateAIAPdf({ project, period, lineItems, summaryValues
 
   const logoData = await loadImage(LOGO_URL);
 
-  drawG702(doc, PW, PH, project, period, summaryValues, logoData);
+  drawG702(doc, PW, PH, project, period, summaryValues, logoData, prevCOAdditions, prevCODeductions);
 
   // Collapse all GC sub-items into a single "General Conditions" summary row
   const gcItems = lineItems.filter(l => l.is_general_conditions);
