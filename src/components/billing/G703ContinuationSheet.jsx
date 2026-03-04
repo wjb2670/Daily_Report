@@ -66,8 +66,8 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
 
   const handleRetainagePctChange = (item, val) => {
     const pctVal = parseFloat(val) || 0;
-    const completed = (item.work_this_period || 0) + (item.materials_this_period || 0);
-    const retainageAmt = completed * (pctVal / 100);
+    const completedToDate = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
+    const retainageAmt = completedToDate * (pctVal / 100);
     onUpdate(item.id, { retainage_percent: pctVal, retainage_amount: retainageAmt });
   };
 
