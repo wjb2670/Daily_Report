@@ -551,8 +551,9 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
 
   if (summaryValues) {
     const s = summaryValues;
-    // Use actual sums from ALL items passed in (mirrors the G703 Grand Totals row exactly)
-    const totalScheduled = items.reduce((sum, item) => sum + (item.scheduled_value || 0), 0);
+    // Use ALL items (not just the current page chunk) so totals match the G703 Grand Totals row
+    const sourceItems = allItems || items;
+    const totalScheduled = sourceItems.reduce((sum, item) => sum + (item.scheduled_value || 0), 0);
     const totalPrevious = items.reduce((sum, item) => sum + (item.previous_applications || 0), 0);
     const totalWorkThisPeriod = items.reduce((sum, item) => sum + (item.work_this_period || 0), 0);
     const totalMaterialsThisPeriod = items.reduce((sum, item) => sum + (item.materials_this_period || 0), 0);
