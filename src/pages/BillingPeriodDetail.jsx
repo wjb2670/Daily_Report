@@ -248,7 +248,7 @@ export default function BillingPeriodDetail() {
                 <label className="text-xs font-medium text-gray-500 block mb-1">Change Order Additions</label>
                 <div className="flex items-center border rounded-md px-3 h-9 bg-gray-50 text-sm text-green-700 font-medium gap-1">
                   <span className="text-gray-400">$</span>
-                  {(period.change_order_additions || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {(prevCOAdditions + (period.change_order_additions || 0)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   <span className="ml-auto text-xs text-gray-300 font-normal">via CO button ▲</span>
                 </div>
               </div>
@@ -256,7 +256,7 @@ export default function BillingPeriodDetail() {
                 <label className="text-xs font-medium text-gray-500 block mb-1">Change Order Deductions</label>
                 <div className="flex items-center border rounded-md px-3 h-9 bg-gray-50 text-sm text-red-600 font-medium gap-1">
                   <span className="text-gray-400">$</span>
-                  {(period.change_order_deductions || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {(prevCODeductions + (period.change_order_deductions || 0)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   <span className="ml-auto text-xs text-gray-300 font-normal">via CO button ▲</span>
                 </div>
               </div>
