@@ -227,8 +227,10 @@ export default function BillingPeriodDetail() {
   const gcLines = lineItems.filter(l => l.is_general_conditions);
   const gcTotal = gcLines.reduce((s, l) => s + (l.work_this_period || 0) + (l.materials_this_period || 0), 0);
 
-  const totalCompletedStored = lineItems.reduce((s, l) =>
-    s + (l.previous_applications || 0) + (l.work_this_period || 0) + (l.materials_this_period || 0), 0);
+  // Line 4: total billed to date — excludes CO line items (COs affect contract sum, not billed work)
+  const totalCompletedStored = lineItems
+    .filter(l => !l.is_change_order)
+    .reduce((s, l) => s + (l.previous_applications || 0) + (l.work_this_period || 0) + (l.materials_this_period || 0), 0);
   const totalRetainage = lineItems.reduce((s, l) => s + (l.retainage_amount || 0), 0);
   const totalEarnedLessRetainage = totalCompletedStored - totalRetainage;
 
