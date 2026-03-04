@@ -69,13 +69,17 @@ export default function BillingPeriodDetail() {
           if (!line.is_change_order) {
             previousPeriodTotals[line.sov_item_id] = completed;
             previousPeriodRetainage[line.sov_item_id] = line.retainage_amount || 0;
+            prevTotalCompleted += completed;
+            prevTotalRetainage += (line.retainage_amount || 0);
+          } else {
+            // For CO items: only count work_this_period as the new value added in that period.
+            // previous_applications on CO items is the sum of all prior periods' CO amounts —
+            // those are already reflected in the SOV line items' previous_applications, so
+            // we must NOT add CO previous_applications again to avoid double-counting.
+            prevTotalCompleted += (line.work_this_period || 0) + (line.materials_this_period || 0);
           }
-          prevTotalCompleted += completed;
-          prevTotalRetainage += (line.retainage_amount || 0);
         });
         // Line 7 = previous period's Line 6 (Total Earned Less Retainage)
-        // prevTotalCompleted is the sum of all line items' total-completed-to-date from the prior period,
-        // which is the correct cumulative value for Line 4 of that period, so subtracting retainage gives Line 6.
         prevEarnedLessRetainage = prevTotalCompleted - prevTotalRetainage;
         // Carry forward cumulative CO totals — sum ALL prior periods (not just the immediately previous one)
         const allPriorPeriods = await base44.entities.BillingPeriod.filter({ project_id: per.project_id });
