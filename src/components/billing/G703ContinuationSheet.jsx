@@ -283,8 +283,11 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
 
             {/* Change Order line items */}
             {coItems.map((item, idx) => {
-              const amount = item.work_this_period || 0;
-              const isAddition = item.co_type === "addition" || amount >= 0;
+              const isAddition = item.co_type === "addition";
+              const completedToDate = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
+              const totalPctItem = item.scheduled_value ? (completedToDate / item.scheduled_value) * 100 : 0;
+              const balanceToFinish = (item.scheduled_value || 0) - completedToDate;
+              const retainageAmt = item.retainage_amount || 0;
               return (
                 <tr key={item.id} className={`border-b border-gray-100 ${isAddition ? "bg-green-50/40" : "bg-red-50/40"}`}>
                   <td className="py-2 px-1 text-center text-gray-400 border border-gray-200 text-xs">CO{idx + 1}</td>
@@ -295,13 +298,68 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                   </td>
                   <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-600">{fmt(item.scheduled_value)}</td>
                   <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">{fmt(item.previous_applications)}</td>
-                  <td className={`py-2 px-1 text-right border border-gray-200 text-xs font-semibold ${isAddition ? "text-green-700" : "text-red-600"}`}>{fmt(amount)}</td>
-                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">—</td>
-                  <td className={`py-2 px-1 text-right border border-gray-200 text-xs font-semibold ${isAddition ? "text-green-700" : "text-red-600"}`}>{fmt(amount)}</td>
-                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">—</td>
-                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">—</td>
-                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">0%</td>
-                  <td className="py-2 px-1 text-right border border-gray-200 text-xs text-gray-400">$0.00</td>
+                  <td className="py-2 px-1 text-right text-blue-600 border border-gray-200">
+                    {locked ? fmt(item.work_this_period) : (
+                      <input
+                        type="number"
+                        className="w-24 text-right text-xs border border-blue-200 rounded px-1 py-0.5 text-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-300"
+                        defaultValue={item.work_this_period != null ? Number(item.work_this_period).toFixed(2) : "0.00"}
+                        key={item.id + "-work"}
+                        placeholder="0.00"
+                        step="0.01"
+                        onFocus={e => e.target.select()}
+                        onBlur={e => handleWorkChange(item, e.target.value)}
+                      />
+                    )}
+                  </td>
+                  <td className="py-2 px-1 text-right text-green-600 border border-gray-200">
+                    {locked ? fmt(item.materials_this_period) : (
+                      <input
+                        type="number"
+                        className="w-24 text-right text-xs border border-green-200 rounded px-1 py-0.5 text-green-600 focus:outline-none focus:ring-1 focus:ring-green-300"
+                        defaultValue={item.materials_this_period != null ? Number(item.materials_this_period).toFixed(2) : "0.00"}
+                        key={item.id + "-mat"}
+                        placeholder="0.00"
+                        step="0.01"
+                        onFocus={e => e.target.select()}
+                        onBlur={e => handleMaterialsChange(item, e.target.value)}
+                      />
+                    )}
+                  </td>
+                  <td className="py-2 px-1 text-right font-medium text-gray-800 border border-gray-200 text-xs">{fmt(completedToDate)}</td>
+                  <td className="py-2 px-1 text-right text-gray-600 border border-gray-200 text-xs">{pct(totalPctItem)}</td>
+                  <td className="py-2 px-1 text-right text-gray-500 border border-gray-200 text-xs">{fmt(balanceToFinish)}</td>
+                  <td className="py-2 px-1 text-right text-orange-600 border border-gray-200">
+                    {locked ? `${item.retainage_percent ?? 0}%` : (
+                      <div className="flex items-center justify-end gap-0.5">
+                        <input
+                          type="number"
+                          className="w-14 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-300"
+                          defaultValue={item.retainage_percent != null ? Number(item.retainage_percent).toFixed(2) : "0.00"}
+                          key={item.id + "-rpct"}
+                          placeholder="0.00"
+                          step="0.01"
+                          onFocus={e => e.target.select()}
+                          onBlur={e => handleRetainagePctChange(item, e.target.value)}
+                        />
+                        <span className="text-orange-400 text-xs">%</span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-2 px-1 text-right text-orange-600 font-medium border border-gray-200">
+                    {locked ? fmt(retainageAmt) : (
+                      <input
+                        type="number"
+                        className="w-24 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-300"
+                        defaultValue={retainageAmt != null ? Number(retainageAmt).toFixed(2) : "0.00"}
+                        key={item.id + "-ramt-" + retainageAmt}
+                        placeholder="0.00"
+                        step="0.01"
+                        onFocus={e => e.target.select()}
+                        onBlur={e => handleRetainageAmtChange(item, e.target.value)}
+                      />
+                    )}
+                  </td>
                 </tr>
               );
             })}
