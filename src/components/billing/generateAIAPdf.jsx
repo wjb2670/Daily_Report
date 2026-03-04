@@ -72,7 +72,7 @@ export async function generateAIAPdf({ project, period, lineItems, summaryValues
   window.open(url, "_blank");
 }
 
-function drawG702(doc, PW, PH, project, period, s, logoData) {
+function drawG702(doc, PW, PH, project, period, s, logoData, prevCOAdditions = 0, prevCODeductions = 0) {
   const M = 36;
 
   doc.setFillColor(255, 255, 255);
