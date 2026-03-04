@@ -69,9 +69,17 @@ export default function BillingPeriodDetail() {
           if (!line.is_change_order) {
             previousPeriodTotals[line.sov_item_id] = completed;
             previousPeriodRetainage[line.sov_item_id] = line.retainage_amount || 0;
+            prevTotalCompleted += completed;
+            prevTotalRetainage += (line.retainage_amount || 0);
           }
-          prevTotalCompleted += completed;
-          prevTotalRetainage += (line.retainage_amount || 0);
+          // CO items: only count work_this_period (the new amount this period), not previous_applications
+          // because CO previous_applications already reflects prior period totals — adding full completed would double-count
+          if (line.is_change_order) {
+            const coThisPeriod = (line.work_this_period || 0) + (line.materials_this_period || 0);
+            const coPrev = line.previous_applications || 0;
+            prevTotalCompleted += coPrev + coThisPeriod;
+            prevTotalRetainage += (line.retainage_amount || 0);
+          }
         });
         // Line 7 = previous period's Line 6 (Total Earned Less Retainage)
         prevEarnedLessRetainage = prevTotalCompleted - prevTotalRetainage;
