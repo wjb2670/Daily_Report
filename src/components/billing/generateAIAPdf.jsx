@@ -64,7 +64,7 @@ export async function generateAIAPdf({ project, period, lineItems, summaryValues
   }
   chunks.forEach((chunk, idx) => {
     doc.addPage();
-    drawG703Page(doc, PW, PH, project, period, chunk, idx === chunks.length - 1 ? summaryValues : null, logoData);
+    drawG703Page(doc, PW, PH, project, period, chunk, idx === chunks.length - 1 ? summaryValues : null, logoData, idx === chunks.length - 1 ? sortedItems : null);
   });
 
   const blob = doc.output("blob");
