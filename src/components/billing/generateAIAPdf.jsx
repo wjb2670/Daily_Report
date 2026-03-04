@@ -551,14 +551,17 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
 
   if (summaryValues) {
     const s = summaryValues;
-    const totalScheduled = s.originalContractSum + s.changeOrderNet;
-    const totalCompleted = s.totalCompletedStored;
-    const totalPct = totalScheduled ? (totalCompleted / totalScheduled) * 100 : 0;
-    const totalBalance = totalScheduled - totalCompleted;
-    // Sum actuals from the items on this page chunk
+    // Use actual sums from ALL items passed in (mirrors the G703 Grand Totals row exactly)
+    const totalScheduled = items.reduce((sum, item) => sum + (item.scheduled_value || 0), 0);
     const totalPrevious = items.reduce((sum, item) => sum + (item.previous_applications || 0), 0);
     const totalWorkThisPeriod = items.reduce((sum, item) => sum + (item.work_this_period || 0), 0);
     const totalMaterialsThisPeriod = items.reduce((sum, item) => sum + (item.materials_this_period || 0), 0);
+    const totalCompleted = items.reduce((sum, item) => sum + (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0), 0);
+    const totalBalance = items.reduce((sum, item) => {
+      const c = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
+      return sum + ((item.scheduled_value || 0) - c);
+    }, 0);
+    const totalPct = totalScheduled ? (totalCompleted / totalScheduled) * 100 : 0;
     const totalRetainageHeld = items.reduce((sum, item) => sum + (item.retainage_amount || 0), 0);
 
     doc.setFillColor(210, 215, 220);
