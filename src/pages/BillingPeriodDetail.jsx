@@ -47,7 +47,7 @@ export default function BillingPeriodDetail() {
     setProject(proj[0] || null);
     setSovItems(allSov);
 
-    // Map existing line items by sov_item_id
+    // Map existing line items by sov_item_id (and track CO items separately)
     const lineMap = {};
     existingLines.forEach(l => { lineMap[l.sov_item_id] = l; });
 
