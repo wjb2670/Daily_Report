@@ -52,18 +52,26 @@ export default function BillingPeriodDetail() {
     // Get previous period's completed totals and retainage for carry-forward
     let previousPeriodTotals = {};
     let previousPeriodRetainage = {};
+    let prevEarnedLessRetainage = 0;
     if (per.period_number > 1) {
       const prevPeriods = await base44.entities.BillingPeriod.filter({ project_id: per.project_id, period_number: per.period_number - 1 });
       if (prevPeriods.length > 0) {
         const prevPeriod = prevPeriods[0];
         const prevLines = await base44.entities.BillingLineItem.filter({ billing_period_id: prevPeriod.id });
+        let prevTotalCompleted = 0;
+        let prevTotalRetainage = 0;
         prevLines.forEach(line => {
           const completed = (line.previous_applications || 0) + (line.work_this_period || 0) + (line.materials_this_period || 0);
           previousPeriodTotals[line.sov_item_id] = completed;
           previousPeriodRetainage[line.sov_item_id] = line.retainage_amount || 0;
+          prevTotalCompleted += completed;
+          prevTotalRetainage += (line.retainage_amount || 0);
         });
+        // Line 7 = previous period's Line 6 (Total Earned Less Retainage)
+        prevEarnedLessRetainage = prevTotalCompleted - prevTotalRetainage;
       }
     }
+    setPrevPeriodEarnedLessRetainage(prevEarnedLessRetainage);
 
     // Always sync previous_applications for existing line items from prior period's Total Completed & Stored
     // and recalculate retainage based on full completed-to-date × retainage percent
