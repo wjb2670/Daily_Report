@@ -167,7 +167,9 @@ export default function BillingPeriodDetail() {
 
   // Compute G702 summary values
   const originalContractSum = project.contract_value || 0;
-  const changeOrderNet = (period.change_order_additions || 0) - (period.change_order_deductions || 0);
+  const cumulativeCOAdditions = prevCOAdditions + (period.change_order_additions || 0);
+  const cumulativeCODeductions = prevCODeductions + (period.change_order_deductions || 0);
+  const changeOrderNet = cumulativeCOAdditions - cumulativeCODeductions;
   const contractSumToDate = originalContractSum + changeOrderNet;
 
   const cmLines = lineItems.filter(l => !l.is_general_conditions);
