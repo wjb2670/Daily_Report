@@ -577,12 +577,12 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
     doc.setFontSize(8.5);
     doc.text("TOTAL:", cols[1].x + cols[1].w - 2, tMid, { align: "right" });
     doc.text($(totalScheduled), cols[2].x + cols[2].w - 2, tMid, { align: "right" });
-    doc.text($(s.previousCertificates), cols[3].x + cols[3].w - 2, tMid, { align: "right" });
-    doc.text($(workThisPeriodTotal), cols[4].x + cols[4].w - 2, tMid, { align: "right" });
-    doc.text("0.00", cols[5].x + cols[5].w - 2, tMid, { align: "right" });
+    doc.text($(totalPrevious), cols[3].x + cols[3].w - 2, tMid, { align: "right" });
+    doc.text($(totalWorkThisPeriod), cols[4].x + cols[4].w - 2, tMid, { align: "right" });
+    doc.text($(totalMaterialsThisPeriod), cols[5].x + cols[5].w - 2, tMid, { align: "right" });
     doc.text($(totalCompleted), cols[6].x + cols[6].w - 2, tMid, { align: "right" });
     doc.text(pct(totalPct) + "%", cols[7].x + cols[7].w - 2, tMid, { align: "right" });
     doc.text($(totalBalance), cols[8].x + cols[8].w - 2, tMid, { align: "right" });
-    doc.text($(s.totalRetainage), cols[9].x + cols[9].w - 2, tMid, { align: "right" });
+    doc.text($(totalRetainageHeld), cols[9].x + cols[9].w - 2, tMid, { align: "right" });
   }
 }
