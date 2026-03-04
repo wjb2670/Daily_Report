@@ -201,6 +201,8 @@ export default function BillingPeriodDetail() {
       project,
       period,
       lineItems,
+      prevCOAdditions,
+      prevCODeductions,
       summaryValues: {
         originalContractSum,
         changeOrderNet,
