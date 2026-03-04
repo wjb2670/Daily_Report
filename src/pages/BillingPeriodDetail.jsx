@@ -71,6 +71,9 @@ export default function BillingPeriodDetail() {
         });
         // Line 7 = previous period's Line 6 (Total Earned Less Retainage)
         prevEarnedLessRetainage = prevTotalCompleted - prevTotalRetainage;
+        // Carry forward cumulative CO totals from previous period
+        setPrevCOAdditions(prevPeriod.change_order_additions || 0);
+        setPrevCODeductions(prevPeriod.change_order_deductions || 0);
       }
     }
     setPrevPeriodEarnedLessRetainage(prevEarnedLessRetainage);
