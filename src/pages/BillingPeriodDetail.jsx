@@ -90,8 +90,6 @@ export default function BillingPeriodDetail() {
         prevPeriodCOItems = prevLines.filter(l => l.is_change_order);
       }
     }
-    // Debug: log what we computed
-    console.log(`[Period ${per.period_number}] prevEarnedLessRetainage (Line 7) = ${prevEarnedLessRetainage}, prevTotalCompleted = ${prevTotalCompleted}, prevTotalRetainage = ${prevTotalRetainage}`);
     setPrevPeriodEarnedLessRetainage(prevEarnedLessRetainage);
 
     // Always sync previous_applications for existing line items from prior period's Total Completed & Stored
