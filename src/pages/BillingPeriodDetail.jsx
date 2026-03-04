@@ -121,6 +121,55 @@ export default function BillingPeriodDetail() {
         mergedLines.push(created);
       }
     }
+
+    // Carry forward CO line items from previous period into this period
+    if (per.period_number > 1) {
+      const prevPeriods = await base44.entities.BillingPeriod.filter({ project_id: per.project_id, period_number: per.period_number - 1 });
+      if (prevPeriods.length > 0) {
+        const prevCoLines = await base44.entities.BillingLineItem.filter({ billing_period_id: prevPeriods[0].id });
+        const prevCOItems = prevCoLines.filter(l => l.is_change_order);
+        const currentCOItems = existingLines.filter(l => l.is_change_order);
+
+        for (const prevCO of prevCOItems) {
+          // Check if a matching CO already exists in this period (by description)
+          const alreadyExists = currentCOItems.some(c => c.description === prevCO.description);
+          if (!alreadyExists) {
+            const prevCompleted = (prevCO.previous_applications || 0) + (prevCO.work_this_period || 0) + (prevCO.materials_this_period || 0);
+            const created = await base44.entities.BillingLineItem.create({
+              billing_period_id: periodId,
+              project_id: per.project_id,
+              description: prevCO.description,
+              scheduled_value: prevCO.scheduled_value || 0,
+              previous_applications: prevCompleted,
+              work_this_period: 0,
+              materials_this_period: 0,
+              retainage_percent: 0,
+              retainage_amount: 0,
+              is_general_conditions: false,
+              is_change_order: true,
+              co_type: prevCO.co_type,
+            });
+            mergedLines.push(created);
+          } else {
+            const existing = currentCOItems.find(c => c.description === prevCO.description);
+            mergedLines.push(existing);
+          }
+        }
+
+        // Also add any CO items already in this period that weren't from prev period
+        const prevCODescriptions = prevCOItems.map(c => c.description);
+        currentCOItems
+          .filter(c => !prevCODescriptions.includes(c.description))
+          .forEach(c => mergedLines.push(c));
+      } else {
+        // No previous period - just add existing CO items
+        existingLines.filter(l => l.is_change_order).forEach(c => mergedLines.push(c));
+      }
+    } else {
+      // Period 1 - add existing CO items
+      existingLines.filter(l => l.is_change_order).forEach(c => mergedLines.push(c));
+    }
+
     setLineItems(mergedLines);
     setLoading(false);
   };
