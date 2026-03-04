@@ -65,17 +65,14 @@ export default function BillingPeriodDetail() {
         let prevTotalCompleted = 0;
         let prevTotalRetainage = 0;
         prevLines.forEach(line => {
+          if (line.is_change_order) return; // exclude COs — same rule as current period's Line 4 & Line 5
           const completed = (line.previous_applications || 0) + (line.work_this_period || 0) + (line.materials_this_period || 0);
-          if (!line.is_change_order) {
-            previousPeriodTotals[line.sov_item_id] = completed;
-            previousPeriodRetainage[line.sov_item_id] = line.retainage_amount || 0;
-          }
-          if (!line.is_change_order) {
-            prevTotalCompleted += completed;
-            prevTotalRetainage += (line.retainage_amount || 0);
-          }
+          previousPeriodTotals[line.sov_item_id] = completed;
+          previousPeriodRetainage[line.sov_item_id] = line.retainage_amount || 0;
+          prevTotalCompleted += completed;
+          prevTotalRetainage += (line.retainage_amount || 0);
         });
-        // Line 7 = previous period's Line 6 = Line 4 - Line 5 of prior period
+        // Line 7 = previous period's Line 6 = Line 4 - Line 5 of prior period (both exclude COs)
         prevEarnedLessRetainage = prevTotalCompleted - prevTotalRetainage;
         // Carry forward cumulative CO totals — sum ALL prior periods (not just the immediately previous one)
         const allPriorPeriods = await base44.entities.BillingPeriod.filter({ project_id: per.project_id });
