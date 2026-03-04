@@ -231,7 +231,7 @@ export default function BillingPeriodDetail() {
   const totalCompletedStored = lineItems
     .filter(l => !l.is_change_order)
     .reduce((s, l) => s + (l.previous_applications || 0) + (l.work_this_period || 0) + (l.materials_this_period || 0), 0);
-  const totalRetainage = lineItems.reduce((s, l) => s + (l.retainage_amount || 0), 0);
+  const totalRetainage = lineItems.filter(l => !l.is_change_order).reduce((s, l) => s + (l.retainage_amount || 0), 0);
   const totalEarnedLessRetainage = totalCompletedStored - totalRetainage;
 
   const previousCertificates = prevPeriodEarnedLessRetainage;
