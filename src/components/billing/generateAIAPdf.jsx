@@ -250,11 +250,15 @@ function drawG702(doc, PW, PH, project, period, s, logoData, prevCOAdditions = 0
   doc.text("DEDUCTIONS", M + coColLabel + coColAdd + coColDed / 2, rY + 9, { align: "center" });
   rY += 13;
 
+  const thisAdd = period.change_order_additions || 0;
+  const thisDed = period.change_order_deductions || 0;
+  const totalAdd = prevCOAdditions + thisAdd;
+  const totalDed = prevCODeductions + thisDed;
   const coRows = [
-    ["Total changes approved\nin previous months", 0, 0],
-    ["Total approved this month", period.change_order_additions || 0, period.change_order_deductions || 0],
-    ["TOTALS", period.change_order_additions || 0, period.change_order_deductions || 0],
-    ["NET CHANGES by Change Orders", (period.change_order_additions || 0) - (period.change_order_deductions || 0), null],
+    ["Total changes approved\nin previous months", prevCOAdditions, prevCODeductions],
+    ["Total approved this month", thisAdd, thisDed],
+    ["TOTALS", totalAdd, totalDed],
+    ["NET CHANGES by Change Orders", totalAdd - totalDed, null],
   ];
 
   coRows.forEach(([label, add, ded], idx) => {
