@@ -65,12 +65,15 @@ export default function BillingPeriodDetail() {
     }
 
     // Always sync previous_applications for existing line items from prior period's Total Completed & Stored
+    // and recalculate retainage based on full completed-to-date × retainage percent
     for (const sovItem of allSov) {
       const existing = lineMap[sovItem.id];
       if (existing && per.period_number > 1) {
         const correctPrev = previousPeriodTotals[sovItem.id] || 0;
-        const correctRetainage = previousPeriodRetainage[sovItem.id] || 0;
-        if (existing.previous_applications !== correctPrev || existing.retainage_amount !== correctRetainage) {
+        const retainagePct = sovItem.retainage_percent ?? existing.retainage_percent ?? 10;
+        const completedToDate = correctPrev + (existing.work_this_period || 0) + (existing.materials_this_period || 0);
+        const correctRetainage = completedToDate * (retainagePct / 100);
+        if (existing.previous_applications !== correctPrev || Math.abs((existing.retainage_amount || 0) - correctRetainage) > 0.001) {
           lineMap[sovItem.id] = await base44.entities.BillingLineItem.update(existing.id, {
             previous_applications: correctPrev,
             retainage_amount: correctRetainage,
