@@ -555,7 +555,11 @@ function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoDa
     const totalCompleted = s.totalCompletedStored;
     const totalPct = totalScheduled ? (totalCompleted / totalScheduled) * 100 : 0;
     const totalBalance = totalScheduled - totalCompleted;
-    const workThisPeriodTotal = totalCompleted - s.previousCertificates;
+    // Sum actuals from the items on this page chunk
+    const totalPrevious = items.reduce((sum, item) => sum + (item.previous_applications || 0), 0);
+    const totalWorkThisPeriod = items.reduce((sum, item) => sum + (item.work_this_period || 0), 0);
+    const totalMaterialsThisPeriod = items.reduce((sum, item) => sum + (item.materials_this_period || 0), 0);
+    const totalRetainageHeld = items.reduce((sum, item) => sum + (item.retainage_amount || 0), 0);
 
     doc.setFillColor(210, 215, 220);
     doc.rect(M, rowY, PW - M * 2, rowH, "F");
