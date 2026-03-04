@@ -413,7 +413,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData, prevCOAdditions = 0
   doc.text("This Certificate is not negotiable. The AMOUNT CERTIFIED is payable only to the Contractor named herein.", rCol + 4, archSigY + 55, { maxWidth: rW - 8 });
 }
 
-function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoData) {
+function drawG703Page(doc, PW, PH, project, period, items, summaryValues, logoData, allItems = null) {
   const M = 28;
 
   doc.setFillColor(255, 255, 255);
