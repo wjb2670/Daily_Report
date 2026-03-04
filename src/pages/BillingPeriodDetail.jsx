@@ -73,9 +73,13 @@ export default function BillingPeriodDetail() {
         });
         // Line 7 = previous period's Line 6 (Total Earned Less Retainage)
         prevEarnedLessRetainage = prevTotalCompleted - prevTotalRetainage;
-        // Carry forward cumulative CO totals from previous period
-        setPrevCOAdditions(prevPeriodData.change_order_additions || 0);
-        setPrevCODeductions(prevPeriodData.change_order_deductions || 0);
+        // Carry forward cumulative CO totals — sum ALL prior periods (not just the immediately previous one)
+        const allPriorPeriods = await base44.entities.BillingPeriod.filter({ project_id: per.project_id });
+        const priorOnly = allPriorPeriods.filter(p => p.period_number < per.period_number);
+        const cumulativeAdditions = priorOnly.reduce((s, p) => s + (p.change_order_additions || 0), 0);
+        const cumulativeDeductions = priorOnly.reduce((s, p) => s + (p.change_order_deductions || 0), 0);
+        setPrevCOAdditions(cumulativeAdditions);
+        setPrevCODeductions(cumulativeDeductions);
         // Save prev CO line items for carry-forward
         prevPeriodCOItems = prevLines.filter(l => l.is_change_order);
       }
