@@ -74,6 +74,10 @@ export default function BillingPeriodDetail() {
         // Carry forward cumulative CO totals from previous period
         setPrevCOAdditions(prevPeriod.change_order_additions || 0);
         setPrevCODeductions(prevPeriod.change_order_deductions || 0);
+        // Track previous period CO line items for carry-forward into current period
+        prevLines.filter(l => l.is_change_order).forEach(coLine => {
+          previousPeriodTotals[coLine.id + "_co"] = coLine;
+        });
       }
     }
     setPrevPeriodEarnedLessRetainage(prevEarnedLessRetainage);
