@@ -166,9 +166,10 @@ export default function BillingPeriodDetail() {
         existingLines.filter(l => l.is_change_order).forEach(c => mergedLines.push(c));
       }
     } else {
-      // Period 1 - add existing CO items
+      // Period 1 - just add existing CO items directly
       existingLines.filter(l => l.is_change_order).forEach(c => mergedLines.push(c));
     }
+
 
     setLineItems(mergedLines);
     setLoading(false);
