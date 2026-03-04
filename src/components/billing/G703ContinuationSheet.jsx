@@ -259,7 +259,7 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                              type="number"
                              className="w-20 text-right text-xs border border-amber-200 rounded px-1 py-0.5 text-amber-600 focus:outline-none focus:ring-1 focus:ring-amber-300"
                              defaultValue={retainageAmt != null ? Number(retainageAmt).toFixed(2) : "0.00"}
-                             key={item.id + "-ramt"}
+                             key={item.id + "-ramt-" + retainageAmt}
                              placeholder="0.00"
                              step="0.01"
                              onBlur={e => handleRetainageAmtChange(item, e.target.value)}
@@ -384,7 +384,7 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                              type="number"
                              className="w-20 text-right text-xs border border-orange-200 rounded px-1 py-0.5 text-orange-600 focus:outline-none focus:ring-1 focus:ring-orange-300"
                              defaultValue={retainageAmt != null ? Number(retainageAmt).toFixed(2) : "0.00"}
-                             key={item.id + "-ramt"}
+                             key={item.id + "-ramt-" + retainageAmt}
                              placeholder="0.00"
                              step="0.01"
                              onBlur={e => handleRetainageAmtChange(item, e.target.value)}
