@@ -22,6 +22,7 @@ export default function BillingPeriodDetail() {
   const [loading, setLoading] = useState(true);
   const [showCOModal, setShowCOModal] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [prevPeriodEarnedLessRetainage, setPrevPeriodEarnedLessRetainage] = useState(0);
 
   useEffect(() => {
     if (periodId) loadAll();
