@@ -72,6 +72,8 @@ export default function BillingPeriodDetail() {
           prevTotalRetainage += (line.retainage_amount || 0);
         });
         // Line 7 = previous period's Line 6 (Total Earned Less Retainage)
+        // prevTotalCompleted already includes ALL prior periods via previous_applications carry-forward,
+        // so this correctly represents the cumulative earned less retainage through the prior period.
         prevEarnedLessRetainage = prevTotalCompleted - prevTotalRetainage;
         // Carry forward cumulative CO totals — sum ALL prior periods (not just the immediately previous one)
         const allPriorPeriods = await base44.entities.BillingPeriod.filter({ project_id: per.project_id });
