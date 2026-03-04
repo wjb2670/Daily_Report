@@ -55,11 +55,13 @@ export default function BillingPeriodDetail() {
     let previousPeriodTotals = {};
     let previousPeriodRetainage = {};
     let prevEarnedLessRetainage = 0;
+    let prevPeriodData = null;
+    let prevPeriodCOItems = [];
     if (per.period_number > 1) {
       const prevPeriods = await base44.entities.BillingPeriod.filter({ project_id: per.project_id, period_number: per.period_number - 1 });
       if (prevPeriods.length > 0) {
-        const prevPeriod = prevPeriods[0];
-        const prevLines = await base44.entities.BillingLineItem.filter({ billing_period_id: prevPeriod.id });
+        prevPeriodData = prevPeriods[0];
+        const prevLines = await base44.entities.BillingLineItem.filter({ billing_period_id: prevPeriodData.id });
         let prevTotalCompleted = 0;
         let prevTotalRetainage = 0;
         prevLines.forEach(line => {
@@ -72,9 +74,10 @@ export default function BillingPeriodDetail() {
         // Line 7 = previous period's Line 6 (Total Earned Less Retainage)
         prevEarnedLessRetainage = prevTotalCompleted - prevTotalRetainage;
         // Carry forward cumulative CO totals from previous period
-        setPrevCOAdditions(prevPeriod.change_order_additions || 0);
-        setPrevCODeductions(prevPeriod.change_order_deductions || 0);
-
+        setPrevCOAdditions(prevPeriodData.change_order_additions || 0);
+        setPrevCODeductions(prevPeriodData.change_order_deductions || 0);
+        // Save prev CO line items for carry-forward
+        prevPeriodCOItems = prevLines.filter(l => l.is_change_order);
       }
     }
     setPrevPeriodEarnedLessRetainage(prevEarnedLessRetainage);
