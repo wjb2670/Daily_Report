@@ -113,6 +113,7 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
               key={item.id + "-mat"}
               placeholder="0.00"
               step="0.01"
+              onFocus={e => e.target.select()}
               onBlur={e => handleMaterialsChange(item, e.target.value)}
             />
           )}
