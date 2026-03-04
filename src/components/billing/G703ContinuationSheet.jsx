@@ -131,8 +131,9 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                 key={item.id + "-rpct"}
                 placeholder="0.00"
                 step="0.01"
+                onFocus={e => e.target.select()}
                 onBlur={e => handleRetainagePctChange(item, e.target.value)}
-              />
+                />
               <span className="text-orange-400 text-xs">%</span>
             </div>
           )}
