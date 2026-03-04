@@ -27,7 +27,7 @@ function loadImage(url) {
   });
 }
 
-export async function generateAIAPdf({ project, period, lineItems, summaryValues }) {
+export async function generateAIAPdf({ project, period, lineItems, summaryValues, prevCOAdditions = 0, prevCODeductions = 0 }) {
   const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "letter" });
   const PW = doc.internal.pageSize.getWidth();
   const PH = doc.internal.pageSize.getHeight();
