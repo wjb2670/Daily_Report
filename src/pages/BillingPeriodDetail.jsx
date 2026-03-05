@@ -101,7 +101,8 @@ export default function BillingPeriodDetail() {
       const existing = lineMap[sovItem.id];
       if (existing && per.period_number > 1) {
         const correctPrev = previousPeriodTotals[sovItem.id] || 0;
-        const retainagePct = sovItem.retainage_percent ?? existing.retainage_percent ?? 10;
+        // Always use the retainage % already stored on the line item — user may have overridden it
+        const retainagePct = existing.retainage_percent ?? sovItem.retainage_percent ?? 10;
         const completedToDate = correctPrev + (existing.work_this_period || 0) + (existing.materials_this_period || 0);
         const correctRetainage = completedToDate * (retainagePct / 100);
         if (existing.previous_applications !== correctPrev || Math.abs((existing.retainage_amount || 0) - correctRetainage) > 0.001) {
