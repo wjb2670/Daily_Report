@@ -42,15 +42,28 @@ export default function ChangeOrderModal({ open, onClose, period, onSaved }) {
       change_order_deductions: newDeductions,
     });
 
+    // Find the highest existing CO number across all periods for this project
+    const allCOLines = await base44.entities.BillingLineItem.filter({
+      project_id: period.project_id,
+      is_change_order: true,
+    });
+    let maxCoNum = 0;
+    allCOLines.forEach(line => {
+      const match = line.description && line.description.match(/^CO #(\d+)/);
+      if (match) maxCoNum = Math.max(maxCoNum, parseInt(match[1], 10));
+    });
+
     // Create a BillingLineItem for each CO row so it appears in the G703
     const validRows = rows.filter(r => r.description && parseFloat(r.amount) > 0);
-    for (const row of validRows) {
+    for (let i = 0; i < validRows.length; i++) {
+      const row = validRows[i];
+      const coNum = maxCoNum + i + 1;
       const amount = parseFloat(row.amount) || 0;
       const signedAmount = row.type === "addition" ? amount : -amount;
       await base44.entities.BillingLineItem.create({
         billing_period_id: period.id,
         project_id: period.project_id,
-        description: `CO: ${row.description}`,
+        description: `CO #${coNum}: ${row.description}`,
         scheduled_value: signedAmount,
         work_this_period: signedAmount,
         previous_applications: 0,
