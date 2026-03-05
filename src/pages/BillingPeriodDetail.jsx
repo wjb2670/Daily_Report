@@ -138,10 +138,7 @@ export default function BillingPeriodDetail() {
           retainage_percent: previousPeriodTotals[sovItem.id + "_retPct"] ?? sovItem.retainage_percent ?? 10,
           retainage_amount: previousPeriodRetainage[sovItem.id] || 0,
           retention_released_this_period: 0,
-          retention_released_to_date: (() => {
-            const prevLine = Object.values({}).find ? null : null; // placeholder
-            return 0; // will carry forward via the sync block above for existing items
-          })(),
+          retention_released_to_date: previousPeriodRetainage[sovItem.id + "_retRelToDate"] || 0,
           is_general_conditions: isGCItem,
         });
         mergedLines.push(created);
