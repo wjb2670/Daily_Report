@@ -312,6 +312,22 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                            />
                          )}
                        </td>
+                       <td className="py-1.5 px-1 text-right text-teal-700 border border-gray-200 text-xs bg-teal-50/60">
+                         {locked ? fmt(item.retention_released_this_period || 0) : (
+                           <input
+                             type="number"
+                             className="w-20 text-right text-xs border border-teal-200 rounded px-1 py-0.5 text-teal-700 focus:outline-none focus:ring-1 focus:ring-teal-300 bg-teal-50"
+                             defaultValue={item.retention_released_this_period != null ? Number(item.retention_released_this_period).toFixed(2) : "0.00"}
+                             key={item.id + "-retrel-" + (item.retention_released_this_period || 0)}
+                             placeholder="0.00"
+                             step="0.01"
+                             onBlur={e => handleRetentionReleasedChange(item, e.target.value)}
+                           />
+                         )}
+                       </td>
+                       <td className="py-1.5 px-1 text-right text-teal-600 border border-gray-200 text-xs bg-teal-50/40 font-medium">
+                         {fmt(item.retention_released_to_date || 0)}
+                       </td>
                      </tr>
                    );
                  })}
