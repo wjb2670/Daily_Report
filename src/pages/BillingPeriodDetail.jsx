@@ -81,7 +81,9 @@ export default function BillingPeriodDetail() {
           prevTotalCompleted += completed;
           prevTotalRetainage += (line.retainage_amount || 0);
         });
-        // Line 7 = previous period's Line 6 = Line 4 - Line 5 of prior period (both exclude COs)
+        // Line 7 = previous period's Line 6 = (Line 4 - Line 5) of prior period
+        // Line 4 = sum of col G for non-CO items; Line 5 = sum of retainage for non-CO items
+        // prevLineMap already excludes CO items (filtered above with is_change_order check)
         prevEarnedLessRetainage = prevTotalCompleted - prevTotalRetainage;
         // Carry forward cumulative CO totals — sum ALL prior periods (not just the immediately previous one)
         const allPriorPeriods = await base44.entities.BillingPeriod.filter({ project_id: per.project_id });
