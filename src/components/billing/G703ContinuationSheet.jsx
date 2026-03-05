@@ -37,19 +37,18 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
   const t1 = gcTotals(gc1Items);
   const t2 = gcTotals(gc2Items);
 
-  // Grand totals — exclude CO items (COs affect contract sum but not the G703 Work Completed totals)
-  const nonCoItems     = lineItems.filter(l => !l.is_change_order);
-  const totalScheduled = nonCoItems.reduce((s, l) => s + (l.scheduled_value || 0), 0);
-  const totalPrevious  = nonCoItems.reduce((s, l) => s + (l.previous_applications || 0), 0);
-  const totalWork      = nonCoItems.reduce((s, l) => s + (l.work_this_period || 0), 0);
-  const totalMaterials = nonCoItems.reduce((s, l) => s + (l.materials_this_period || 0), 0);
-  const totalCompleted = nonCoItems.reduce((s, l) =>
+  // Grand totals — sum every item in every column, no exceptions
+  const totalScheduled = lineItems.reduce((s, l) => s + (l.scheduled_value || 0), 0);
+  const totalPrevious  = lineItems.reduce((s, l) => s + (l.previous_applications || 0), 0);
+  const totalWork      = lineItems.reduce((s, l) => s + (l.work_this_period || 0), 0);
+  const totalMaterials = lineItems.reduce((s, l) => s + (l.materials_this_period || 0), 0);
+  const totalCompleted = lineItems.reduce((s, l) =>
     s + (l.previous_applications || 0) + (l.work_this_period || 0) + (l.materials_this_period || 0), 0);
-  const totalBalance   = nonCoItems.reduce((s, l) => {
+  const totalBalance   = lineItems.reduce((s, l) => {
     const c = (l.previous_applications || 0) + (l.work_this_period || 0) + (l.materials_this_period || 0);
     return s + ((l.scheduled_value || 0) - c);
   }, 0);
-  const totalRetainage = nonCoItems.reduce((s, l) => s + (l.retainage_amount || 0), 0);
+  const totalRetainage = lineItems.reduce((s, l) => s + (l.retainage_amount || 0), 0);
 
   const handleWorkChange = (item, val) => {
     const work = parseFloat(val) || 0;
