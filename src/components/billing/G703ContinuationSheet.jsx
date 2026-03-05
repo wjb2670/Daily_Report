@@ -513,6 +513,8 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
               <td className="py-2 px-1 text-right border border-gray-300">{fmt(totalBalance)}</td>
               <td className="py-2 px-1 border border-gray-300" />
               <td className="py-2 px-1 text-right text-orange-600 border border-gray-300">{fmt(totalRetainage)}</td>
+              <td className="py-2 px-1 text-right text-teal-700 border border-gray-300 bg-teal-50">{fmt(totalReleasedThisPeriod)}</td>
+              <td className="py-2 px-1 text-right text-teal-600 border border-gray-300 bg-teal-50">{fmt(totalReleasedToDate)}</td>
             </tr>
           </tfoot>
         </table>
