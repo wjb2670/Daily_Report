@@ -238,14 +238,12 @@ export default function BillingPeriodDetail() {
   const gcLines = lineItems.filter(l => l.is_general_conditions);
   const gcTotal = gcLines.reduce((s, l) => s + (l.work_this_period || 0) + (l.materials_this_period || 0), 0);
 
-  // Line 4: Total Completed & Stored to Date — sum of column G for all NON-CO line items
+  // Line 4: Total Completed & Stored to Date — sum of column G for ALL line items
   const totalCompletedStored = lineItems
-    .filter(l => !l.is_change_order)
     .reduce((s, l) => s + (l.previous_applications || 0) + (l.work_this_period || 0) + (l.materials_this_period || 0), 0);
 
-  // Line 5: Total Retainage — sum of "Retainage Held" column for all NON-CO line items
+  // Line 5: Total Retainage — sum of Retainage Held column for ALL line items
   const totalRetainage = lineItems
-    .filter(l => !l.is_change_order)
     .reduce((s, l) => s + (l.retainage_amount || 0), 0);
 
   // Line 6: Total Earned Less Retainage = Line 4 - Line 5
