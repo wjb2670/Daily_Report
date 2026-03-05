@@ -82,6 +82,19 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
     onUpdate(item.id, { retainage_amount: retainageAmt });
   };
 
+  const handleRetentionReleasedChange = (item, val) => {
+    const released = parseFloat(val) || 0;
+    const prevRetainage = item.retainage_amount || 0;
+    // New retainage held = old retainage - released this period
+    const newRetainageAmt = Math.max(0, prevRetainage - released);
+    const releasedToDate = (item.retention_released_to_date || 0) - (item.retention_released_this_period || 0) + released;
+    onUpdate(item.id, {
+      retention_released_this_period: released,
+      retention_released_to_date: releasedToDate,
+      retainage_amount: newRetainageAmt,
+    });
+  };
+
   const renderEditableRow = (item, displayNum) => {
     const completedToDate  = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
     const totalPctItem     = item.scheduled_value ? (completedToDate / item.scheduled_value) * 100 : 0;
