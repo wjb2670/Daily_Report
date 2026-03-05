@@ -38,7 +38,12 @@ export async function generateAIAPdf({ project, period, lineItems, summaryValues
 
   // Collapse all GC sub-items into a single "General Conditions" summary row
   const gcItems = lineItems.filter(l => l.is_general_conditions);
-  const nonGcItems = lineItems.filter(l => !l.is_general_conditions);
+  const nonGcItems = lineItems
+    .filter(l => !l.is_general_conditions)
+    .map(item => item.is_change_order
+      ? { ...item, _coNum: parseInt((item.description || "").match(/CO #(\d+)/)?.[1] || "9999", 10) }
+      : item
+    );
 
   const gcCollapsed = gcItems.length > 0 ? [{
     item_number: "01",
