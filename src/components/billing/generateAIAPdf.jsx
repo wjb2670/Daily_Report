@@ -229,7 +229,7 @@ function drawG702(doc, PW, PH, project, period, s, logoData, prevCOAdditions = 0
     ["6.  Total Earned Less Retainage (4 – 5)", s.totalEarnedLessRetainage, false, false],
     ["7.  Less Previous Certificates for Payment", s.previousCertificates, false, false],
     ["8.  Current Payment Due", s.currentPaymentDue, true, false],
-    ["9.  Balance to Finish, Including Retainage (3 – 6)", s.balanceToFinish, false, false],
+    ["9.  Balance to Finish, Including Retainage (3 – 6)", s.contractSumToDate - s.totalEarnedLessRetainage, false, false],
   ];
 
   summaryRows.forEach(([label, val, hl, indented]) => {
