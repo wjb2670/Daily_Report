@@ -57,6 +57,10 @@ export async function generateAIAPdf({ project, period, lineItems, summaryValues
   }] : [];
 
   const sortedItems = [...nonGcItems, ...gcCollapsed].sort((a, b) => {
+    // CO items sort by their CO number after all regular items
+    if (a.is_change_order && b.is_change_order) return (a._coNum || 9999) - (b._coNum || 9999);
+    if (a.is_change_order) return 1;
+    if (b.is_change_order) return -1;
     const numA = parseFloat(a.item_number) || 9999;
     const numB = parseFloat(b.item_number) || 9999;
     return numA - numB;
