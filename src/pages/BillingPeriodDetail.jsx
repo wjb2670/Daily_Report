@@ -151,6 +151,7 @@ export default function BillingPeriodDetail() {
         const alreadyExists = currentCOItems.some(c => c.description === prevCO.description);
         if (!alreadyExists) {
           const prevCompleted = (prevCO.previous_applications || 0) + (prevCO.work_this_period || 0) + (prevCO.materials_this_period || 0);
+          const prevCORetainage = (prevCO.retainage_amount || 0) + 0; // carry forward cumulative retainage
           const created = await base44.entities.BillingLineItem.create({
             billing_period_id: periodId,
             project_id: per.project_id,
@@ -159,8 +160,8 @@ export default function BillingPeriodDetail() {
             previous_applications: prevCompleted,
             work_this_period: 0,
             materials_this_period: 0,
-            retainage_percent: 0,
-            retainage_amount: 0,
+            retainage_percent: prevCO.retainage_percent ?? 10,
+            retainage_amount: prevCORetainage,
             is_general_conditions: false,
             is_change_order: true,
             co_type: prevCO.co_type,
