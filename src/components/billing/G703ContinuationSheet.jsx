@@ -14,7 +14,13 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
   const cmItems  = lineItems.filter(l => !l.is_general_conditions && l.gc_phase !== "phase2" && !l.is_change_order);
   const gc1Items = lineItems.filter(l => l.is_general_conditions && l.gc_phase !== "phase2");
   const gc2Items = lineItems.filter(l => l.gc_phase === "phase2");
-  const coItems  = lineItems.filter(l => l.is_change_order);
+  const coItems  = lineItems
+    .filter(l => l.is_change_order)
+    .sort((a, b) => {
+      const numA = parseInt((a.description || "").match(/CO #(\d+)/)?.[1] || "9999", 10);
+      const numB = parseInt((b.description || "").match(/CO #(\d+)/)?.[1] || "9999", 10);
+      return numA - numB;
+    });
 
   const gcTotals = (items) => {
     const scheduled = items.reduce((s, l) => s + (l.scheduled_value || 0), 0);
