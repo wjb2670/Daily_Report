@@ -251,11 +251,15 @@ export default function BillingPeriodDetail() {
   // Line 6: Total Earned Less Retainage = Line 4 - Line 5
   const totalEarnedLessRetainage = totalCompletedStored - totalRetainage;
 
+  // Retention released this period (screen-only teal column total)
+  const totalRetentionReleasedThisPeriod = lineItems
+    .reduce((s, l) => s + (l.retention_released_this_period || 0), 0);
+
   // Line 7: Less Previous Certificates = Line 6 of the prior period
   const previousCertificates = prevPeriodEarnedLessRetainage;
 
-  // Line 8: Current Payment Due = Line 6 - Line 7
-  const currentPaymentDue = totalEarnedLessRetainage - previousCertificates;
+  // Line 8: Current Payment Due = Line 6 - Line 7 + retention released this period
+  const currentPaymentDue = totalEarnedLessRetainage - previousCertificates + totalRetentionReleasedThisPeriod;
 
   // Line 9: Balance to Finish = Line 3 - Line 6 (Contract Sum to Date minus Total Earned Less Retainage)
   const balanceToFinish = contractSumToDate - totalEarnedLessRetainage;
