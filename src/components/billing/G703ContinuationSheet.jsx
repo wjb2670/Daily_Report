@@ -240,6 +240,8 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
                   <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{pct(t1.pct)}</td>
                   <td className="py-2 px-1 text-right text-gray-600 border border-gray-300">{fmt(t1.balance)}</td>
                   <td className="py-2 px-1 text-right text-orange-600 font-semibold border border-gray-300">{fmt(t1.retainage)}</td>
+                  <td className="py-2 px-1 border border-gray-300 bg-teal-50" />
+                  <td className="py-2 px-1 border border-gray-300 bg-teal-50" />
                 </tr>
                 {gc1Expanded && gc1Items.map((item) => {
                    const completedToDate  = (item.previous_applications || 0) + (item.work_this_period || 0) + (item.materials_this_period || 0);
