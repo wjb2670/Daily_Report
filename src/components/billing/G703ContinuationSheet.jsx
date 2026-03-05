@@ -197,6 +197,8 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
               <th className="text-right py-2 px-1 font-bold text-gray-700 border border-gray-300">Balance<br/>to Finish</th>
               <th className="text-right py-2 px-1 font-bold text-orange-700 border border-gray-300">Ret.<br/>%</th>
               <th className="text-right py-2 px-1 font-bold text-orange-700 border border-gray-300">Ret.<br/>$</th>
+              <th className="text-right py-2 px-1 font-bold text-teal-700 border border-gray-300 bg-teal-50">Ret.<br/>Released<br/>This Period<br/><span className="font-normal text-teal-400">(screen only)</span></th>
+              <th className="text-right py-2 px-1 font-bold text-teal-600 border border-gray-300 bg-teal-50">Ret.<br/>Released<br/>To Date<br/><span className="font-normal text-teal-400">(screen only)</span></th>
             </tr>
           </thead>
           <tbody>
