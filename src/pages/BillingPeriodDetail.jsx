@@ -77,6 +77,7 @@ export default function BillingPeriodDetail() {
           const completed = (line.previous_applications || 0) + (line.work_this_period || 0) + (line.materials_this_period || 0);
           previousPeriodTotals[line.sov_item_id] = completed;
           previousPeriodRetainage[line.sov_item_id] = line.retainage_amount || 0;
+          previousPeriodTotals[line.sov_item_id + "_retPct"] = line.retainage_percent ?? 10;
           prevTotalCompleted += completed;
           prevTotalRetainage += (line.retainage_amount || 0);
         });
