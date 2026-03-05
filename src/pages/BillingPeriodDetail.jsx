@@ -236,16 +236,27 @@ export default function BillingPeriodDetail() {
   const gcLines = lineItems.filter(l => l.is_general_conditions);
   const gcTotal = gcLines.reduce((s, l) => s + (l.work_this_period || 0) + (l.materials_this_period || 0), 0);
 
-  // Line 4: total billed to date — excludes CO line items (COs affect contract sum, not billed work)
+  // Line 4: Total Completed & Stored to Date — sum of column G for all NON-CO line items
   const totalCompletedStored = lineItems
     .filter(l => !l.is_change_order)
     .reduce((s, l) => s + (l.previous_applications || 0) + (l.work_this_period || 0) + (l.materials_this_period || 0), 0);
-  const totalRetainage = lineItems.filter(l => !l.is_change_order).reduce((s, l) => s + (l.retainage_amount || 0), 0);
+
+  // Line 5: Total Retainage — sum of "Retainage Held" column for all NON-CO line items
+  const totalRetainage = lineItems
+    .filter(l => !l.is_change_order)
+    .reduce((s, l) => s + (l.retainage_amount || 0), 0);
+
+  // Line 6: Total Earned Less Retainage = Line 4 - Line 5
   const totalEarnedLessRetainage = totalCompletedStored - totalRetainage;
 
+  // Line 7: Less Previous Certificates = Line 6 of the prior period
   const previousCertificates = prevPeriodEarnedLessRetainage;
+
+  // Line 8: Current Payment Due = Line 6 - Line 7
   const currentPaymentDue = totalEarnedLessRetainage - previousCertificates;
-  const balanceToFinish = contractSumToDate - totalCompletedStored;
+
+  // Line 9: Balance to Finish = Line 3 - Line 6 (Contract Sum to Date minus Total Earned Less Retainage)
+  const balanceToFinish = contractSumToDate - totalEarnedLessRetainage;
 
   return (
     <div className="max-w-7xl mx-auto">
