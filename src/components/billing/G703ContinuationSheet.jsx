@@ -49,6 +49,8 @@ export default function G703ContinuationSheet({ lineItems, locked, onUpdate }) {
     return s + ((l.scheduled_value || 0) - c);
   }, 0);
   const totalRetainage = lineItems.reduce((s, l) => s + (l.retainage_amount || 0), 0);
+  const totalReleasedThisPeriod = lineItems.reduce((s, l) => s + (l.retention_released_this_period || 0), 0);
+  const totalReleasedToDate = lineItems.reduce((s, l) => s + (l.retention_released_to_date || 0), 0);
 
   const handleWorkChange = (item, val) => {
     const work = parseFloat(val) || 0;
