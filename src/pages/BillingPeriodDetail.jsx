@@ -23,6 +23,7 @@ export default function BillingPeriodDetail() {
   const [loading, setLoading] = useState(true);
   const [showCOModal, setShowCOModal] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [generatingExcel, setGeneratingExcel] = useState(false);
   const [prevPeriodEarnedLessRetainage, setPrevPeriodEarnedLessRetainage] = useState(0);
   const [prevCOAdditions, setPrevCOAdditions] = useState(0);
   const [prevCODeductions, setPrevCODeductions] = useState(0);
