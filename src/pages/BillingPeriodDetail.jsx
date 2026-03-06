@@ -206,6 +206,29 @@ export default function BillingPeriodDetail() {
     status: !period.locked ? "submitted" : "draft"
   });
 
+  const handleGenerateExcel = () => {
+    setGeneratingExcel(true);
+    generateAIAExcel({
+      project,
+      period,
+      lineItems,
+      prevCOAdditions,
+      prevCODeductions,
+      summaryValues: {
+        originalContractSum,
+        changeOrderNet,
+        contractSumToDate,
+        totalCompletedStored,
+        totalRetainage,
+        totalEarnedLessRetainage,
+        previousCertificates,
+        currentPaymentDue,
+        balanceToFinish,
+      },
+    });
+    setGeneratingExcel(false);
+  };
+
   const handleGeneratePdf = async () => {
     setGeneratingPdf(true);
     await generateAIAPdf({
