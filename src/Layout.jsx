@@ -7,7 +7,7 @@ import {
   ClipboardList,
   Users,
   FileText,
-  DollarSign,
+
   Menu,
   X,
   ChevronRight,
@@ -22,7 +22,7 @@ const navItems = [
   { label: "Daily Reports", page: "DailyReport", icon: ClipboardList },
   { label: "Subcontractors", page: "Subcontractors", icon: Users },
   { label: "Contracts", page: "Contracts", icon: FileText },
-  { label: "Billing", page: "Billing", icon: DollarSign },
+
 ];
 
 export default function Layout({ children, currentPageName }) {
