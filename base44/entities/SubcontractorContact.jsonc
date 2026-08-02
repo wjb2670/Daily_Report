@@ -1,0 +1,42 @@
+{
+  "name": "SubcontractorContact",
+  "type": "object",
+  "properties": {
+    "subcontractor_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "estimating",
+        "administrative",
+        "accounting",
+        "field",
+        "owner"
+      ],
+      "default": "estimating"
+    },
+    "title": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "cell": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "subcontractor_id",
+    "name"
+  ]
+}

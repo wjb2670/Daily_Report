@@ -1,0 +1,45 @@
+{
+  "name": "BillingPeriod",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "period_number": {
+      "type": "number"
+    },
+    "period_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "approved",
+        "paid"
+      ],
+      "default": "draft"
+    },
+    "change_order_additions": {
+      "type": "number",
+      "default": 0
+    },
+    "change_order_deductions": {
+      "type": "number",
+      "default": 0
+    },
+    "locked": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "period_number"
+  ]
+}

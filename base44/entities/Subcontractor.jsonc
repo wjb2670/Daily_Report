@@ -1,0 +1,51 @@
+{
+  "name": "Subcontractor",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string"
+    },
+    "trade": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "subcontractor",
+        "professional"
+      ],
+      "default": "subcontractor"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "license_number": {
+      "type": "string"
+    },
+    "insurance_expiry": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_name"
+  ]
+}

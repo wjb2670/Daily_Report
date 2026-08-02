@@ -1,0 +1,46 @@
+{
+  "name": "Scope",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "cost_code": {
+      "type": "string",
+      "description": "e.g. 2100, 6100/6200"
+    },
+    "description": {
+      "type": "string",
+      "description": "Scope name, e.g. Site Work"
+    },
+    "subcontractor_company": {
+      "type": "string"
+    },
+    "awarded_amount": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "bidding",
+        "awarded",
+        "contract_sent",
+        "contract_signed",
+        "active",
+        "complete"
+      ],
+      "default": "bidding"
+    },
+    "scope_of_work": {
+      "type": "string",
+      "description": "Full detailed scope text"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "description"
+  ]
+}

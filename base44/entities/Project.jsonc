@@ -1,0 +1,91 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Project name"
+    },
+    "job_number": {
+      "type": "string",
+      "description": "Job number"
+    },
+    "project_type": {
+      "type": "string",
+      "enum": [
+        "GC",
+        "CM"
+      ],
+      "default": "GC",
+      "description": "General Contractor or Construction Manager"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "bidding",
+        "awarded",
+        "active",
+        "on_hold",
+        "complete"
+      ],
+      "default": "awarded"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "contract_value": {
+      "type": "number"
+    },
+    "project_manager": {
+      "type": "string"
+    },
+    "superintendent": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_company": {
+      "type": "string"
+    },
+    "owner_address": {
+      "type": "string"
+    },
+    "owner_email": {
+      "type": "string"
+    },
+    "owner_phone": {
+      "type": "string"
+    },
+    "owner_contact": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "job_number"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "name": "GeneralConditionsItem",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "phase1",
+        "phase2"
+      ],
+      "default": "phase1",
+      "description": "Phase 1 = 8 Unit Garage, Phase 2 = 12 Unit Garage"
+    },
+    "description": {
+      "type": "string",
+      "description": "e.g. Project Manager, Site Trailer, Dumpsters"
+    },
+    "cost_code": {
+      "type": "string",
+      "description": "Cost code this item applies to"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "allocation_method": {
+      "type": "string",
+      "enum": [
+        "fixed",
+        "percentage_of_contract",
+        "percentage_of_cost_code"
+      ],
+      "default": "fixed",
+      "description": "How this GC cost is allocated"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "description"
+  ]
+}

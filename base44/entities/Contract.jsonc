@@ -1,0 +1,54 @@
+{
+  "name": "Contract",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "subcontractor"
+      ],
+      "default": "owner"
+    },
+    "subcontractor_id": {
+      "type": "string"
+    },
+    "contract_number": {
+      "type": "string"
+    },
+    "contract_value": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "signed",
+        "executed"
+      ],
+      "default": "draft"
+    },
+    "date_issued": {
+      "type": "string",
+      "format": "date"
+    },
+    "date_signed": {
+      "type": "string",
+      "format": "date"
+    },
+    "document_url": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "type"
+  ]
+}

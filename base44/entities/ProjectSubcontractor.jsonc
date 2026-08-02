@@ -1,0 +1,46 @@
+{
+  "name": "ProjectSubcontractor",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "subcontractor_id": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "cost_codes": {
+      "type": "string"
+    },
+    "bid_amount": {
+      "type": "number"
+    },
+    "awarded_amount": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "bidding",
+        "awarded",
+        "active",
+        "complete",
+        "terminated"
+      ],
+      "default": "bidding"
+    },
+    "contract_signed": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "subcontractor_id"
+  ]
+}

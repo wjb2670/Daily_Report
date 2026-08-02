@@ -1,0 +1,46 @@
+{
+  "name": "ScheduleOfValues",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "line_number": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "cost_code": {
+      "type": "string"
+    },
+    "scheduled_value": {
+      "type": "number"
+    },
+    "billed_to_date": {
+      "type": "number",
+      "default": 0
+    },
+    "percent_complete": {
+      "type": "number",
+      "default": 0
+    },
+    "retainage_percent": {
+      "type": "number",
+      "default": 10,
+      "description": "Retainage % set at project start, not printed on AIA"
+    },
+    "retainage": {
+      "type": "number",
+      "default": 0
+    },
+    "category": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "description",
+    "scheduled_value"
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "name": "BillingLineItem",
+  "type": "object",
+  "properties": {
+    "billing_period_id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "sov_item_id": {
+      "type": "string"
+    },
+    "item_number": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "scheduled_value": {
+      "type": "number",
+      "default": 0
+    },
+    "previous_applications": {
+      "type": "number",
+      "default": 0
+    },
+    "work_this_period": {
+      "type": "number",
+      "default": 0
+    },
+    "materials_this_period": {
+      "type": "number",
+      "default": 0
+    },
+    "retainage_percent": {
+      "type": "number",
+      "default": 0
+    },
+    "retainage_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "retention_released_this_period": {
+      "type": "number",
+      "default": 0,
+      "description": "Amount of retainage released/billed this period (screen only, not printed)"
+    },
+    "retention_released_to_date": {
+      "type": "number",
+      "default": 0,
+      "description": "Cumulative retainage released across all periods to date"
+    },
+    "is_general_conditions": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_change_order": {
+      "type": "boolean",
+      "default": false
+    },
+    "co_type": {
+      "type": "string",
+      "enum": [
+        "addition",
+        "deduction"
+      ],
+      "description": "Type of change order line item"
+    },
+    "gc_phase": {
+      "type": "string",
+      "enum": [
+        "phase1",
+        "phase2"
+      ],
+      "description": "For GC items: phase1 = 8 Unit Garage (item 01), phase2 = 12 Unit Garage (item 20)"
+    }
+  },
+  "required": [
+    "billing_period_id",
+    "project_id",
+    "description",
+    "scheduled_value"
+  ]
+}
