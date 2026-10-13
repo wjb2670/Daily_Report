@@ -1,13 +1,11 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
   LayoutDashboard,
   FolderOpen,
   ClipboardList,
   Users,
-  FileText,
-
   Menu,
   X,
   ChevronRight,
@@ -21,19 +19,11 @@ const navItems = [
   { label: "Scopes", page: "Scopes", icon: Layers },
   { label: "Daily Reports", page: "DailyReport", icon: ClipboardList },
   { label: "Subcontractors", page: "Subcontractors", icon: Users },
-  { label: "Contracts", page: "Contracts", icon: FileText },
 
 ];
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!currentPageName || currentPageName === "" || currentPageName === "DailyReport") {
-      navigate(createPageUrl("Dashboard"));
-    }
-  }, []);
 
   return (
     <div className="min-h-screen bg-blue-50 flex">
