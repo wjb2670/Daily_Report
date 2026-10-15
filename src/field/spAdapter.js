@@ -129,6 +129,13 @@ async function listMyProjects() {
   }
 }
 
+// Every project in the list, any status — used when generating printed reports.
+export async function listAllProjects() {
+  const path = await listPath('projects');
+  const items = await graphAll(`${path}/items?$expand=fields&$top=500`);
+  return items.map(toProject).map(strip).sort((a, b) => a.name.localeCompare(b.name));
+}
+
 // ---- Daily reports -----------------------------------------------------------
 
 const esc = v => String(v).replace(/'/g, "''");
@@ -182,16 +189,18 @@ async function uploadPhoto({ file }) {
 
 // Turns a stored photo reference into a viewable image address.
 const thumbCache = new Map();
-export function resolvePhoto(url) {
+// `size` is 'large' (about 800px, for the app) or 'c1600x1600' (for printing).
+export function resolvePhoto(url, size = 'large') {
   if (!url?.startsWith('sp:')) return Promise.resolve(url);
-  if (!thumbCache.has(url)) {
+  const key = `${size}|${url}`;
+  if (!thumbCache.has(key)) {
     const [driveId, itemId] = url.slice(3).split('/');
-    const p = graph(`/drives/${driveId}/items/${itemId}/thumbnails?$select=large`)
-      .then(r => r.value?.[0]?.large?.url || null)
-      .catch(err => { thumbCache.delete(url); throw err; });
-    thumbCache.set(url, p);
+    const p = graph(`/drives/${driveId}/items/${itemId}/thumbnails?$select=${size}`)
+      .then(r => r.value?.[0]?.[size]?.url || null)
+      .catch(err => { thumbCache.delete(key); throw err; });
+    thumbCache.set(key, p);
   }
-  return thumbCache.get(url);
+  return thumbCache.get(key);
 }
 
 // ---- Base44-shaped client ------------------------------------------------------
@@ -222,6 +231,7 @@ export const base44 = {
       },
     },
     DailyReport: { filter: filterReports, create: createReport, update: updateReport },
+    AllProjects: { list: () => listAllProjects() },
   },
   auth: { me: getMe },
   integrations: { Core: { UploadFile: uploadPhoto } },
