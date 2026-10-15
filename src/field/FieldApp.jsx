@@ -8,12 +8,10 @@ import SetupPage from '@/field/SetupPage';
 import ReportsPage from '@/field/ReportsPage';
 import { initAuth, signIn, signOut, currentAccount } from '@/field/auth';
 
-const LOGO = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69986966442e93bb8f52d310/5f8462f80_whayland-logo-white1.png';
+import logoUrl from '@/field/whayland-logo.png';
 
 function Logo({ className }) {
-  const [failed, setFailed] = useState(false);
-  if (failed) return <span className={`font-black tracking-wider text-white ${className}`}>WHAYLAND</span>;
-  return <img src={LOGO} alt="Whayland" className={className} onError={() => setFailed(true)} />;
+  return <img src={logoUrl} alt="Whayland" className={className} />;
 }
 
 function SignIn({ error }) {

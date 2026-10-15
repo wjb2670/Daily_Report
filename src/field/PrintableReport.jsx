@@ -1,9 +1,9 @@
 import React from 'react';
+import logoUrl from '@/field/whayland-logo.png';
 
 // Print-ready daily reports for one project over a date range.
 // Letter size; each day starts on a new page; that day's photos follow it.
 
-const LOGO = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69986966442e93bb8f52d310/2d6e79006_6671BlueandGrayLogo.png';
 const NAVY = '#0f2a5e';
 const PHOTOS_PER_PAGE = 6;
 
@@ -36,10 +36,7 @@ export function summarize(reports) {
 }
 
 function Logo() {
-  return (
-    <img src={LOGO} alt="The Whayland Company" className="h-14 w-auto"
-      onError={e => { e.currentTarget.replaceWith(Object.assign(document.createElement('div'), { textContent: 'THE WHAYLAND COMPANY', style: `font-weight:900;letter-spacing:.12em;color:${NAVY};font-size:20px` })); }} />
-  );
+  return <img src={logoUrl} alt="The Whayland Company" style={{ height: '0.62in', width: 'auto' }} />;
 }
 
 function SectionTitle({ children }) {
