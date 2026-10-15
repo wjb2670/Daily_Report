@@ -1,5 +1,6 @@
-# Publishes the Field Reports app (Microsoft 365 version) to
-# https://wjb2670.github.io/Daily_Report/ whenever main changes.
+# Publishes the Field Reports app to https://wjb2670.github.io/Daily_Report/
+# and the Sussex Irrigation Service Calls app to .../Daily_Report/service-calls/
+# whenever main changes.
 name: Publish Field Reports
 
 on:
@@ -27,6 +28,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx vite build --config vite.field.config.js
+      - run: npx vite build --config vite.service.config.js
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist-field

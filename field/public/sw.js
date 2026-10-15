@@ -1,6 +1,6 @@
 // Keeps the Field Reports app on the device so it opens without signal.
 // Reports and photos themselves are saved separately and synced by the app.
-const CACHE = 'field-reports-v1';
+const CACHE = 'field-reports-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png'];
 
 self.addEventListener('install', event => {
@@ -20,6 +20,8 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  // The Service Calls app lives under this one; leave it alone.
+  if (url.pathname.includes('/service-calls/')) return;
 
   // Pages: try the network for the latest version, fall back to the saved copy.
   if (req.mode === 'navigate') {
