@@ -7,7 +7,7 @@ import { photoQueue } from '@/lib/dailyReportStore';
 
 const newId = () => `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 
-export default function PhotoGalleryCard({ report, onChangePhotos, syncStatus, disabled, toast }) {
+export default function PhotoGalleryCard({ report, onChangePhotos, syncStatus, disabled, toast, instruction }) {
   const cameraRef = useRef(null);
   const libraryRef = useRef(null);
   const [processing, setProcessing] = useState(0);
@@ -71,6 +71,7 @@ export default function PhotoGalleryCard({ report, onChangePhotos, syncStatus, d
 
   return (
     <Section
+      instruction={disabled ? null : instruction}
       icon={Camera}
       tone="purple"
       title="Photos"

@@ -49,7 +49,8 @@ function Reading({ slot, reading, state, onRetry }) {
 
 // Fills in the 7 AM and 2 PM readings once their time has passed. Readings
 // already saved on the report are never re-fetched.
-export default function WeatherCard({ project, date, report, onReading, onField, onCoordinates, disabled }) {
+// Used by the Daily Report page so weather fills in whichever screen is showing.
+export function useReportWeather({ project, date, report, onReading, onCoordinates, disabled }) {
   const [coords, setCoords] = useState(null);
   const [locError, setLocError] = useState(null);
   const [slotState, setSlotState] = useState({});
@@ -116,10 +117,17 @@ export default function WeatherCard({ project, date, report, onReading, onField,
     setSlotState(s => ({ ...s, [slot]: undefined }));
     setTick(n => n + 1);
   };
+
+  return { slotState, locError, retry };
+}
+
+export default function WeatherCard({ report, onField, disabled, instruction, weather }) {
+  const { slotState, locError, retry } = weather;
   const place = report?.weather_am?.location || report?.weather_pm?.location;
 
   return (
     <Section
+      instruction={disabled ? null : instruction}
       icon={CloudSun}
       tone="amber"
       title="Weather"

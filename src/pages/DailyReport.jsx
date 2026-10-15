@@ -8,13 +8,15 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import {
   HardHat, Hammer, Truck, Users, ShieldCheck, ClipboardCheck, Clock, Zap, FileText, Wrench, Loader2,
+  CloudSun, Camera, ArrowLeft, Check,
 } from 'lucide-react';
 import Section from '@/components/report/Section';
 import ListSection from '@/components/report/ListSection';
 import ReportHeader from '@/components/report/ReportHeader';
-import WeatherCard from '@/components/report/WeatherCard';
+import WeatherCard, { useReportWeather } from '@/components/report/WeatherCard';
 import PhotoGalleryCard from '@/components/report/PhotoGalleryCard';
 import FooterActions from '@/components/report/FooterActions';
+import SectionTiles from '@/components/report/SectionTiles';
 import {
   ReportSyncer, LAST_PROJECT_KEY, draftKey, loadReport, pendingDraftKeys, readDraft, todayStr, writeDraft,
 } from '@/lib/dailyReportStore';
@@ -26,9 +28,9 @@ const RETRY_EVERY_MS = 30_000;
 const DELAY_CAUSES = ['Weather', 'Owner', 'Material', 'Design / RFI', 'Subcontractor', 'Inspection', 'Other'];
 const INSPECTION_RESULTS = ['Passed', 'Failed', 'Partial', 'Rescheduled'];
 
-function TextSection({ icon, tone, title, subtitle, field, placeholder, report, onField, disabled, rows = 4 }) {
+function TextSection({ icon, tone, title, subtitle, instruction, field, placeholder, report, onField, disabled, rows = 4 }) {
   return (
-    <Section icon={icon} tone={tone} title={title} subtitle={subtitle}>
+    <Section icon={icon} tone={tone} title={title} subtitle={subtitle} instruction={disabled ? null : instruction}>
       <Textarea
         aria-label={title}
         placeholder={placeholder}
@@ -84,6 +86,7 @@ export default function DailyReport() {
   const dirtyRef = useRef(false);
   const revisedRef = useRef(false);
   const timerRef = useRef(null);
+  const openedHereRef = useRef(false);
 
   const project = useMemo(() => projects.find(p => p.id === projectId) || null, [projects, projectId]);
   const key = projectId ? draftKey(projectId, date) : null;
@@ -108,6 +111,7 @@ export default function DailyReport() {
     const next = new URLSearchParams();
     if (projectId) next.set('project', projectId);
     next.set('date', date);
+    if (params.get('section')) next.set('section', params.get('section'));
     if (next.toString() !== params.toString()) setParams(next, { replace: true });
     if (projectId) localStorage.setItem(LAST_PROJECT_KEY, projectId);
   }, [projectId, date]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -237,27 +241,292 @@ export default function DailyReport() {
 
   const onChangePhotos = useCallback(fn => change(prev => ({ ...prev, photos: fn(prev.photos || []) })), [change]);
 
+  const disabled = report?.status === 'sent';
+  const weather = useReportWeather({ project, date, report, onReading, onCoordinates, disabled });
+  const manpower = report?.manpower || [];
+  const manHours = manpower.reduce((sum, m) => sum + (Number(m.workers) || 0) * (Number(m.hours) || 0), 0);
+  const headcount = manpower.reduce((sum, m) => sum + (Number(m.workers) || 0), 0);
+
+  // ---- Sections: one tile each on the report's home screen -----------------------
+  const openKey = params.get('section');
+  const openSection = useCallback(sectionKey => {
+    const next = new URLSearchParams(params);
+    if (sectionKey) next.set('section', sectionKey);
+    else next.delete('section');
+    // A new history entry for each section, so the phone's Back button returns to the tiles.
+    openedHereRef.current = !!sectionKey;
+    setParams(next, { replace: !sectionKey });
+    window.scrollTo({ top: 0 });
+  }, [params, setParams]);
+
+  // Return to the tiles. Uses the browser's Back when the section was opened
+  // from the tiles, so the phone's own Back button and this one agree.
+  const closeSection = () => {
+    if (openedHereRef.current) {
+      openedHereRef.current = false;
+      window.history.back();
+      setTimeout(() => window.scrollTo({ top: 0 }), 0);
+    } else {
+      openSection(null);
+    }
+  };
+
+  const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  const optional = (n, one, many) => ({
+    value: n ? count(n, one, many) : 'None',
+    status: n ? 'Added' : 'Optional — tap if any',
+    done: n > 0,
+  });
+
+  const sections = !report ? [] : [
+    {
+      key: 'weather', title: 'Weather', icon: CloudSun, tone: 'amber',
+      value: report.weather_am || report.weather_pm
+        ? [report.weather_am, report.weather_pm].filter(Boolean).map(w => `${w.temperature_f ?? '—'}°`).join(' / ')
+        : 'Automatic',
+      status: report.weather_am && report.weather_pm ? 'AM & PM recorded' : report.weather_am ? 'AM recorded' : 'Records itself',
+      done: !!(report.weather_am || report.weather_pm),
+      render: () => (
+        <WeatherCard report={report} onField={onField} disabled={disabled} weather={weather}
+          instruction="Nothing to enter here — weather records itself at 7:00 AM and 2:00 PM. Only add site conditions if the ground is wet, muddy, frozen or flooded." />
+      ),
+    },
+    {
+      key: 'crew', title: 'Crew on Site', icon: HardHat, tone: 'blue', required: true,
+      value: headcount ? `${headcount} on site` : 'No crew yet',
+      status: headcount ? `${manHours} man-hours` : 'Required',
+      done: manpower.length > 0,
+      render: () => (
+        <ListSection
+          icon={HardHat} tone="blue" title="Crew on Site"
+          subtitle={headcount ? `${headcount} on site · ${manHours} man-hours` : null}
+          instruction="Add one line for each company on site today, including Whayland's own crew. Enter how many workers they had and how many hours each worked."
+          addLabel="Add this crew" emptyText="No crews added yet." disabled={disabled}
+          fields={[
+            { key: 'company', label: 'Company', required: true, hint: 'e.g. Whayland', suggestions: ['Whayland', ...subcontractorNames] },
+            { key: 'trade', label: 'Trade', hint: 'e.g. Carpentry, Concrete, Electrical' },
+            { key: 'workers', label: 'Number of workers', type: 'number', hint: 'e.g. 4', required: true },
+            { key: 'hours', label: 'Hours each worked', type: 'number', step: '0.5', hint: 'e.g. 8', required: true },
+            { key: 'work_performed', label: 'What they worked on', hint: 'e.g. Framing east wall, Building B', full: true },
+          ]}
+          summary={m => ({
+            title: m.company,
+            detail: [m.trade, m.workers && `${m.workers} workers`, m.hours && `${m.hours} hrs each`, m.work_performed].filter(Boolean).join(' · '),
+          })}
+          {...listProps('manpower')}
+        />
+      ),
+    },
+    {
+      key: 'work', title: 'Work Performed', icon: Hammer, tone: 'green', required: true,
+      value: report.work_performed?.trim() ? 'Entered' : 'Not yet',
+      status: report.work_performed?.trim() ? 'Done' : 'Required',
+      done: !!report.work_performed?.trim(),
+      render: () => (
+        <TextSection icon={Hammer} tone="green" title="Work Performed" field="work_performed" rows={7}
+          instruction="Describe what got done today. Say where (area, building, floor or cost code) so the office knows exactly what moved forward."
+          placeholder={'e.g.\nArea B: framed east wall, gridlines 4–7.\nMain entry: storefront frames set.'}
+          report={report} onField={onField} disabled={disabled} />
+      ),
+    },
+    {
+      key: 'photos', title: 'Photos', icon: Camera, tone: 'purple',
+      value: report.photos?.length ? count(report.photos.length, 'photo', 'photos') : 'None yet',
+      status: report.photos?.length ? (report.photos.some(p => p.pending) ? 'Some waiting for signal' : 'Uploaded') : 'Take a few',
+      done: (report.photos?.length || 0) > 0,
+      render: () => (
+        <PhotoGalleryCard report={report} onChangePhotos={onChangePhotos} syncStatus={status} disabled={disabled} toast={toast}
+          instruction="Take photos of today's progress, any problems, and deliveries. Add a short caption under each photo so others know what they're looking at." />
+      ),
+    },
+    {
+      key: 'safety', title: 'Safety', icon: ShieldCheck, tone: 'red', required: true,
+      value: report.safety_incidents?.trim()
+        ? (report.safety_incidents.trim().toLowerCase() === 'none' ? 'No incidents' : 'Incident noted')
+        : 'Not yet',
+      status: report.safety_incidents?.trim() ? (report.toolbox_talk?.trim() ? 'Done' : 'Add toolbox talk') : 'Required',
+      done: !!report.safety_incidents?.trim(),
+      render: () => (
+        <Section icon={ShieldCheck} tone="red" title="Safety"
+          instruction={disabled ? null : "Enter today's toolbox talk topic. If anyone was hurt or there was a close call, describe it. If nothing happened, tap “No incidents today.”"}>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="toolbox_talk" className="text-sm font-semibold text-gray-700">Toolbox talk topic</Label>
+              <Input id="toolbox_talk" placeholder="e.g. Ladder safety" value={report.toolbox_talk || ''}
+                onChange={e => onField('toolbox_talk', e.target.value)} disabled={disabled} className="h-11 sm:h-10" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="safety_incidents" className="text-sm font-semibold text-gray-700">Injuries, incidents or close calls <span className="text-red-600">*</span></Label>
+              {!disabled && !report.safety_incidents && (
+                <Button type="button" onClick={() => onField('safety_incidents', 'None')}
+                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold text-base">
+                  <Check className="w-5 h-5 mr-2" /> No incidents today
+                </Button>
+              )}
+              <Textarea id="safety_incidents" rows={3}
+                placeholder="If something happened: what happened, who was involved, and what was done about it."
+                value={report.safety_incidents || ''} onChange={e => onField('safety_incidents', e.target.value)} disabled={disabled} className="text-base md:text-sm" />
+            </div>
+          </div>
+        </Section>
+      ),
+    },
+    {
+      key: 'deliveries', title: 'Deliveries', icon: Truck, tone: 'amber',
+      ...optional(report.deliveries?.length || 0, 'delivery', 'deliveries'),
+      render: () => (
+        <ListSection icon={Truck} tone="amber" title="Deliveries"
+          instruction="Add one line for each delivery that arrived today."
+          addLabel="Add this delivery" emptyText="No deliveries added." disabled={disabled}
+          fields={[
+            { key: 'material', label: 'What was delivered', required: true, hint: 'e.g. Drywall, 2x6 studs, rebar' },
+            { key: 'supplier', label: 'Supplier', hint: 'e.g. 84 Lumber' },
+            { key: 'quantity', label: 'Quantity', hint: 'e.g. 120 sheets' },
+            { key: 'notes', label: 'Notes', hint: 'e.g. 3 sheets damaged' },
+          ]}
+          {...listProps('deliveries')}
+        />
+      ),
+    },
+    {
+      key: 'equipment', title: 'Equipment', icon: Wrench, tone: 'slate',
+      ...optional(report.equipment?.length || 0, 'machine', 'machines'),
+      render: () => (
+        <ListSection icon={Wrench} tone="slate" title="Equipment"
+          instruction="List the equipment used on site today, such as an excavator, lift, loader or roller."
+          addLabel="Add this equipment" emptyText="No equipment added." disabled={disabled}
+          fields={[
+            { key: 'equipment', label: 'Equipment', required: true, hint: 'e.g. Mini excavator' },
+            { key: 'company', label: 'Owned or rented by', hint: 'e.g. Whayland, United Rentals' },
+            { key: 'hours', label: 'Hours used', type: 'number', step: '0.5', hint: 'e.g. 6', suffixLabel: 'hrs' },
+            { key: 'notes', label: 'Notes', hint: 'e.g. Down 1 hr for repair' },
+          ]}
+          {...listProps('equipment')}
+        />
+      ),
+    },
+    {
+      key: 'inspections', title: 'Inspections', icon: ClipboardCheck, tone: 'green',
+      ...optional(report.inspections?.length || 0, 'inspection', 'inspections'),
+      render: () => (
+        <ListSection icon={ClipboardCheck} tone="green" title="Inspections"
+          instruction="Add any inspection that happened today and its result."
+          addLabel="Add this inspection" emptyText="No inspections added." disabled={disabled}
+          fields={[
+            { key: 'type', label: 'What was inspected', required: true, hint: 'e.g. Footing, Framing, Electrical rough-in' },
+            { key: 'inspector', label: 'Inspector or agency', hint: 'e.g. Sussex County' },
+            { key: 'result', label: 'Result', type: 'select', options: INSPECTION_RESULTS },
+            { key: 'notes', label: 'Notes', hint: 'e.g. Re-inspect Friday' },
+          ]}
+          {...listProps('inspections')}
+        />
+      ),
+    },
+    {
+      key: 'visitors', title: 'Visitors', icon: Users, tone: 'purple',
+      ...optional(report.visitors?.length || 0, 'visitor', 'visitors'),
+      render: () => (
+        <ListSection icon={Users} tone="purple" title="Visitors & Meetings"
+          instruction="Add anyone who came to the site today, such as the owner, architect, engineer or a supplier rep."
+          addLabel="Add this visitor" emptyText="No visitors added." disabled={disabled}
+          fields={[
+            { key: 'name', label: 'Name', required: true, hint: 'e.g. John Smith' },
+            { key: 'company', label: 'Company', hint: 'e.g. Owner, ABC Architects' },
+            { key: 'purpose', label: 'Why they came', hint: 'e.g. Weekly OAC meeting', full: true },
+          ]}
+          {...listProps('visitors')}
+        />
+      ),
+    },
+    {
+      key: 'delays', title: 'Delays', icon: Clock, tone: 'red',
+      ...optional(report.delays?.length || 0, 'delay', 'delays'),
+      render: () => (
+        <ListSection icon={Clock} tone="red" title="Delays"
+          instruction="If work stopped or slowed today, add why and about how many hours were lost. This protects us if we need more time on the schedule."
+          addLabel="Add this delay" emptyText="No delays added." disabled={disabled}
+          fields={[
+            { key: 'cause', label: 'Cause', required: true, type: 'select', options: DELAY_CAUSES },
+            { key: 'hours_lost', label: 'Hours lost', type: 'number', step: '0.5', hint: 'e.g. 2', suffixLabel: 'hrs lost' },
+            { key: 'description', label: 'What happened', hint: 'e.g. Rain stopped roofing from 1–3 PM', full: true },
+          ]}
+          {...listProps('delays')}
+        />
+      ),
+    },
+    {
+      key: 'utilities', title: 'Utilities', icon: Zap, tone: 'amber',
+      value: report.utilities_installed?.trim() || report.utilities_removed?.trim() ? 'Entered' : 'None',
+      status: report.utilities_installed?.trim() || report.utilities_removed?.trim() ? 'Added' : 'Optional — tap if any',
+      done: !!(report.utilities_installed?.trim() || report.utilities_removed?.trim()),
+      render: () => (
+        <Section icon={Zap} tone="amber" title="Utilities"
+          instruction={disabled ? null : 'Describe any utilities installed or removed today, such as water, sewer, power or gas lines.'}>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="utilities_installed" className="text-sm font-semibold text-gray-700">Installed today</Label>
+              <Textarea id="utilities_installed" rows={3} value={report.utilities_installed || ''} placeholder="e.g. 60 ft of 4&quot; sewer line, manhole MH-2 to building"
+                onChange={e => onField('utilities_installed', e.target.value)} disabled={disabled} className="text-base md:text-sm" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="utilities_removed" className="text-sm font-semibold text-gray-700">Removed today</Label>
+              <Textarea id="utilities_removed" rows={3} value={report.utilities_removed || ''} placeholder="e.g. Temporary power pole removed"
+                onChange={e => onField('utilities_removed', e.target.value)} disabled={disabled} className="text-base md:text-sm" />
+            </div>
+          </div>
+        </Section>
+      ),
+    },
+    {
+      key: 'notes', title: 'Notes', icon: FileText, tone: 'slate',
+      value: report.notes?.trim() ? 'Entered' : 'None',
+      status: report.notes?.trim() ? 'Added' : 'Optional',
+      done: !!report.notes?.trim(),
+      render: () => (
+        <TextSection icon={FileText} tone="slate" title="General Notes" field="notes"
+          instruction="Anything else the office should know about today: problems, owner requests, questions for the architect, schedule concerns."
+          placeholder="Type your notes here…" report={report} onField={onField} disabled={disabled} />
+      ),
+    },
+  ];
+
+  const current = sections.find(s => s.key === openKey);
+  const missing = sections.filter(s => s.required && !s.done).map(s => s.title);
+
   const submit = signer => {
-    const hasWork = report.work_performed?.trim() || report.manpower?.length;
-    if (!hasWork && !window.confirm('No crew or work performed is listed. Submit anyway?')) return;
+    if (missing.length && !window.confirm(`Still missing: ${missing.join(', ')}.\n\nSubmit anyway?`)) return;
     const now = new Date().toISOString();
     change(prev => ({ ...prev, status: 'submitted', signed_by: signer, signed_at: now, submitted_at: now }), { system: true });
     setTimeout(sendNow, 0);
     toast({ title: 'Report submitted', description: 'It will be filed to SharePoint at 7:00 PM.' });
   };
 
-  const disabled = report?.status === 'sent';
-  const manHours = (report?.manpower || []).reduce((sum, m) => sum + (Number(m.workers) || 0) * (Number(m.hours) || 0), 0);
-  const headcount = (report?.manpower || []).reduce((sum, m) => sum + (Number(m.workers) || 0), 0);
+  // ---- One section open ---------------------------------------------------------------
+  if (report && !loading && current) {
+    return (
+      <div className="max-w-3xl mx-auto pb-10">
+        <button type="button" onClick={closeSection}
+          className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold mb-3 py-2 pr-3">
+          <ArrowLeft className="w-5 h-5" /> Back to report
+        </button>
+        <p className="text-sm text-gray-500 mb-3 truncate">{report.project_name} · {new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+        {current.render()}
+        <Button onClick={closeSection} className="w-full h-12 mt-4 bg-[#0f2a5e] hover:bg-[#1e3a8a] text-white font-semibold text-base">
+          <Check className="w-5 h-5 mr-2" /> Done — back to report
+        </Button>
+      </div>
+    );
+  }
 
+  // ---- Report home: project, tiles, sign-off ----------------------------------------
   return (
-    <div className="max-w-4xl mx-auto pb-10">
+    <div className="max-w-5xl mx-auto pb-10">
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-[#0f2a5e]">Daily Report</h1>
-        <p className="text-gray-500 mt-1">Saves as you go. Weather records at 7:00 AM and 2:00 PM; the report is filed at 7:00 PM.</p>
+        <p className="text-gray-500 mt-1">Tap a tile to fill it in. Everything saves as you go.</p>
       </div>
 
-      <div className="space-y-4 sm:space-y-5">
+      <div className="space-y-5">
         <ReportHeader
           projects={projects}
           projectId={projectId}
@@ -270,7 +539,7 @@ export default function DailyReport() {
         />
 
         {!projectId && projectsLoaded && (
-          <p className="text-center text-gray-500 py-6">Choose a project to start today&apos;s report.</p>
+          <p className="text-center text-gray-500 py-6">Choose your project above to start today&apos;s report.</p>
         )}
         {projectId && projectsLoaded && !project && (
           <p className="text-center text-gray-500 py-6">That project isn&apos;t available. Choose another project above.</p>
@@ -281,152 +550,12 @@ export default function DailyReport() {
 
         {report && !loading && (
           <>
-            <WeatherCard project={project} date={date} report={report} onReading={onReading} onField={onField} onCoordinates={onCoordinates} disabled={disabled} />
-
-            <ListSection
-              icon={HardHat}
-              tone="blue"
-              title="Manpower"
-              subtitle={headcount ? `${headcount} on site · ${manHours} man-hours` : 'Whayland crew and subcontractors on site'}
-              addLabel="Add crew"
-              emptyText="No crews listed yet."
-              disabled={disabled}
-              fields={[
-                { key: 'company', label: 'Company', required: true, suggestions: ['Whayland', ...subcontractorNames] },
-                { key: 'trade', label: 'Trade' },
-                { key: 'workers', label: '# of workers', type: 'number' },
-                { key: 'hours', label: 'Hours each', type: 'number', step: '0.5' },
-                { key: 'work_performed', label: 'Work performed', full: true },
-              ]}
-              summary={m => ({
-                title: m.company,
-                detail: [m.trade, m.workers && `${m.workers} workers`, m.hours && `${m.hours} hrs`, m.work_performed].filter(Boolean).join(' · '),
-              })}
-              {...listProps('manpower')}
-            />
-
-            <TextSection icon={Hammer} tone="green" title="Work Performed" subtitle="By area or cost code" field="work_performed"
-              placeholder="e.g. Area B: poured footings F1–F6. 03-300: set rebar for grade beams." report={report} onField={onField} disabled={disabled} rows={5} />
-
-            <ListSection
-              icon={Wrench}
-              tone="slate"
-              title="Equipment"
-              addLabel="Add equipment"
-              emptyText="No equipment listed."
-              disabled={disabled}
-              fields={[
-                { key: 'equipment', label: 'Equipment', required: true },
-                { key: 'company', label: 'Owned / rented by' },
-                { key: 'hours', label: 'Hours used', type: 'number', step: '0.5', suffixLabel: 'hrs' },
-                { key: 'notes', label: 'Notes' },
-              ]}
-              {...listProps('equipment')}
-            />
-
-            <ListSection
-              icon={Truck}
-              tone="amber"
-              title="Deliveries"
-              addLabel="Add delivery"
-              emptyText="No deliveries today."
-              disabled={disabled}
-              fields={[
-                { key: 'material', label: 'Material', required: true },
-                { key: 'supplier', label: 'Supplier' },
-                { key: 'quantity', label: 'Quantity' },
-                { key: 'notes', label: 'Notes' },
-              ]}
-              {...listProps('deliveries')}
-            />
-
-            <ListSection
-              icon={ClipboardCheck}
-              tone="green"
-              title="Inspections"
-              addLabel="Add inspection"
-              emptyText="No inspections today."
-              disabled={disabled}
-              fields={[
-                { key: 'type', label: 'Inspection type', required: true },
-                { key: 'inspector', label: 'Inspector / agency' },
-                { key: 'result', label: 'Result', type: 'select', options: INSPECTION_RESULTS },
-                { key: 'notes', label: 'Notes' },
-              ]}
-              {...listProps('inspections')}
-            />
-
-            <ListSection
-              icon={Users}
-              tone="purple"
-              title="Visitors & Meetings"
-              addLabel="Add visitor"
-              emptyText="No visitors today."
-              disabled={disabled}
-              fields={[
-                { key: 'name', label: 'Name', required: true },
-                { key: 'company', label: 'Company' },
-                { key: 'purpose', label: 'Purpose / meeting', full: true },
-              ]}
-              {...listProps('visitors')}
-            />
-
-            <Section icon={ShieldCheck} tone="red" title="Safety">
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <Label htmlFor="toolbox_talk">Toolbox talk topic</Label>
-                  <Input id="toolbox_talk" placeholder="e.g. Trench safety" value={report.toolbox_talk || ''}
-                    onChange={e => onField('toolbox_talk', e.target.value)} disabled={disabled} className="h-11 sm:h-9" />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <Label htmlFor="safety_incidents">Incidents, injuries, or near-misses</Label>
-                    {!disabled && !report.safety_incidents && (
-                      <Button type="button" variant="outline" size="sm" className="h-8" onClick={() => onField('safety_incidents', 'None')}>None today</Button>
-                    )}
-                  </div>
-                  <Textarea id="safety_incidents" placeholder="Describe what happened, who was involved, and what was done." rows={3}
-                    value={report.safety_incidents || ''} onChange={e => onField('safety_incidents', e.target.value)} disabled={disabled} className="text-base md:text-sm" />
-                </div>
-              </div>
-            </Section>
-
-            <ListSection
-              icon={Clock}
-              tone="red"
-              title="Delays"
-              subtitle="Record the cause and hours lost — this supports time extensions and claims"
-              addLabel="Add delay"
-              emptyText="No delays today."
-              disabled={disabled}
-              fields={[
-                { key: 'cause', label: 'Cause', required: true, type: 'select', options: DELAY_CAUSES },
-                { key: 'hours_lost', label: 'Hours lost', type: 'number', step: '0.5', suffixLabel: 'hrs lost' },
-                { key: 'description', label: 'What happened', full: true },
-              ]}
-              {...listProps('delays')}
-            />
-
-            <Section icon={Zap} tone="amber" title="Utilities">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label htmlFor="utilities_installed">Installed</Label>
-                  <Textarea id="utilities_installed" rows={3} value={report.utilities_installed || ''} placeholder="Utilities installed today…"
-                    onChange={e => onField('utilities_installed', e.target.value)} disabled={disabled} className="text-base md:text-sm" />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="utilities_removed">Removed</Label>
-                  <Textarea id="utilities_removed" rows={3} value={report.utilities_removed || ''} placeholder="Utilities removed today…"
-                    onChange={e => onField('utilities_removed', e.target.value)} disabled={disabled} className="text-base md:text-sm" />
-                </div>
-              </div>
-            </Section>
-
-            <PhotoGalleryCard report={report} onChangePhotos={onChangePhotos} syncStatus={status} disabled={disabled} toast={toast} />
-
-            <TextSection icon={FileText} tone="slate" title="General Notes" field="notes"
-              placeholder="Anything else from today: issues, owner requests, RFIs, schedule notes…" report={report} onField={onField} disabled={disabled} />
-
+            <SectionTiles sections={sections} onOpen={openSection} />
+            {missing.length > 0 && report.status === 'draft' && (
+              <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+                Before you sign off, fill in: <strong>{missing.join(', ')}</strong>.
+              </p>
+            )}
             <FooterActions report={report} status={status} lastSaved={lastSaved} pending={pending} onSubmit={submit} disabled={disabled} />
           </>
         )}
