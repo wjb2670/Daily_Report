@@ -12,7 +12,7 @@ const blank = fields => Object.fromEntries(fields.map(f => [f.key, f.default ?? 
 // A card with a small entry form and the list of entries below it.
 // Tap the pencil on an entry to load it back into the form and change it.
 export default function ListSection({
-  icon, tone, title, subtitle, instruction, fields, items = [], onChange, addLabel = 'Add', emptyText, summary, extraActions, disabled,
+  icon, tone, title, subtitle, instruction, fields, items = [], onChange, addLabel = 'Add', emptyText, summary, extraActions, renderItemExtra, disabled,
 }) {
   const [draft, setDraft] = useState(() => blank(fields));
   const [editingId, setEditingId] = useState(null);
@@ -127,8 +127,9 @@ export default function ListSection({
             return (
               <li
                 key={item.id}
-                className={`flex items-start justify-between gap-2 rounded-lg border px-3 py-2 text-sm ${editingId === item.id ? 'border-[#1e3a8a] bg-blue-50' : 'border-gray-200 bg-gray-50'}`}
+                className={`rounded-lg border px-3 py-2 text-sm ${editingId === item.id ? 'border-[#1e3a8a] bg-blue-50' : 'border-gray-200 bg-gray-50'}`}
               >
+                <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 py-1">
                   <div className="font-semibold text-[#0f2a5e] break-words">{t}</div>
                   {detail && <div className="text-gray-500 break-words">{detail}</div>}
@@ -154,6 +155,8 @@ export default function ListSection({
                     </Button>
                   </div>
                 )}
+                </div>
+                {renderItemExtra?.(item)}
               </li>
             );
           })}

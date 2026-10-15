@@ -17,6 +17,9 @@ import WeatherCard, { useReportWeather } from '@/components/report/WeatherCard';
 import PhotoGalleryCard from '@/components/report/PhotoGalleryCard';
 import FooterActions from '@/components/report/FooterActions';
 import SectionTiles from '@/components/report/SectionTiles';
+import DeliveryTickets from '@/components/report/DeliveryTickets';
+import { isTicket } from '@/components/report/photoTools';
+import { photoQueue } from '@/lib/dailyReportStore';
 import {
   ReportSyncer, LAST_PROJECT_KEY, draftKey, loadReport, pendingDraftKeys, readDraft, todayStr, writeDraft,
 } from '@/lib/dailyReportStore';
@@ -289,6 +292,17 @@ export default function DailyReport() {
     done: n > 0,
   });
 
+  const sitePhotos = (report?.photos || []).filter(p => !isTicket(p));
+  const ticketPhotos = (report?.photos || []).filter(isTicket);
+
+  // Removing a delivery also removes its ticket photos.
+  const setDeliveries = deliveries => change(prev => {
+    const keep = new Set(deliveries.map(d => d.id));
+    const dropped = (prev.photos || []).filter(p => isTicket(p) && !keep.has(p.delivery_id));
+    dropped.forEach(p => p.pending && photoQueue.remove(p.id).catch(() => {}));
+    return { ...prev, deliveries, photos: (prev.photos || []).filter(p => !dropped.includes(p)) };
+  });
+
   const sections = !report ? [] : [
     {
       key: 'weather', title: 'Weather', icon: CloudSun, tone: 'amber',
@@ -342,9 +356,9 @@ export default function DailyReport() {
     },
     {
       key: 'photos', title: 'Photos', icon: Camera, tone: 'purple',
-      value: report.photos?.length ? count(report.photos.length, 'photo', 'photos') : 'None yet',
-      status: report.photos?.length ? (report.photos.some(p => p.pending) ? 'Some waiting for signal' : 'Uploaded') : 'Take a few',
-      done: (report.photos?.length || 0) > 0,
+      value: sitePhotos.length ? count(sitePhotos.length, 'photo', 'photos') : 'None yet',
+      status: sitePhotos.length ? (sitePhotos.some(p => p.pending) ? 'Some waiting for signal' : 'Uploaded') : 'Take a few',
+      done: sitePhotos.length > 0,
       render: () => (
         <PhotoGalleryCard report={report} onChangePhotos={onChangePhotos} syncStatus={status} disabled={disabled} toast={toast}
           instruction="Take photos of today's progress, any problems, and deliveries. Add a short caption under each photo so others know what they're looking at." />
@@ -385,9 +399,10 @@ export default function DailyReport() {
     {
       key: 'deliveries', title: 'Deliveries', icon: Truck, tone: 'amber',
       ...optional(report.deliveries?.length || 0, 'delivery', 'deliveries'),
+      ...(ticketPhotos.length ? { status: count(ticketPhotos.length, 'ticket photo', 'ticket photos') } : {}),
       render: () => (
         <ListSection icon={Truck} tone="amber" title="Deliveries"
-          instruction="Add one line for each delivery that arrived today."
+          instruction="Add one line for each delivery that arrived today. Then tap “Take ticket photo” under it to photograph the delivery ticket."
           addLabel="Add this delivery" emptyText="No deliveries added." disabled={disabled}
           fields={[
             { key: 'material', label: 'What was delivered', required: true, hint: 'e.g. Drywall, 2x6 studs, rebar' },
@@ -395,7 +410,11 @@ export default function DailyReport() {
             { key: 'quantity', label: 'Quantity', hint: 'e.g. 120 sheets' },
             { key: 'notes', label: 'Notes', hint: 'e.g. 3 sheets damaged' },
           ]}
-          {...listProps('deliveries')}
+          items={report.deliveries || []}
+          onChange={setDeliveries}
+          renderItemExtra={d => (
+            <DeliveryTickets delivery={d} report={report} onChangePhotos={onChangePhotos} syncStatus={status} disabled={disabled} toast={toast} />
+          )}
         />
       ),
     },
