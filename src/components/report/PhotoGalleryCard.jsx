@@ -4,6 +4,25 @@ import { Camera, Images, Trash2, Loader2, CloudOff, MapPin } from 'lucide-react'
 import Section from './Section';
 import { preparePhoto, formatStamp } from '@/lib/photos';
 import { photoQueue } from '@/lib/dailyReportStore';
+import { useResolvedSrc } from '@/lib/resolveImage';
+
+// Shows the copy on this device if there is one, otherwise the uploaded photo.
+function PhotoImage({ photo, preview }) {
+  const uploaded = useResolvedSrc(preview ? null : photo.url);
+  const src = preview || uploaded;
+  if (!src) {
+    return (
+      <div className="flex items-center justify-center h-full text-xs text-gray-400 p-2 text-center">
+        {photo.url ? 'Loading photo…' : 'Uploading from another device'}
+      </div>
+    );
+  }
+  return (
+    <a href={src} target="_blank" rel="noreferrer">
+      <img src={src} alt={photo.caption || 'Job site photo'} className="w-full h-full object-cover object-bottom" />
+    </a>
+  );
+}
 
 const newId = () => `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 
@@ -96,15 +115,10 @@ export default function PhotoGalleryCard({ report, onChangePhotos, syncStatus, d
       {photos.length > 0 ? (
         <div className="grid grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3 gap-3">
           {photos.map(photo => {
-            const src = photo.url || previews[photo.id];
             return (
               <figure key={photo.id} className="rounded-lg overflow-hidden border border-gray-200 bg-white">
                 <div className="relative aspect-[4/3] bg-gray-100">
-                  {src ? (
-                    <a href={src} target="_blank" rel="noreferrer"><img src={src} alt={photo.caption || 'Job site photo'} className="w-full h-full object-cover object-bottom" /></a>
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-xs text-gray-400 p-2 text-center">Uploading from another device</div>
-                  )}
+                  <PhotoImage photo={photo} preview={previews[photo.id]} />
                   {photo.pending && (
                     <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-full bg-amber-500/90 text-white text-[11px] font-semibold px-2 py-0.5">
                       {syncStatus === 'saving' ? <Loader2 className="w-3 h-3 animate-spin" /> : <CloudOff className="w-3 h-3" />}
