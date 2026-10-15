@@ -69,6 +69,7 @@ export default function DailyReport() {
   const [params, setParams] = useSearchParams();
   const [projects, setProjects] = useState([]);
   const [projectsLoaded, setProjectsLoaded] = useState(false);
+  const [projectsError, setProjectsError] = useState('');
   const [subcontractorNames, setSubcontractorNames] = useState([]);
   const [userName, setUserName] = useState('');
 
@@ -96,7 +97,9 @@ export default function DailyReport() {
   useEffect(() => {
     base44.entities.Project.list('name')
       .then(all => setProjects(all.filter(p => REPORT_STATUSES.includes(p.status) || p.id === projectId)))
-      .catch(() => toast({ title: 'Could not load projects', description: 'Check the connection and reopen the page.', variant: 'destructive' }))
+      .catch(err => {
+        setProjectsError(err?.code === 'not_set_up' ? err.message : 'Could not load your projects. Check the connection and reopen the app.');
+      })
       .finally(() => setProjectsLoaded(true));
     base44.entities.Subcontractor.list('company_name')
       .then(all => setSubcontractorNames(all.map(s => s.company_name).filter(Boolean)))
@@ -105,6 +108,14 @@ export default function DailyReport() {
       .then(u => setUserName(u?.full_name || u?.email || ''))
       .catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Someone on just one job goes straight to it.
+  useEffect(() => {
+    if (projectsLoaded && projects.length === 1 && projects[0].id !== projectId) {
+      const stillValid = projects.some(p => p.id === projectId);
+      if (!stillValid) setProjectId(projects[0].id);
+    }
+  }, [projectsLoaded, projects]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep the address bar in step so a report can be bookmarked or shared.
   useEffect(() => {
@@ -538,7 +549,16 @@ export default function DailyReport() {
           disabled={disabled}
         />
 
-        {!projectId && projectsLoaded && (
+        {projectsError && (
+          <p className="text-center text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{projectsError}</p>
+        )}
+        {projectsLoaded && !projectsError && projects.length === 0 && (
+          <div className="text-center bg-white rounded-xl border border-gray-200 px-4 py-8">
+            <p className="font-semibold text-[#0f2a5e]">No projects are assigned to you yet.</p>
+            <p className="text-gray-500 mt-1">Ask the office to add you as the Superintendent or under Crew Access on your project.</p>
+          </div>
+        )}
+        {!projectId && projectsLoaded && projects.length > 0 && (
           <p className="text-center text-gray-500 py-6">Choose your project above to start today&apos;s report.</p>
         )}
         {projectId && projectsLoaded && !project && (
