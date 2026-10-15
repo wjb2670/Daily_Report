@@ -42,6 +42,14 @@
     "zip": {
       "type": "string"
     },
+    "latitude": {
+      "type": "number",
+      "description": "Job site latitude, looked up from the address for weather"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Job site longitude, looked up from the address for weather"
+    },
     "start_date": {
       "type": "string",
       "format": "date"

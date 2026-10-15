@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import ProjectFormModal from "@/components/projects/ProjectFormModal.jsx";
 import SOVSection from "@/components/projects/SOVSection.jsx";
+import ProjectReportsList from "@/components/report/ProjectReportsList.jsx";
 
 const statusColors = {
   bidding: "bg-yellow-100 text-yellow-800",
@@ -36,7 +37,9 @@ export default function ProjectDetail() {
   };
 
   const handleSave = async (data) => {
-    await base44.entities.Project.update(projectId, data);
+    // A new job site address means the weather location must be looked up again.
+    const moved = ["address", "city", "state", "zip"].some(k => k in data && (data[k] || "") !== (project[k] || ""));
+    await base44.entities.Project.update(projectId, moved ? { ...data, latitude: null, longitude: null } : data);
     setShowEdit(false);
     loadProject();
   };
@@ -203,11 +206,7 @@ export default function ProjectDetail() {
         </div>
       )}
 
-      {activeTab === "reports" && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center text-gray-400">
-          <p>Daily reports for this project coming soon.</p>
-        </div>
-      )}
+      {activeTab === "reports" && <ProjectReportsList projectId={projectId} />}
 
       {showEdit && (
         <ProjectFormModal project={project} onSave={handleSave} onClose={() => setShowEdit(false)} />

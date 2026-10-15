@@ -1,0 +1,151 @@
+{
+  "name": "DailyReport",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "job_number": {
+      "type": "string"
+    },
+    "report_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Work day this report covers (project local date)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "sent"
+      ],
+      "default": "draft",
+      "description": "draft = in progress; submitted = superintendent signed off; sent = filed to SharePoint at 7 PM"
+    },
+    "superintendent": {
+      "type": "string"
+    },
+    "prepared_by": {
+      "type": "string",
+      "description": "Name or email of the person who last edited the report"
+    },
+    "work_performed": {
+      "type": "string",
+      "description": "Summary of work performed today by area or cost code"
+    },
+    "weather_am": {
+      "type": "object",
+      "description": "Observed weather nearest 7:00 AM project local time (National Weather Service)"
+    },
+    "weather_pm": {
+      "type": "object",
+      "description": "Observed weather nearest 2:00 PM project local time (National Weather Service)"
+    },
+    "site_conditions": {
+      "type": "string",
+      "description": "Ground and site conditions noted by the crew (mud, standing water, etc.)"
+    },
+    "manpower": {
+      "type": "array",
+      "description": "Crews on site: company, trade, workers, hours, work performed",
+      "items": {
+        "type": "object"
+      }
+    },
+    "equipment": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "deliveries": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "visitors": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "inspections": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "toolbox_talk": {
+      "type": "string",
+      "description": "Toolbox talk / safety meeting topic"
+    },
+    "safety_incidents": {
+      "type": "string",
+      "description": "Incidents, injuries, or near-misses; blank if none"
+    },
+    "delays": {
+      "type": "array",
+      "description": "Delays with cause (weather, owner, material, design, subcontractor, other) and hours lost",
+      "items": {
+        "type": "object"
+      }
+    },
+    "utilities_installed": {
+      "type": "string"
+    },
+    "utilities_removed": {
+      "type": "string"
+    },
+    "photos": {
+      "type": "array",
+      "description": "Uploaded photos: url, caption, taken_at, latitude, longitude, uploaded_at",
+      "items": {
+        "type": "object"
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "signed_by": {
+      "type": "string",
+      "description": "Superintendent name entered at sign-off"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revisions": {
+      "type": "array",
+      "description": "Edits made after the report was submitted: at, by",
+      "items": {
+        "type": "object"
+      }
+    },
+    "client_updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the report was last changed on a device; used to merge offline edits"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the report and photos were filed to SharePoint"
+    },
+    "sharepoint_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "report_date"
+  ]
+}

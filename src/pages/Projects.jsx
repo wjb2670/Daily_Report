@@ -42,7 +42,9 @@ export default function Projects() {
 
   const handleSave = async (data) => {
     if (editingProject) {
-      await base44.entities.Project.update(editingProject.id, data);
+      // A new job site address means the weather location must be looked up again.
+      const moved = ["address", "city", "state", "zip"].some(k => k in data && (data[k] || "") !== (editingProject[k] || ""));
+      await base44.entities.Project.update(editingProject.id, moved ? { ...data, latitude: null, longitude: null } : data);
     } else {
       await base44.entities.Project.create(data);
     }
