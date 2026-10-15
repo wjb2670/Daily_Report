@@ -163,12 +163,15 @@ async function updateReport(id, data) {
 const safeName = s => String(s || '').replace(/["*:<>?/\\|#%]+/g, '-').replace(/\s+/g, ' ').trim().slice(0, 80) || 'Job';
 
 // Photos land in Daily Report Photos / <Job # – Project> / <date> /
+// (delivery ticket photos in a Delivery Tickets folder inside that day)
 async function uploadPhoto({ file }) {
   const site = await getSite();
-  const [date, job] = file.name.split('_');
+  const [date, job, photoId = ''] = file.name.split('_');
+  const isTicket = photoId.startsWith('t');
   const project = (recall('projects') || []).find(p => (p.job_number || 'job').replace(/[^\w-]+/g, '') === job);
   const jobFolder = safeName(project ? `${project.job_number} - ${project.name}` : job);
-  const path = [PHOTO_FOLDER, jobFolder, date || 'undated', file.name].map(encodeURIComponent).join('/');
+  const path = [PHOTO_FOLDER, jobFolder, date || 'undated', ...(isTicket ? ['Delivery Tickets'] : []), file.name]
+    .map(encodeURIComponent).join('/');
   const item = await graph(`/sites/${site.id}/drive/root:/${path}:/content`, {
     method: 'PUT',
     body: file,
