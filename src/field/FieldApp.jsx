@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
 import DailyReport from '@/pages/DailyReport';
 import SetupPage from '@/field/SetupPage';
+import ReportsPage from '@/field/ReportsPage';
 import { initAuth, signIn, signOut, currentAccount } from '@/field/auth';
 
 const LOGO = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69986966442e93bb8f52d310/5f8462f80_whayland-logo-white1.png';
@@ -42,28 +43,34 @@ function SignIn({ error }) {
 function Shell({ account, children }) {
   const { pathname } = useLocation();
   return (
-    <div className="min-h-screen bg-blue-50">
-      <header className="bg-[#0f2a5e] text-white sticky top-0 z-40 shadow">
+    <div className="min-h-screen bg-blue-50 print:bg-white">
+      <header className="bg-[#0f2a5e] text-white sticky top-0 z-40 shadow print:hidden">
         <div className="max-w-5xl mx-auto flex items-center gap-3 px-4 h-14">
           <Link to="/" className="flex items-center gap-3 min-w-0">
             <Logo className="h-8 w-auto" />
-            <span className="text-blue-200 text-sm font-medium border-l border-blue-400/40 pl-3 hidden min-[380px]:inline">Field Reports</span>
+            <span className="text-blue-200 text-sm font-medium border-l border-blue-400/40 pl-3 hidden sm:inline">Field Reports</span>
           </Link>
-          <div className="ml-auto flex items-center gap-2 min-w-0">
-            <span className="text-sm text-blue-100 truncate hidden sm:inline">{account.name}</span>
+          <div className="ml-auto flex items-center gap-1 sm:gap-2 min-w-0">
+            {pathname === '/reports' ? (
+              <Link to="/" className="text-sm font-semibold bg-white text-[#0f2a5e] rounded-md px-3 py-1.5 whitespace-nowrap">Daily Report</Link>
+            ) : (
+              <Link to="/reports" className="text-sm font-semibold bg-white text-[#0f2a5e] rounded-md px-3 py-1.5 whitespace-nowrap">Generate Reports</Link>
+            )}
+            <span className="text-sm text-blue-100 truncate hidden md:inline">{account.name}</span>
             <button
               type="button"
               onClick={() => { if (window.confirm('Sign out of Field Reports?')) signOut(); }}
+              aria-label="Sign out"
               className="inline-flex items-center gap-1.5 text-sm text-blue-100 hover:text-white px-2 py-2"
             >
-              <LogOut className="w-4 h-4" /> Sign out
+              <LogOut className="w-4 h-4" /> <span className="hidden sm:inline">Sign out</span>
             </button>
           </div>
         </div>
       </header>
-      <main className="p-4 md:p-6">{children}</main>
-      {pathname !== '/setup' && (
-        <footer className="text-center pb-6">
+      <main className="p-4 md:p-6 print:p-0">{children}</main>
+      {pathname === '/' && (
+        <footer className="text-center pb-6 print:hidden">
           <Link to="/setup" className="text-xs text-gray-400 hover:text-gray-600">Site setup (office)</Link>
         </footer>
       )}
@@ -94,6 +101,7 @@ export default function FieldApp() {
       <Shell account={state.account}>
         <Routes>
           <Route path="/setup" element={<SetupPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
           <Route path="*" element={<DailyReport />} />
         </Routes>
       </Shell>
