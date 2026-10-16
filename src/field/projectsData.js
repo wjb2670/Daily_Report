@@ -6,8 +6,10 @@ import { getSite, getListId } from '@/field/spAdapter';
 
 export const PM_SITE_PATH = '/sites/PMTeam';
 export const TEMPLATE_FOLDER = 'Master Template Files';
+// Each year's Project Files has a master job folder the team copies for new jobs.
+export const MASTER_FOLDER = 'MAKE COPY - Master Job Folder';
 
-// The subfolders every Whayland project folder gets (same as current jobs).
+// Used only if no master job folder can be found: the same subfolders, empty.
 export const PROJECT_SUBFOLDERS = [
   'Buy Out Log', 'Cert of Occupancies', 'Close-Out Docs', 'Drawings', 'Estimating Turnover Folder',
   'Field Bulletins', 'Field Reports', 'Finish Schedule', 'Inspection Reports', 'Owner Change Orders',
@@ -98,31 +100,72 @@ async function makeFolder(driveId, parentId, name) {
   }
 }
 
-// "2026 Project Files/2026-42 Project Name" with all the standard subfolders.
+async function findMasterFolder(driveId, year) {
+  for (const y of [Number(year), Number(year) - 1, Number(year) - 2]) {
+    try {
+      return await graph(`/drives/${driveId}/root:/${enc(`${yearFolder(y)}/${MASTER_FOLDER}`)}?$select=id,name,webUrl`);
+    } catch (err) {
+      if (err.status !== 404) throw err;
+    }
+  }
+  return null;
+}
+
+async function itemAt(driveId, path) {
+  try {
+    return await graph(`/drives/${driveId}/root:/${enc(path)}?$select=id,name,webUrl,folder`);
+  } catch (err) {
+    if (err.status === 404) return null;
+    throw err;
+  }
+}
+
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+// "2026 Project Files/2026-42 Project Name": a copy of the master job folder
+// (all subfolders, Job Tracking Log, Sub Contact List and templates).
 export async function createProjectFolder(number, projectName, onStep) {
   const { driveId } = await getPmDrive();
   const year = number.slice(0, 4);
   const yearDir = await makeFolder(driveId, null, yearFolder(year));
   const name = safeName(`${number} ${projectName}`);
-  let folder;
-  try {
-    folder = await graph(`/drives/${driveId}/items/${yearDir.id}/children`, { method: 'POST', body: { name, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' } });
-  } catch (err) {
-    if (err.status === 409) {
-      const e = new Error(`A folder named “${name}” already exists in ${yearFolder(year)}.`);
-      e.code = 'folder_exists';
-      throw e;
-    }
-    throw err;
+  const path = `${yearFolder(year)}/${name}`;
+
+  if (await itemAt(driveId, path)) {
+    const e = new Error(`A folder named “${name}” already exists in ${yearFolder(year)}.`);
+    e.code = 'folder_exists';
+    throw e;
   }
-  onStep?.(`Created folder “${name}”`);
+
+  const master = await findMasterFolder(driveId, year);
+  if (master) {
+    onStep?.(`Copying “${MASTER_FOLDER}”…`);
+    await graph(`/drives/${driveId}/items/${master.id}/copy`, {
+      method: 'POST',
+      body: { parentReference: { driveId, id: yearDir.id }, name },
+    });
+    // SharePoint copies in the background; wait for the new folder to appear.
+    for (let i = 0; i < 60; i++) {
+      const made = await itemAt(driveId, path);
+      if (made) {
+        onStep?.(`Created folder “${name}” from the master job folder`);
+        return { id: made.id, webUrl: made.webUrl, name, fromMaster: true };
+      }
+      await wait(i < 10 ? 1000 : 2000);
+    }
+    throw new Error('SharePoint is still copying the master job folder. Check the PM Team site in a minute, then try again.');
+  }
+
+  // No master folder found: build the standard subfolders, empty.
+  const folder = await graph(`/drives/${driveId}/items/${yearDir.id}/children`, { method: 'POST', body: { name, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' } });
+  onStep?.(`Created folder “${name}” (no master job folder found, so subfolders are empty)`);
   let done = 0;
   for (const sub of PROJECT_SUBFOLDERS) {
     await makeFolder(driveId, folder.id, sub);
     done += 1;
     if (done % 6 === 0 || done === PROJECT_SUBFOLDERS.length) onStep?.(`Added ${done} of ${PROJECT_SUBFOLDERS.length} subfolders`);
   }
-  return { id: folder.id, webUrl: folder.webUrl, name };
+  return { id: folder.id, webUrl: folder.webUrl, name, fromMaster: false };
 }
 
 // ---- Templates and documents ----------------------------------------------------
