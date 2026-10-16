@@ -22,8 +22,10 @@ export async function graph(path, { method = 'GET', body, headers = {} } = {}) {
     err.status = res.status;
     throw err;
   }
-  if (res.status === 204) return null;
-  return res.json();
+  // Some calls (e.g. copying a file) answer with no body.
+  if (res.status === 204 || res.status === 202) return null;
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
 }
 
 // Follows paging so long lists come back complete.
