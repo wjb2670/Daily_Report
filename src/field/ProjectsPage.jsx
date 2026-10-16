@@ -29,7 +29,7 @@ export default function ProjectsPage() {
   const shown = (projects || []).filter(p => {
     if (filter === 'All') return true;
     if (filter === 'Active') return p.status === 'Active';
-    return startupSteps(p).some(s => !s.done) && p.status !== 'Complete';
+    return !p.existing && startupSteps(p).some(s => !s.done) && p.status !== 'Complete';
   });
 
   return (
@@ -37,11 +37,16 @@ export default function ProjectsPage() {
       <div className="flex items-end justify-between gap-3 flex-wrap mb-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#0f2a5e]">Projects</h1>
-          <p className="text-gray-500 mt-1">Start every newly awarded job here. It gets its job number, folder and startup checklist.</p>
+          <p className="text-gray-500 mt-1">Start every newly awarded job here. Jobs that already have a folder can be added with “Add existing project.”</p>
         </div>
-        <Link to="/projects/new" className="inline-flex items-center gap-2 h-12 px-5 rounded-md bg-[#0f2a5e] hover:bg-[#1e3a8a] text-white font-semibold">
-          <Plus className="w-5 h-5" /> New project
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link to="/projects/existing" className="inline-flex items-center gap-2 h-12 px-4 rounded-md border border-[#0f2a5e] bg-white text-[#0f2a5e] font-semibold">
+            Add existing project
+          </Link>
+          <Link to="/projects/new" className="inline-flex items-center gap-2 h-12 px-5 rounded-md bg-[#0f2a5e] hover:bg-[#1e3a8a] text-white font-semibold">
+            <Plus className="w-5 h-5" /> New project
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2 mb-4">
@@ -80,16 +85,22 @@ export default function ProjectsPage() {
                         {[p.owner, p.contractType, money(p.contractAmount), [p.city, p.state].filter(Boolean).join(', ')].filter(Boolean).join(' · ')}
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <div className={`text-sm font-bold ${done === steps.length ? 'text-green-700' : 'text-amber-700'}`}>{done} of {steps.length}</div>
-                      <div className="text-xs text-gray-500">startup steps</div>
+                    {p.existing ? (
+                      <div className="text-right shrink-0 text-xs text-gray-500 font-semibold uppercase">Existing job</div>
+                    ) : (
+                      <div className="text-right shrink-0">
+                        <div className={`text-sm font-bold ${done === steps.length ? 'text-green-700' : 'text-amber-700'}`}>{done} of {steps.length}</div>
+                        <div className="text-xs text-gray-500">startup steps</div>
+                      </div>
+                    )}
+                  </div>
+                  {!p.existing && (
+                    <div className="flex gap-1 mt-3">
+                      {steps.map(s => (
+                        <div key={s.key} title={s.label} className={`h-2 flex-1 rounded-full ${s.done ? 'bg-green-500' : 'bg-gray-200'}`} />
+                      ))}
                     </div>
-                  </div>
-                  <div className="flex gap-1 mt-3">
-                    {steps.map(s => (
-                      <div key={s.key} title={s.label} className={`h-2 flex-1 rounded-full ${s.done ? 'bg-green-500' : 'bg-gray-200'}`} />
-                    ))}
-                  </div>
+                  )}
                 </Link>
               </li>
             );

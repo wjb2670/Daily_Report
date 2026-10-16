@@ -168,6 +168,23 @@ export async function createProjectFolder(number, projectName, onStep) {
   return { id: folder.id, webUrl: folder.webUrl, name, fromMaster: false };
 }
 
+// Project folders already on the PM Team site (this year and the three before),
+// newest first. Used to add jobs that started before the app.
+export async function listExistingProjectFolders() {
+  const { driveId } = await getPmDrive();
+  const thisYear = new Date().getFullYear();
+  const found = [];
+  for (const y of [thisYear, thisYear - 1, thisYear - 2, thisYear - 3]) {
+    const re = new RegExp(`^(${y}-\\d{1,3})\\s+(.+)$`);
+    const take = f => { const m = f.name.match(re); if (m) found.push({ number: m[1], name: m[2].trim(), id: f.id, webUrl: f.webUrl, year: y }); };
+    for (const f of await childFolders(driveId, yearFolder(y))) {
+      if (re.test(f.name)) take(f);
+      else if (f.name !== MASTER_FOLDER) for (const g of await childFolders(driveId, `${yearFolder(y)}/${f.name}`)) take(g);
+    }
+  }
+  return found.sort((a, b) => b.number.localeCompare(a.number, undefined, { numeric: true }));
+}
+
 // ---- Templates and documents ----------------------------------------------------
 
 export async function listContractTemplates() {
@@ -246,6 +263,7 @@ export function toProjectRecord(item) {
     folderUrl: f.ProjectFolderUrl || '',
     folderId: f.ProjectFolderId || '',
     notes: f.ProjectNotes || '',
+    existing: f.ExistingJob === true,
     created: item.createdDateTime || '',
   };
 }
@@ -255,7 +273,7 @@ const TO_FIELD = {
   contractAmount: 'ContractAmount', address: 'Address', city: 'City', state: 'State', zip: 'Zip',
   projectManager: 'ProjectManager', bondsRequired: 'BondsRequired', paymentBond: 'PaymentBond',
   performanceBond: 'PerformanceBond', ownerContract: 'OwnerContract', folderUrl: 'ProjectFolderUrl',
-  folderId: 'ProjectFolderId', notes: 'ProjectNotes',
+  folderId: 'ProjectFolderId', notes: 'ProjectNotes', existing: 'ExistingJob',
 };
 const DATE_FIELDS = { awardDate: 'AwardDate', awardLetterDate: 'AwardLetterDate', ntpDate: 'NTPDate' };
 

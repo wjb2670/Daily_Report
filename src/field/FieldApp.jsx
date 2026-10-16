@@ -8,6 +8,7 @@ import SetupPage from '@/field/SetupPage';
 import ReportsPage from '@/field/ReportsPage';
 import ProjectsPage from '@/field/ProjectsPage';
 import NewProjectPage from '@/field/NewProjectPage';
+import AddExistingPage from '@/field/AddExistingPage';
 import ProjectStartupPage from '@/field/ProjectStartupPage';
 import { initAuth, signIn, signOut, currentAccount } from '@/field/auth';
 
@@ -110,6 +111,7 @@ export default function FieldApp() {
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/projects/new" element={<NewProjectPage />} />
+          <Route path="/projects/existing" element={<AddExistingPage />} />
           <Route path="/projects/:id" element={<ProjectStartupPage />} />
           <Route path="*" element={<DailyReport />} />
         </Routes>
