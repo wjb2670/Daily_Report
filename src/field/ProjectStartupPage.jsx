@@ -148,8 +148,14 @@ export default function ProjectStartupPage() {
           </div>
           <div className="bg-white rounded-md px-1 py-0.5"><ProjectStatus status={p.status} /></div>
         </div>
-        <div className="flex gap-1 mt-4">{steps.map(s => <div key={s.key} title={s.label} className={`h-2 flex-1 rounded-full ${s.done ? 'bg-green-400' : 'bg-white/25'}`} />)}</div>
-        <p className="text-sm text-blue-100 mt-2">{doneCount} of {steps.length} startup steps done</p>
+        {p.existing ? (
+          <p className="text-sm text-blue-100 mt-3">Existing job, linked to its folder. The startup steps below are optional; fill in any that help.</p>
+        ) : (
+          <>
+            <div className="flex gap-1 mt-4">{steps.map(s => <div key={s.key} title={s.label} className={`h-2 flex-1 rounded-full ${s.done ? 'bg-green-400' : 'bg-white/25'}`} />)}</div>
+            <p className="text-sm text-blue-100 mt-2">{doneCount} of {steps.length} startup steps done</p>
+          </>
+        )}
       </section>
 
       <div className="space-y-3">

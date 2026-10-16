@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, CheckCircle2, Pencil } from 'lucide-react';
 import { todayStr } from '@/lib/dailyReportStore';
-import { nextJobNumber, jobNumberInUse, createProjectFolder, createProjectRecord, PROJECT_SUBFOLDERS } from '@/field/projectsData';
+import { nextJobNumber, jobNumberInUse, createProjectFolder, createProjectRecord, MASTER_FOLDER } from '@/field/projectsData';
 
 const input = 'w-full h-11 rounded-md border border-gray-300 bg-white px-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]';
 
@@ -147,7 +147,7 @@ export default function NewProjectPage() {
 
         <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 text-sm text-gray-600">
           <div className="font-semibold text-[#0f2a5e] mb-1">This creates</div>
-          <p>PM Team › {year} Project Files › <strong>{number || `${year}-__`} {form.name || 'Project name'}</strong>, with the {PROJECT_SUBFOLDERS.length} standard subfolders (Owner Contract, Drawings, Submittals, RFI, Permits, Sub Contract Agreements…).</p>
+          <p>PM Team › {year} Project Files › <strong>{number || `${year}-__`} {form.name || 'Project name'}</strong>, copied from “{MASTER_FOLDER}”: all the standard subfolders and templates, plus Job Tracking Log and Sub Contact List.</p>
         </section>
 
         {steps.length > 0 && (

@@ -45,6 +45,7 @@ export const LISTS = {
       choice('OwnerContract', CONTRACT_STATUS, 'Owner Contract'),
       text('ProjectFolderUrl', 'Project Folder'),
       text('ProjectFolderId', 'Project Folder ID'),
+      { name: 'ExistingJob', displayName: 'Existing Job', boolean: {} },
     ],
   },
   reports: {
