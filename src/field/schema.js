@@ -8,15 +8,21 @@ const notes = (name, displayName) => ({ name, displayName: displayName || name, 
 const number = (name, displayName) => ({ name, displayName: displayName || name, number: {} });
 const people = (name, displayName) => ({ name, displayName: displayName || name, personOrGroup: { allowMultipleSelection: true, chooseFromType: 'peopleOnly' } });
 const choice = (name, choices, displayName) => ({ name, displayName: displayName || name, choice: { choices, displayAs: 'dropDownMenu', allowTextEntry: false }, defaultValue: { value: choices[0] } });
+const date = (name, displayName) => ({ name, displayName: displayName || name, dateTime: { format: 'dateOnly' } });
+
+// New-project startup steps, kept as plain columns so they read well in SharePoint too.
+export const BOND_STATUS = ['Not started', 'Requested', 'Received'];
+export const CONTRACT_STATUS = ['Not started', 'Drafted', 'Sent for signature', 'Signed'];
+export const BONDS_REQUIRED = ['Not yet known', 'Yes', 'No'];
 
 export const LISTS = {
   projects: {
     displayName: 'Projects',
-    description: 'Jobs available in the Field Reports app. A project appears in the app for the people named in Superintendent or Crew Access while its Status is Active.',
+    description: 'Every Whayland job, from award through completion. A project appears in the field app for the people named in Superintendent or Crew Access.',
     titleLabel: 'Project Name',
     columns: [
       text('JobNumber', 'Job Number', { indexed: true }),
-      choice('Status', ['Active', 'On Hold', 'Complete']),
+      choice('Status', ['Awarded', 'Active', 'On Hold', 'Complete']),
       people('Superintendent'),
       people('CrewAccess', 'Crew Access'),
       text('Address'),
@@ -27,6 +33,18 @@ export const LISTS = {
       number('Latitude'),
       number('Longitude'),
       notes('ProjectNotes', 'Notes'),
+      text('OwnerName', 'Owner / Client'),
+      choice('ContractType', ['GC', 'CM'], 'Contract Type'),
+      number('ContractAmount', 'Contract Amount'),
+      date('AwardDate', 'Award Date'),
+      date('AwardLetterDate', 'Award Letter Received'),
+      date('NTPDate', 'Notice to Proceed'),
+      choice('BondsRequired', BONDS_REQUIRED, 'Bonds Required'),
+      choice('PaymentBond', BOND_STATUS, 'Payment Bond'),
+      choice('PerformanceBond', BOND_STATUS, 'Performance Bond'),
+      choice('OwnerContract', CONTRACT_STATUS, 'Owner Contract'),
+      text('ProjectFolderUrl', 'Project Folder'),
+      text('ProjectFolderId', 'Project Folder ID'),
     ],
   },
   reports: {
@@ -66,7 +84,7 @@ export const LISTS = {
 
 const STATUS_TO_LIST = { draft: 'Draft', submitted: 'Submitted', sent: 'Filed' };
 const STATUS_FROM_LIST = { Draft: 'draft', Submitted: 'submitted', Filed: 'sent' };
-export const PROJECT_STATUS = { Active: 'active', 'On Hold': 'on_hold', Complete: 'complete' };
+export const PROJECT_STATUS = { Awarded: 'awarded', Active: 'active', 'On Hold': 'on_hold', Complete: 'complete' };
 
 const weatherText = w => (w ? `${w.temperature_f ?? '—'}°F, ${w.condition || ''}${w.wind_mph != null ? `, wind ${w.wind_mph} mph` : ''}`.replace(/, $/, '') : '');
 

@@ -104,7 +104,7 @@ export default function ReportsPage() {
     const photoCount = result.includePhotos ? result.reports.reduce((n, r) => n + sitePhotos(r).length, 0) : 0;
     return (
       <div className="-m-4 md:-m-6 print:m-0">
-        <div className="print:hidden sticky top-14 z-30 bg-white border-b border-gray-200 shadow-sm">
+        <div className="print:hidden sticky top-[92px] sm:top-14 z-30 bg-white border-b border-gray-200 shadow-sm">
           <div className="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
             <button type="button" onClick={() => setResult(null)} className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold py-2 pr-2">
               <ArrowLeft className="w-5 h-5" /> Change

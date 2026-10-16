@@ -26,8 +26,20 @@ async function ensureList(site, key, log) {
     for (const col of missing) {
       await graph(`/sites/${site.id}/lists/${list.id}/columns`, { method: 'POST', body: col });
     }
-    log(missing.length
-      ? `Added ${missing.length} missing column${missing.length === 1 ? '' : 's'} to “${def.displayName}”`
+    // Existing dropdown columns get any new choices (e.g. "Awarded" for Status).
+    let widened = 0;
+    const current = await graphAll(`/sites/${site.id}/lists/${list.id}/columns?$select=id,name,choice`);
+    for (const col of def.columns.filter(c => c.choice)) {
+      const have = current.find(c => c.name === col.name);
+      const choices = have?.choice?.choices;
+      if (choices && col.choice.choices.some(c => !choices.includes(c))) {
+        const merged = [...col.choice.choices, ...choices.filter(c => !col.choice.choices.includes(c))];
+        await graph(`/sites/${site.id}/lists/${list.id}/columns/${have.id}`, { method: 'PATCH', body: { choice: { ...col.choice, choices: merged } } });
+        widened += 1;
+      }
+    }
+    log(missing.length || widened
+      ? `Updated “${def.displayName}”: ${[missing.length && `${missing.length} new column${missing.length === 1 ? '' : 's'}`, widened && `${widened} dropdown${widened === 1 ? '' : 's'} with new choices`].filter(Boolean).join(', ')}`
       : `“${def.displayName}” list is already set up`);
   }
 

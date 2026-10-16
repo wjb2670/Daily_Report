@@ -6,6 +6,9 @@ import { Toaster } from '@/components/ui/toaster';
 import DailyReport from '@/pages/DailyReport';
 import SetupPage from '@/field/SetupPage';
 import ReportsPage from '@/field/ReportsPage';
+import ProjectsPage from '@/field/ProjectsPage';
+import NewProjectPage from '@/field/NewProjectPage';
+import ProjectStartupPage from '@/field/ProjectStartupPage';
 import { initAuth, signIn, signOut, currentAccount } from '@/field/auth';
 
 import logoUrl from '@/field/whayland-logo.png';
@@ -43,17 +46,22 @@ function Shell({ account, children }) {
   return (
     <div className="min-h-screen bg-blue-50 print:bg-white">
       <header className="bg-[#0f2a5e] text-white sticky top-0 z-40 shadow print:hidden">
-        <div className="max-w-5xl mx-auto flex items-center gap-3 px-4 h-14">
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2 sm:h-14 sm:py-0">
           <Link to="/" className="flex items-center gap-3 min-w-0">
             <Logo className="h-8 w-auto" />
-            <span className="text-blue-200 text-sm font-medium border-l border-blue-400/40 pl-3 hidden sm:inline">Field Reports</span>
           </Link>
+          <nav className="order-3 sm:order-none w-full sm:w-auto grid grid-cols-3 sm:flex gap-1">
+            {[['/', 'Daily Report'], ['/projects', 'Projects'], ['/reports', 'Reports']].map(([to, label]) => {
+              const active = to === '/' ? pathname === '/' : pathname.startsWith(to);
+              return (
+                <Link key={to} to={to}
+                  className={`text-center text-sm font-semibold rounded-md px-3 py-1.5 whitespace-nowrap ${active ? 'bg-white text-[#0f2a5e]' : 'text-blue-100 hover:text-white hover:bg-white/10'}`}>
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
           <div className="ml-auto flex items-center gap-1 sm:gap-2 min-w-0">
-            {pathname === '/reports' ? (
-              <Link to="/" className="text-sm font-semibold bg-white text-[#0f2a5e] rounded-md px-3 py-1.5 whitespace-nowrap">Daily Report</Link>
-            ) : (
-              <Link to="/reports" className="text-sm font-semibold bg-white text-[#0f2a5e] rounded-md px-3 py-1.5 whitespace-nowrap">Generate Reports</Link>
-            )}
             <span className="text-sm text-blue-100 truncate hidden md:inline">{account.name}</span>
             <button
               type="button"
@@ -100,6 +108,9 @@ export default function FieldApp() {
         <Routes>
           <Route path="/setup" element={<SetupPage />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/projects/new" element={<NewProjectPage />} />
+          <Route path="/projects/:id" element={<ProjectStartupPage />} />
           <Route path="*" element={<DailyReport />} />
         </Routes>
       </Shell>
