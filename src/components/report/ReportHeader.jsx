@@ -25,7 +25,7 @@ export default function ReportHeader({ projects, projectId, date, onProjectChang
             id="project"
             value={projectId || ''}
             onChange={e => onProjectChange(e.target.value)}
-            className="w-full h-11 sm:h-9 rounded-md border border-input bg-white px-3 text-base md:text-sm"
+            className="w-full h-11 rounded-md border border-input bg-white px-3 text-base md:text-sm"
           >
             <option value="" disabled>Select a project…</option>
             {projects.map(p => (
@@ -40,7 +40,7 @@ export default function ReportHeader({ projects, projectId, date, onProjectChang
             type="date"
             value={date}
             onChange={e => e.target.value && onDateChange(e.target.value)}
-            className="h-11 sm:h-9"
+            className="h-11"
           />
         </div>
         <div className="space-y-1">
@@ -51,7 +51,7 @@ export default function ReportHeader({ projects, projectId, date, onProjectChang
             value={report?.superintendent || ''}
             onChange={e => onField('superintendent', e.target.value)}
             disabled={!report || disabled}
-            className="h-11 sm:h-9"
+            className="h-11"
           />
         </div>
       </div>
