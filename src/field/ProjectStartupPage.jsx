@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Loader2, ArrowLeft, ExternalLink, Paperclip, CheckCircle2, Circle, FileText, RefreshCw } from 'lucide-react';
+import { Loader2, ArrowLeft, ExternalLink, Paperclip, CheckCircle2, Circle, FileText, RefreshCw, FolderOpen, Search } from 'lucide-react';
+import { can } from '@/field/roles';
 import { useToast } from '@/components/ui/use-toast';
 import { todayStr } from '@/lib/dailyReportStore';
 import {
   getProjectRecord, updateProjectRecord, startupSteps, listContractTemplates, copyContractTemplate,
-  uploadStartupDoc, listStartupDocs, projectsListUrl,
+  uploadStartupDoc, listStartupDocs, projectsListUrl, listExistingProjectFolders,
 } from '@/field/projectsData';
 import { BOND_STATUS, CONTRACT_STATUS, BONDS_REQUIRED } from '@/field/schema';
 import { ProjectStatus } from '@/field/ProjectsPage';
@@ -78,6 +79,57 @@ function DateDone({ id, label, value, onChange }) {
       <input id={id} type="date" className={input} value={value || ''} onChange={e => onChange(e.target.value)} />
       {!value && <button type="button" onClick={() => onChange(todayStr())} className="h-10 px-3 rounded-md bg-[#0f2a5e] text-white text-sm font-semibold">Received today</button>}
       {value && <button type="button" onClick={() => onChange('')} className="text-sm text-gray-500 underline">Clear</button>}
+    </div>
+  );
+}
+
+// Office only: link (or change) the job's folder on the PM Team site.
+function FolderLink({ project, onLink }) {
+  const [open, setOpen] = useState(false);
+  const [folders, setFolders] = useState(null);
+  const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+
+  const start = () => {
+    setOpen(true);
+    setQuery(project.jobNumber || '');
+    if (!folders) listExistingProjectFolders().then(setFolders).catch(err => setError(err.message || 'Could not read the PM Team project folders.'));
+  };
+  const q = query.trim().toLowerCase();
+  const shown = (folders || []).filter(f => !q || `${f.number} ${f.name}`.toLowerCase().includes(q)).slice(0, 40);
+
+  if (!open) {
+    return (
+      <button type="button" onClick={start}
+        className={`inline-flex items-center gap-2 h-11 px-4 rounded-md font-semibold ${project.folderId ? 'border border-gray-300 bg-white text-[#0f2a5e] text-sm' : 'bg-[#0f2a5e] hover:bg-[#1e3a8a] text-white'}`}>
+        <FolderOpen className="w-5 h-5" /> {project.folderId ? 'Change folder' : 'Link job folder'}
+      </button>
+    );
+  }
+  return (
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-2">
+      <div className="text-sm font-semibold text-gray-700">Pick this job’s folder on the PM Team site</div>
+      <div className="relative">
+        <Search className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
+        <input aria-label="Search folders" className={`${input} w-full pl-10`} value={query} onChange={e => setQuery(e.target.value)} placeholder="Search by job number or name" />
+      </div>
+      {error ? <p className="text-sm text-red-700">{error}</p>
+        : !folders ? <div className="flex items-center gap-2 text-sm text-gray-500 py-2"><Loader2 className="w-4 h-4 animate-spin" /> Reading project folders…</div>
+        : shown.length === 0 ? <p className="text-sm text-gray-500 py-2">No matching folders. Clear the search to see them all.</p>
+        : (
+          <ul className="bg-white rounded-md border border-gray-200 divide-y divide-gray-100 max-h-72 overflow-y-auto">
+            {shown.map(f => (
+              <li key={f.id}>
+                <button type="button" onClick={() => { onLink(f); setOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-blue-50">
+                  <span className="font-mono font-bold text-[#0f2a5e] w-20 shrink-0">{f.number}</span>
+                  <span className="flex-1 truncate text-gray-800">{f.name}</span>
+                  {f.id === project.folderId ? <span className="text-xs font-semibold text-green-700 uppercase">Linked</span> : <span className="text-sm font-semibold text-[#1e3a8a]">Link</span>}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      <button type="button" onClick={() => setOpen(false)} className="text-sm text-gray-600 underline">Cancel</button>
     </div>
   );
 }
@@ -165,6 +217,14 @@ export default function ProjectStartupPage() {
               Open {p.jobNumber} folder on PM Team <ExternalLink className="w-4 h-4" />
             </a>
           ) : <p className="text-sm text-amber-800">No project folder is linked.</p>}
+          {can('projectsEdit') && (
+            <FolderLink project={p} onLink={f => {
+              save({ folderUrl: f.webUrl, folderId: f.id });
+              loadDocs({ ...p, folderUrl: f.webUrl, folderId: f.id });
+              toast({ title: 'Folder linked', description: `${f.number} ${f.name}` });
+            }} />
+          )}
+          <p className="text-xs text-gray-500">Office only. Field crews never see this folder in the app.</p>
         </Step>
 
         <Step n={2} title="Award letter" done={stepDone('award')} hint="Date the award letter came in. Attach it to file it in Owner Contract.">
