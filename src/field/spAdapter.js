@@ -3,6 +3,7 @@
 // Only the calls the report screens use are provided.
 import { graph, graphAll } from '@/field/graph';
 import { CONFIG, currentAccount } from '@/field/auth';
+import { can } from '@/field/roles';
 import { LISTS, PHOTO_FOLDER, PROJECT_STATUS, reportToFields, fieldsToReport } from '@/field/schema';
 
 const CACHE = 'fieldReports:';
@@ -118,7 +119,9 @@ async function listMyProjects() {
     const items = await graphAll(`${path}/items?$expand=fields&$top=500`);
     const all = items.map(toProject);
     const mine = [];
-    for (const p of all) if (await isAssigned(p, me)) mine.push(strip(p));
+    // Office and Admin see every project; everyone else sees the ones they're assigned to.
+    const seeAll = can('allProjects');
+    for (const p of all) if (seeAll || await isAssigned(p, me)) mine.push(strip(p));
     mine.sort((a, b) => a.name.localeCompare(b.name));
     remember('projects', mine);
     return mine;

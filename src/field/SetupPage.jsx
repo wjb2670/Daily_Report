@@ -4,6 +4,7 @@ import { CheckCircle2, Loader2, AlertTriangle, Settings, ExternalLink } from 'lu
 import { graph, graphAll } from '@/field/graph';
 import { CONFIG } from '@/field/auth';
 import { LISTS, PHOTO_FOLDER } from '@/field/schema';
+import { INITIAL_ACCESS } from '@/field/roles';
 
 // Creates (or completes) the lists, columns and photo folder the app needs in
 // the Field Reports site. Safe to run again: it only adds what's missing.
@@ -73,7 +74,15 @@ export default function SetupPage() {
       const site = await graph(`/sites/${CONFIG.siteHost}:${CONFIG.sitePath}?$select=id,webUrl,displayName`);
       log(`Found the “${site.displayName}” site`);
       const lists = {};
-      for (const key of ['projects', 'reports', 'subs']) lists[key] = await ensureList(site, key, log);
+      for (const key of ['projects', 'reports', 'subs', 'access']) lists[key] = await ensureList(site, key, log);
+      // First time only: add the starting people to App Access.
+      const people = (await graph(`/sites/${site.id}/lists/${lists.access.id}/items?$top=1`)).value || [];
+      if (people.length === 0) {
+        for (const p of INITIAL_ACCESS) {
+          await graph(`/sites/${site.id}/lists/${lists.access.id}/items`, { method: 'POST', body: { fields: { Title: p.name, Email: p.email, Role: p.role } } });
+        }
+        log(`Added ${INITIAL_ACCESS.length} people to App Access (${INITIAL_ACCESS.map(p => p.name.split(' ')[0]).join(', ')})`);
+      }
       try {
         await graph(`/sites/${site.id}/drive/root/children`, {
           method: 'POST',
@@ -114,6 +123,7 @@ export default function SetupPage() {
           <li><strong>Projects</strong> list — the office adds jobs and assigns the Superintendent and Crew Access.</li>
           <li><strong>Daily Reports</strong> list — one row per project per day, filled in by the app.</li>
           <li><strong>Subcontractors</strong> list — company names suggested to the crew.</li>
+          <li><strong>App Access</strong> list — who can see reports and projects. Managed on the Access page.</li>
           <li><strong>{PHOTO_FOLDER}</strong> folder — photos, filed by job and date.</li>
         </ul>
         <Button onClick={run} disabled={running} className="w-full sm:w-auto h-11 bg-[#1e3a8a] hover:bg-[#0f2a5e] text-white font-semibold">

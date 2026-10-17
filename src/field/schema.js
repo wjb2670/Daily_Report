@@ -81,6 +81,15 @@ export const LISTS = {
     titleLabel: 'Company',
     columns: [text('Trade')],
   },
+  access: {
+    displayName: 'App Access',
+    description: 'Who can use which part of the Field Reports app. Managed on the app’s Access page. Anyone not listed is Field.',
+    titleLabel: 'Name',
+    columns: [
+      text('Email', 'Email', { indexed: true }),
+      choice('Role', ['Field', 'Reports only', 'Office', 'Admin']),
+    ],
+  },
 };
 
 const STATUS_TO_LIST = { draft: 'Draft', submitted: 'Submitted', sent: 'Filed' };

@@ -3,6 +3,7 @@ import logoUrl from '@/field/whayland-logo.png';
 
 // Print-ready daily reports for one project over a date range.
 // Letter size; each day starts on a new page; that day's photos follow it.
+// All text is black except the section headings, which are Whayland navy.
 
 const NAVY = '#0f2a5e';
 const PHOTOS_PER_PAGE = 6;
@@ -313,32 +314,32 @@ function Cover({ project, from, to, reports, preparedBy, includePhotos }) {
 }
 
 export const PRINT_CSS = `
-  @page { size: letter; margin: 0.45in 0.5in 0.55in; @bottom-left { content: "The Whayland Company · Daily Reports"; font: 8pt system-ui, sans-serif; color: #6b7280; } @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt system-ui, sans-serif; color: #6b7280; } }
-  .rp-root { color: #111827; font: 9.5pt/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: letter; margin: 0.45in 0.5in 0.55in; @bottom-left { content: "The Whayland Company · Daily Reports"; font: 8pt system-ui, sans-serif; color: #000; } @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt system-ui, sans-serif; color: #000; } }
+  .rp-root { color: #000; font: 9.5pt/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .rp-page { background: #fff; }
   .rp-break { break-before: page; }
-  .rp-coverhead { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid ${NAVY}; padding-bottom: 10px; margin-bottom: 18px; }
-  .rp-kicker { font-size: 13pt; font-weight: 800; color: ${NAVY}; text-transform: uppercase; letter-spacing: .06em; }
-  .rp-h1 { font-size: 22pt; font-weight: 800; color: ${NAVY}; margin: 6px 0 4px; line-height: 1.15; }
+  .rp-coverhead { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 18px; }
+  .rp-kicker { font-size: 13pt; font-weight: 800; color: #000; text-transform: uppercase; letter-spacing: .06em; }
+  .rp-h1 { font-size: 22pt; font-weight: 800; color: #000; margin: 6px 0 4px; line-height: 1.15; }
   .rp-h3 { font-size: 11pt; font-weight: 800; color: ${NAVY}; text-transform: uppercase; letter-spacing: .04em; margin: 8px 0 3px; padding-bottom: 2px; border-bottom: 1.5px solid ${NAVY}; break-after: avoid; }
   .rp-h3 .rp-muted { text-transform: none; letter-spacing: 0; font-weight: 600; }
-  .rp-muted { color: #6b7280; font-size: 9pt; }
-  .rp-label { color: #6b7280; font-size: 8pt; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
+  .rp-muted { color: #000; font-size: 9pt; }
+  .rp-label { color: #000; font-size: 8pt; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; }
   .rp-text { margin: 2px 0 0; white-space: pre-wrap; }
-  .rp-none { margin: 8px 0 0; padding: 5px 8px; background: #f3f4f6; border-radius: 4px; font-size: 9pt; color: #374151; }
-  .rp-empty { margin: 2px 0 0; color: #6b7280; font-style: italic; }
+  .rp-none { margin: 8px 0 0; padding: 5px 8px; background: #f3f4f6; border-radius: 4px; font-size: 9pt; color: #000; }
+  .rp-empty { margin: 2px 0 0; color: #000; font-style: italic; }
   .rp-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
-  .rp-table th { background: #eef2f8; color: ${NAVY}; font-weight: 700; padding: 3px 6px; border: 1px solid #cbd5e1; font-size: 8pt; text-transform: uppercase; letter-spacing: .03em; }
-  .rp-table td { padding: 3px 6px; border: 1px solid #cbd5e1; vertical-align: top; }
+  .rp-table th { background: #f1f1f1; color: #000; font-weight: 700; padding: 3px 6px; border: 1px solid #bfbfbf; font-size: 8pt; text-transform: uppercase; letter-spacing: .03em; }
+  .rp-table td { padding: 3px 6px; border: 1px solid #bfbfbf; vertical-align: top; }
   .rp-table tr { break-inside: avoid; }
   .rp-kv th { text-align: left; }
-  .rp-pagehead { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; border-bottom: 3px solid ${NAVY}; padding-bottom: 5px; margin-bottom: 4px; }
-  .rp-proj { font-weight: 800; color: ${NAVY}; font-size: 11pt; }
-  .rp-daytitle { font-weight: 800; font-size: 13pt; color: #111827; }
-  .rp-draft { display: inline-block; margin-top: 4px; background: #fef3c7; color: #92400e; font-weight: 800; font-size: 8.5pt; padding: 2px 8px; border-radius: 4px; letter-spacing: .04em; }
+  .rp-pagehead { display: flex; justify-content: space-between; gap: 16px; align-items: flex-end; border-bottom: 3px solid #000; padding-bottom: 5px; margin-bottom: 4px; }
+  .rp-proj { font-weight: 800; color: #000; font-size: 11pt; }
+  .rp-daytitle { font-weight: 800; font-size: 13pt; color: #000; }
+  .rp-draft { display: inline-block; margin-top: 4px; background: #fef3c7; color: #000; font-weight: 800; font-size: 8.5pt; padding: 2px 8px; border-radius: 4px; letter-spacing: .04em; }
   .rp-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .rp-stat { border: 1px solid #cbd5e1; border-left: 4px solid ${NAVY}; border-radius: 4px; padding: 6px 8px; }
-  .rp-statval { font-size: 16pt; font-weight: 800; color: ${NAVY}; line-height: 1.1; }
+  .rp-stat { border: 1px solid #bfbfbf; border-left: 4px solid #000; border-radius: 4px; padding: 6px 8px; }
+  .rp-statval { font-size: 16pt; font-weight: 800; color: #000; line-height: 1.1; }
   .rp-signoff { display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 16px; margin-top: 10px; break-inside: avoid; }
   .rp-sig { border-bottom: 1px solid #111827; padding: 4px 2px 2px; min-height: 22px; font-weight: 600; }
   .rp-photogrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
