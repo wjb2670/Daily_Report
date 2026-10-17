@@ -11,6 +11,7 @@ import NewProjectPage from '@/field/NewProjectPage';
 import AddExistingPage from '@/field/AddExistingPage';
 import ProjectStartupPage from '@/field/ProjectStartupPage';
 import AccessPage from '@/field/AccessPage';
+import InstallHint from '@/field/InstallHint';
 import { loadMyRole } from '@/field/accessData';
 import { can } from '@/field/roles';
 import { initAuth, signIn, signOut, currentAccount } from '@/field/auth';
@@ -27,6 +28,7 @@ function SignIn({ error }) {
     <div className="min-h-screen bg-[#0f2a5e] flex items-center justify-center p-4">
       <div className="w-full max-w-sm text-center">
         <Logo className="h-20 w-auto mx-auto mb-6" />
+        <InstallHint className="mb-4" />
         <div className="bg-white rounded-2xl shadow-xl p-6 space-y-4">
           <div className="inline-flex p-3 rounded-xl text-blue-600 bg-blue-50"><ClipboardList className="w-7 h-7" /></div>
           <h1 className="text-2xl font-bold text-[#0f2a5e]">Field Reports</h1>
@@ -114,7 +116,10 @@ function Shell({ account, role, children }) {
           </div>
         </div>
       </header>
-      <main className="p-4 md:p-6 print:p-0">{children}</main>
+      <main className="p-4 md:p-6 print:p-0">
+        <InstallHint className="max-w-3xl mx-auto mb-4 print:hidden" />
+        {children}
+      </main>
       {pathname === '/' && can('admin') && (
         <footer className="text-center pb-6 print:hidden">
           <Link to="/setup" className="text-xs text-gray-400 hover:text-gray-600">Site setup (office)</Link>
