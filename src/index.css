@@ -86,3 +86,23 @@
     @apply bg-background text-foreground;
   }
 }
+/* Date boxes: Safari on iPhone/iPad gives them a fixed minimum width and its
+   own styling, so they spill out of their column. Keep them inside it and
+   the same height as the boxes next to them. */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  margin-left: auto;
+}
