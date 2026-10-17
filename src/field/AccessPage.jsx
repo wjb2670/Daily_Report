@@ -8,7 +8,7 @@ const input = 'w-full h-11 rounded-md border border-gray-300 bg-white px-3 text-
 
 function RolePicker({ value, onChange, disabled, idPrefix }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5" role="radiogroup">
+    <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5" role="radiogroup">
       {ROLES.map(r => (
         <button key={r} id={`${idPrefix}-${r}`} type="button" role="radio" aria-checked={value === r} disabled={disabled}
           onClick={() => onChange(r)}

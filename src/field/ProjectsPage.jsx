@@ -40,14 +40,17 @@ export default function ProjectsPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-[#0f2a5e]">Projects</h1>
           <p className="text-gray-500 mt-1">Start every newly awarded job here. Jobs that already have a folder can be added with “Add existing project.”</p>
         </div>
-        {can('projectsEdit') && <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
+          {can('subsView') && <Link to="/scope-library" className="inline-flex items-center gap-2 h-12 px-4 rounded-md border border-gray-300 bg-white text-[#0f2a5e] font-semibold">Scope library</Link>}
+        {can('projectsEdit') && <>
           <Link to="/projects/existing" className="inline-flex items-center gap-2 h-12 px-4 rounded-md border border-[#0f2a5e] bg-white text-[#0f2a5e] font-semibold">
             Add existing project
           </Link>
           <Link to="/projects/new" className="inline-flex items-center gap-2 h-12 px-5 rounded-md bg-[#0f2a5e] hover:bg-[#1e3a8a] text-white font-semibold">
             <Plus className="w-5 h-5" /> New project
           </Link>
-        </div>}
+        </>}
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2 mb-4">

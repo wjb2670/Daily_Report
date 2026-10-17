@@ -209,6 +209,7 @@ export function resolvePhoto(url, size = 'large') {
 // ---- Base44-shaped client ------------------------------------------------------
 
 export const base44 = {
+  fieldApp: true,
   entities: {
     Project: {
       list: () => listMyProjects(),

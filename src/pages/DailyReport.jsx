@@ -568,6 +568,13 @@ export default function DailyReport() {
           disabled={disabled}
         />
 
+        {base44.fieldApp && project && (
+          <a href={`#/scopes/${project.id}`} className="flex items-center justify-between gap-3 bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3 hover:border-[#0f2a5e]">
+            <span><span className="font-semibold text-[#0f2a5e]">Sub scopes</span><span className="text-gray-500 text-sm"> · what each subcontractor agreed to do on this job</span></span>
+            <span aria-hidden="true" className="text-[#0f2a5e] font-bold">›</span>
+          </a>
+        )}
+
         {projectsError && (
           <p className="text-center text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{projectsError}</p>
         )}

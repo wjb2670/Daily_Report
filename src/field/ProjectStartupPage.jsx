@@ -210,6 +210,13 @@ export default function ProjectStartupPage() {
         )}
       </section>
 
+      {can('subsView') && (
+        <Link to={`/projects/${p.id}/subs`} className="flex items-center justify-between gap-3 bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3 mb-3 hover:border-[#0f2a5e]">
+          <span><span className="font-bold text-[#0f2a5e]">Subcontracts &amp; scopes</span><span className="text-gray-500 text-sm"> · PM scopes, Exhibit A and contract files</span></span>
+          <span aria-hidden="true" className="text-[#0f2a5e] font-bold text-xl">›</span>
+        </Link>
+      )}
+
       <div className="space-y-3">
         <Step n={1} title="Job number & project folder" done={stepDone('number')}>
           {p.folderUrl ? (

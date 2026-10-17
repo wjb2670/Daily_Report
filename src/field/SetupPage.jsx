@@ -5,6 +5,7 @@ import { graph, graphAll } from '@/field/graph';
 import { CONFIG } from '@/field/auth';
 import { LISTS, PHOTO_FOLDER } from '@/field/schema';
 import { INITIAL_ACCESS } from '@/field/roles';
+import { libraryRowsFromSeed } from '@/field/scopesData';
 
 // Creates (or completes) the lists, columns and photo folder the app needs in
 // the Field Reports site. Safe to run again: it only adds what's missing.
@@ -74,7 +75,7 @@ export default function SetupPage() {
       const site = await graph(`/sites/${CONFIG.siteHost}:${CONFIG.sitePath}?$select=id,webUrl,displayName`);
       log(`Found the “${site.displayName}” site`);
       const lists = {};
-      for (const key of ['projects', 'reports', 'subs', 'access']) lists[key] = await ensureList(site, key, log);
+      for (const key of ['projects', 'reports', 'subs', 'access', 'scopeLibrary', 'subcontracts', 'subPrices']) lists[key] = await ensureList(site, key, log);
       // First time only: add the starting people to App Access.
       const people = (await graph(`/sites/${site.id}/lists/${lists.access.id}/items?$top=1`)).value || [];
       if (people.length === 0) {
@@ -82,6 +83,13 @@ export default function SetupPage() {
           await graph(`/sites/${site.id}/lists/${lists.access.id}/items`, { method: 'POST', body: { fields: { Title: p.name, Email: p.email, Role: p.role } } });
         }
         log(`Added ${INITIAL_ACCESS.length} people to App Access (${INITIAL_ACCESS.map(p => p.name.split(' ')[0]).join(', ')})`);
+      }
+      // First time only: fill the Scope Library from Whayland's own scopes.
+      const lib = (await graph(`/sites/${site.id}/lists/${lists.scopeLibrary.id}/items?$top=1`)).value || [];
+      if (lib.length === 0) {
+        const rows = libraryRowsFromSeed();
+        for (const fields of rows) await graph(`/sites/${site.id}/lists/${lists.scopeLibrary.id}/items`, { method: 'POST', body: { fields } });
+        log(`Filled the Scope Library with ${rows.length - 3} trades and the standard Exhibit A lines`);
       }
       try {
         await graph(`/sites/${site.id}/drive/root/children`, {
@@ -124,6 +132,7 @@ export default function SetupPage() {
           <li><strong>Daily Reports</strong> list — one row per project per day, filled in by the app.</li>
           <li><strong>Subcontractors</strong> list — company names suggested to the crew.</li>
           <li><strong>App Access</strong> list — who can see reports and projects. Managed on the Access page.</li>
+          <li><strong>Scope Library</strong>, <strong>Subcontracts</strong> and <strong>Subcontract Prices</strong> lists — subcontract scopes by trade and job.</li>
           <li><strong>{PHOTO_FOLDER}</strong> folder — photos, filed by job and date.</li>
         </ul>
         <Button onClick={run} disabled={running} className="w-full sm:w-auto h-11 bg-[#1e3a8a] hover:bg-[#0f2a5e] text-white font-semibold">
