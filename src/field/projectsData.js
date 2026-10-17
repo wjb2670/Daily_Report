@@ -85,9 +85,9 @@ export async function jobNumberInUse(number) {
   return false;
 }
 
-const safeName = s => String(s || '').replace(/["*:<>?/\\|#%]+/g, '-').replace(/\s+/g, ' ').trim().replace(/[. ]+$/, '');
+export const safeName = s => String(s || '').replace(/["*:<>?/\\|#%]+/g, '-').replace(/\s+/g, ' ').trim().replace(/[. ]+$/, '');
 
-async function makeFolder(driveId, parentId, name) {
+export async function makeFolder(driveId, parentId, name) {
   const parent = parentId ? `/drives/${driveId}/items/${parentId}/children` : `/drives/${driveId}/root/children`;
   try {
     return await graph(parent, { method: 'POST', body: { name, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' } });

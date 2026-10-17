@@ -12,6 +12,10 @@ import AddExistingPage from '@/field/AddExistingPage';
 import ProjectStartupPage from '@/field/ProjectStartupPage';
 import AccessPage from '@/field/AccessPage';
 import InstallHint from '@/field/InstallHint';
+import SubcontractsPage from '@/field/SubcontractsPage';
+import SubcontractEditor from '@/field/SubcontractEditor';
+import ScopeLibraryPage from '@/field/ScopeLibraryPage';
+import FieldScopesPage from '@/field/FieldScopesPage';
 import { loadMyRole } from '@/field/accessData';
 import { can } from '@/field/roles';
 import { initAuth, signIn, signOut, currentAccount } from '@/field/auth';
@@ -161,6 +165,10 @@ export default function FieldApp() {
           <Route path="/projects" element={<Allowed area="projectsView"><ProjectsPage /></Allowed>} />
           <Route path="/projects/new" element={<Allowed area="projectsEdit"><NewProjectPage /></Allowed>} />
           <Route path="/projects/existing" element={<Allowed area="projectsEdit"><AddExistingPage /></Allowed>} />
+          <Route path="/projects/:id/subs" element={<Allowed area="subsView"><SubcontractsPage /></Allowed>} />
+          <Route path="/projects/:id/subs/:subId" element={<Allowed area="subsView"><SubcontractEditor /></Allowed>} />
+          <Route path="/scope-library" element={<Allowed area="subsView"><ScopeLibraryPage /></Allowed>} />
+          <Route path="/scopes/:projectId" element={<Allowed area="fieldScopes"><FieldScopesPage /></Allowed>} />
           <Route path="/projects/:id" element={<Allowed area="projectsView" readOnlyUnless="projectsEdit"><ProjectStartupPage /></Allowed>} />
           <Route path="*" element={can('daily') ? <DailyReport /> : <Navigate to="/reports" replace />} />
         </Routes>

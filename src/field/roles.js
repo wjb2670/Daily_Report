@@ -3,12 +3,13 @@
 // Roles are kept in the "App Access" list on the Field Reports site and
 // managed on the Access page. Anyone not on the list is Field.
 
-export const ROLES = ['Field', 'Reports only', 'Office', 'Admin'];
+export const ROLES = ['Field', 'Reports only', 'Office', 'PM', 'Admin'];
 
 export const ROLE_HELP = {
   Field: 'Daily reports for the projects they are assigned to.',
   'Reports only': 'View and print reports, and look at projects. Can’t change anything.',
-  Office: 'Daily reports for every project, reports, and adding or updating projects.',
+  Office: 'Daily reports for every project, reports, adding or updating projects, and creating subcontracts from approved scopes.',
+  PM: 'Everything Office can do, plus writing and approving subcontract scopes and editing the scope library.',
   Admin: 'Everything, including the Access page and Site setup.',
 };
 
@@ -26,11 +27,15 @@ export const INITIAL_ACCESS = [
 
 // area → roles that may open it
 const AREAS = {
-  daily: ['Field', 'Office', 'Admin'],
-  allProjects: ['Office', 'Admin'], // every project in Daily Report, not just assigned ones
-  reports: ['Reports only', 'Office', 'Admin'],
-  projectsView: ['Reports only', 'Office', 'Admin'],
-  projectsEdit: ['Office', 'Admin'],
+  daily: ['Field', 'Office', 'PM', 'Admin'],
+  allProjects: ['Office', 'PM', 'Admin'], // every project in Daily Report, not just assigned ones
+  reports: ['Reports only', 'Office', 'PM', 'Admin'],
+  projectsView: ['Reports only', 'Office', 'PM', 'Admin'],
+  projectsEdit: ['Office', 'PM', 'Admin'],
+  subsView: ['Reports only', 'Office', 'PM', 'Admin'], // subcontracts with prices
+  subsContract: ['Office', 'PM', 'Admin'], // create contract files once a scope is approved
+  scopesEdit: ['PM', 'Admin'], // write/approve scopes, edit the library
+  fieldScopes: ['Field', 'Office', 'PM', 'Admin'], // approved scopes, no prices
   admin: ['Admin'],
 };
 
