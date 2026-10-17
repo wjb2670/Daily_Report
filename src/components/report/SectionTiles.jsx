@@ -11,7 +11,7 @@ function StatusLabel({ section }) {
     return <span className="inline-block rounded-full bg-green-500 text-white text-xs font-bold uppercase tracking-wide px-2.5 py-1">Done</span>;
   }
   if (section.required) {
-    return <span className="inline-block rounded-full bg-amber-400 text-[#0f2a5e] text-xs font-bold uppercase tracking-wide px-2.5 py-1">Needed</span>;
+    return <span className="inline-block rounded-full bg-red-600 text-white text-xs font-bold uppercase tracking-wide px-2.5 py-1">Needed</span>;
   }
   return <span className="inline-block rounded-full bg-white/15 text-white text-xs font-semibold uppercase tracking-wide px-2.5 py-1">Optional</span>;
 }
@@ -25,7 +25,7 @@ export default function SectionTiles({ sections, onOpen }) {
     <div>
       <div className="flex items-center justify-between gap-3 mb-3">
         <h2 className="font-bold text-[#0f2a5e] text-xl">Today&apos;s report</h2>
-        <span className={`text-base font-bold ${allDone ? 'text-green-700' : 'text-amber-700'}`}>
+        <span className={`text-base font-bold ${allDone ? 'text-green-700' : 'text-red-600'}`}>
           {requiredDone} of {required.length} required done
         </span>
       </div>
@@ -39,7 +39,7 @@ export default function SectionTiles({ sections, onOpen }) {
               onClick={() => onOpen(s.key)}
               className={`text-left rounded-xl p-4 min-h-[128px] flex flex-col justify-between gap-3 bg-[#0f2a5e] text-white shadow-md
                 transition-all hover:bg-[#1e3a8a] active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300
-                ${needed ? 'ring-4 ring-amber-400' : ''}`}
+                ${needed ? 'ring-4 ring-red-500' : ''}`}
             >
               <div>
                 <div className="text-lg sm:text-xl font-bold leading-tight">{s.title}</div>
