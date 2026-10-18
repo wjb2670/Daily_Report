@@ -1,12 +1,25 @@
-// Whayland's subcontractor database: the "Final Subcontractor List.xlsx"
-// workbook the office keeps up to date. The app reads it straight from
+// Whayland's subcontractor database: MASTER SUB LIST.xlsx on the Estimating
+// Team site, which estimating keeps up to date. The app reads it straight from
 // SharePoint each session, so the spreadsheet stays the one place to edit.
 import { graph } from '@/field/graph';
-import { getPmDrive } from '@/field/projectsData';
+import { CONFIG } from '@/field/auth';
 
-export const DIRECTORY_FILE = 'Final Subcontractor List.xlsx';
-export const DIRECTORY_HOME = 'Master Template Files';
+export const DIRECTORY_SITE = '/sites/EstimatingTeam';
+export const DIRECTORY_FILE = 'MASTER SUB LIST.xlsx';
+export const DIRECTORY_HOME = ''; // top of the site's Documents
 const SHEET = 'Subcontractors';
+
+let drivePromise = null;
+function getDirectoryDrive() {
+  if (!drivePromise) {
+    drivePromise = (async () => {
+      const site = await graph(`/sites/${CONFIG.siteHost}:${DIRECTORY_SITE}?$select=id`);
+      const drive = await graph(`/sites/${site.id}/drive?$select=id`);
+      return { driveId: drive.id };
+    })().catch(err => { drivePromise = null; throw err; });
+  }
+  return drivePromise;
+}
 
 const enc = path => path.split('/').map(encodeURIComponent).join('/');
 const clean = v => String(v ?? '').replace(/\s+/g, ' ').trim();
@@ -14,11 +27,11 @@ const key = s => clean(s).toLowerCase().replace(/[.,]/g, '').replace(/\b(inc|llc
 
 async function findWorkbook(driveId) {
   try {
-    return await graph(`/drives/${driveId}/root:/${enc(`${DIRECTORY_HOME}/${DIRECTORY_FILE}`)}?$select=id,name,webUrl`);
+    return await graph(`/drives/${driveId}/root:/${enc([DIRECTORY_HOME, DIRECTORY_FILE].filter(Boolean).join('/'))}?$select=id,name,webUrl`);
   } catch (err) {
     if (err.status !== 404) throw err;
   }
-  // Not in Master Template Files: look anywhere on the PM Team site.
+  // Moved within the site: find it by name.
   const found = await graph(`/drives/${driveId}/root/search(q='${encodeURIComponent(DIRECTORY_FILE.replace(/\.xlsx$/, ''))}')?$select=id,name,webUrl`);
   return (found.value || []).find(i => i.name === DIRECTORY_FILE) || null;
 }
@@ -63,10 +76,19 @@ let cache = null;
 export function loadDirectory({ refresh = false } = {}) {
   if (cache && !refresh) return cache;
   cache = (async () => {
-    const { driveId } = await getPmDrive();
+    let driveId;
+    try {
+      ({ driveId } = await getDirectoryDrive());
+    } catch (err) {
+      const e = new Error(err.status === 403 || err.status === 404
+        ? 'You don’t have access to the Estimating Team site, where the subcontractor list lives. Ask Wendy for access, or type the company details in.'
+        : err.message);
+      e.code = 'no_directory';
+      throw e;
+    }
     const file = await findWorkbook(driveId);
     if (!file) {
-      const err = new Error(`Couldn’t find “${DIRECTORY_FILE}” on the PM Team site. Put it in ${DIRECTORY_HOME} so everyone in the office can use it.`);
+      const err = new Error(`Couldn’t find “${DIRECTORY_FILE}” on the Estimating Team site. Type the company details in for now.`);
       err.code = 'no_directory';
       throw err;
     }
@@ -86,9 +108,12 @@ export function loadDirectory({ refresh = false } = {}) {
 }
 
 // Cost code 3010 → division "03"; directory trades start "03 - Concrete …".
+// Whayland cost codes are 4 digits for divisions 1–9 (3010 → 03) and 5 for
+// 10 and up (15400 → 15).
 export const divisionOf = costCode => {
-  const m = String(costCode || '').match(/^(\d{1,2})\d{2}/);
-  return m ? m[1].padStart(2, '0') : '';
+  const digits = (String(costCode || '').match(/^\d+/) || [''])[0];
+  if (digits.length < 4) return '';
+  return digits.length === 4 ? `0${digits[0]}` : digits.slice(0, 2);
 };
 export const inDivision = (company, division) => !!division && company.trades.some(t => t.startsWith(`${division} `) || t.startsWith(`${division}-`));
 
