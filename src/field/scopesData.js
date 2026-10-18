@@ -167,6 +167,7 @@ const toSub = item => {
     tradeName: f.TradeName || '',
     workName: f.WorkName || '',
     status: f.Status || 'Draft',
+    companyContact: f.CompanyContact || '',
     companyAddress: f.CompanyAddress || '',
     companyCity: f.CompanyCity || '',
     companyPhone: f.CompanyPhone || '',
@@ -182,7 +183,7 @@ const toSub = item => {
 
 const SUB_FIELDS = {
   company: 'Title', projectId: 'ProjectId', jobNumber: 'JobNumber', contractNumber: 'ContractNumber', costCode: 'CostCode',
-  tradeName: 'TradeName', workName: 'WorkName', status: 'Status', companyAddress: 'CompanyAddress', companyCity: 'CompanyCity',
+  tradeName: 'TradeName', workName: 'WorkName', status: 'Status', companyContact: 'CompanyContact', companyAddress: 'CompanyAddress', companyCity: 'CompanyCity',
   companyPhone: 'CompanyPhone', companyEmail: 'CompanyEmail', approvedBy: 'ApprovedBy', folderUrl: 'FolderUrl', folderId: 'FolderId',
 };
 function subFields(changes) {
