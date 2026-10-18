@@ -103,6 +103,7 @@ export const LISTS = {
       text('TradeName', 'Trade'),
       text('WorkName', 'Work Name (Exhibit A)'),
       choice('Status', ['Draft', 'PM approved', 'Contract sent', 'Signed']),
+      text('CompanyContact', 'Company Contact'),
       text('CompanyAddress', 'Company Address'),
       text('CompanyCity', 'Company City, ST ZIP'),
       text('CompanyPhone', 'Company Phone'),

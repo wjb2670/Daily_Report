@@ -13,6 +13,8 @@ import {
 import { currentAccount } from '@/field/auth';
 import { can } from '@/field/roles';
 import { SubStatus } from '@/field/SubcontractsPage';
+import CompanyPicker from '@/field/CompanyPicker';
+import { detailsFrom } from '@/field/subDirectory';
 
 const input = 'w-full h-11 rounded-md border border-gray-300 bg-white px-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] disabled:bg-gray-50 disabled:text-gray-600';
 const letter = i => String.fromCharCode(97 + (i % 26));
@@ -138,6 +140,8 @@ function Preview({ sub, project }) {
 
 function NewSub({ project, library, onCreated }) {
   const [form, setForm] = useState({ company: '', tradeId: '', amount: '' });
+  const [details, setDetails] = useState(null);
+  const [picking, setPicking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const trade = library.trades.find(t => t.id === form.tradeId);
@@ -148,6 +152,7 @@ function NewSub({ project, library, onCreated }) {
       const existing = await listSubcontracts(project.id).catch(() => []);
       const contractNumber = await nextContractNumber(project, existing);
       const data = {
+        ...(details || {}),
         company: form.company.trim(), projectId: String(project.id), jobNumber: project.jobNumber, contractNumber,
         costCode: trade?.costCode || '', tradeName: trade?.name || '', workName: trade?.workName || '',
         status: 'Draft', scope: buildScope(library, trade),
@@ -161,9 +166,6 @@ function NewSub({ project, library, onCreated }) {
   return (
     <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-4">
       <h1 className="text-2xl font-bold text-[#0f2a5e]">New subcontract</h1>
-      <Field id="ns-company" label="Subcontractor (company)">
-        <input id="ns-company" className={input} value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} placeholder="e.g. Harkins Concrete Construction, Inc" />
-      </Field>
       <Field id="ns-trade" label="Trade">
         <select id="ns-trade" className={input} value={form.tradeId} onChange={e => setForm(f => ({ ...f, tradeId: e.target.value }))}>
           <option value="">Pick a trade…</option>
@@ -171,6 +173,21 @@ function NewSub({ project, library, onCreated }) {
           <option value="__none">Other (start with only the standard lines)</option>
         </select>
       </Field>
+      <Field id="ns-company" label="Subcontractor (company)">
+        <div className="flex gap-2">
+          <input id="ns-company" className={input} value={form.company} onChange={e => { setForm(f => ({ ...f, company: e.target.value })); setDetails(null); }} placeholder="e.g. Harkins Concrete Construction, Inc" />
+          <button type="button" onClick={() => setPicking(true)} className="h-11 px-3 rounded-md border border-[#0f2a5e] text-[#0f2a5e] text-sm font-semibold shrink-0 whitespace-nowrap">From sub list</button>
+        </div>
+      </Field>
+      {picking && (
+        <CompanyPicker costCode={trade?.costCode} initialQuery={form.company} onClose={() => setPicking(false)}
+          onPick={(c, p) => { const d = detailsFrom(c, p); setDetails(d); setForm(f => ({ ...f, company: d.company })); setPicking(false); }} />
+      )}
+      {details && (
+        <p className="text-sm text-gray-600 bg-gray-50 rounded-md px-3 py-2">
+          From the sub list: {[details.companyContact, details.companyEmail, details.companyPhone, details.companyCity].filter(Boolean).join(' · ') || 'no contact details listed'}
+        </p>
+      )}
       <Field id="ns-amount" label="Contract amount (office only)">
         <input id="ns-amount" inputMode="decimal" className={input} value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value.replace(/[^0-9.]/g, '') }))} placeholder="0.00" />
       </Field>
@@ -199,6 +216,7 @@ export default function SubcontractEditor() {
   const [busy, setBusy] = useState('');
   const [steps, setSteps] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [picking, setPicking] = useState(false);
   const dirty = useRef(false);
   const isNew = subId === 'new';
 
@@ -227,7 +245,7 @@ export default function SubcontractEditor() {
       try {
         await updateSubcontract(sub.id, {
           company: sub.company, costCode: sub.costCode, tradeName: sub.tradeName, workName: sub.workName, contractNumber: sub.contractNumber,
-          companyAddress: sub.companyAddress, companyCity: sub.companyCity, companyPhone: sub.companyPhone, companyEmail: sub.companyEmail, scope: sub.scope,
+          companyContact: sub.companyContact, companyAddress: sub.companyAddress, companyCity: sub.companyCity, companyPhone: sub.companyPhone, companyEmail: sub.companyEmail, scope: sub.scope,
         });
         dirty.current = false;
         setSaveState('saved');
@@ -317,9 +335,17 @@ export default function SubcontractEditor() {
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-5">
         <div className="space-y-4 min-w-0">
           <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-5 space-y-3">
-            <h2 className="font-bold text-[#0f2a5e] text-lg">Subcontractor</h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="font-bold text-[#0f2a5e] text-lg">Subcontractor</h2>
+              {editable && <button type="button" onClick={() => setPicking(p => !p)} className="h-9 px-3 rounded-md border border-[#0f2a5e] text-[#0f2a5e] text-sm font-semibold">Fill from sub list</button>}
+            </div>
+            {picking && (
+              <CompanyPicker costCode={sub.costCode} initialQuery={sub.company} onClose={() => setPicking(false)}
+                onPick={(c, p) => { change(detailsFrom(c, p)); setPicking(false); }} />
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field id="sc-company" label="Company" className="sm:col-span-2"><input id="sc-company" className={input} disabled={!editable} value={sub.company} onChange={e => change({ company: e.target.value })} /></Field>
+              <Field id="sc-contact" label="Contact person" className="sm:col-span-2"><input id="sc-contact" className={input} disabled={!editable} value={sub.companyContact || ''} onChange={e => change({ companyContact: e.target.value })} /></Field>
               <Field id="sc-address" label="Address"><input id="sc-address" className={input} disabled={!editable} value={sub.companyAddress} onChange={e => change({ companyAddress: e.target.value })} /></Field>
               <Field id="sc-city" label="City, ST ZIP"><input id="sc-city" className={input} disabled={!editable} value={sub.companyCity} onChange={e => change({ companyCity: e.target.value })} /></Field>
               <Field id="sc-phone" label="Phone"><input id="sc-phone" type="tel" className={input} disabled={!editable} value={sub.companyPhone} onChange={e => change({ companyPhone: e.target.value })} /></Field>
