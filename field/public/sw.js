@@ -1,6 +1,6 @@
 // Keeps the Field Reports app on the device so it opens without signal.
 // Reports and photos themselves are saved separately and synced by the app.
-const CACHE = 'field-reports-v1';
+const CACHE = 'field-reports-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png'];
 
 self.addEventListener('install', event => {
