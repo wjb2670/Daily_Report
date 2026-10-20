@@ -264,6 +264,9 @@ export function toProjectRecord(item) {
     folderId: f.ProjectFolderId || '',
     notes: f.ProjectNotes || '',
     existing: f.ExistingJob === true,
+    fieldNote: f.FieldNote || '',
+    fieldFolders: (() => { try { return JSON.parse(f.FieldFoldersJSON || 'null'); } catch { return null; } })(),
+    fieldAccess: (() => { try { return JSON.parse(f.FieldAccessJSON || 'null'); } catch { return null; } })(),
     created: item.createdDateTime || '',
   };
 }
@@ -273,7 +276,7 @@ const TO_FIELD = {
   contractAmount: 'ContractAmount', address: 'Address', city: 'City', state: 'State', zip: 'Zip',
   projectManager: 'ProjectManager', bondsRequired: 'BondsRequired', paymentBond: 'PaymentBond',
   performanceBond: 'PerformanceBond', ownerContract: 'OwnerContract', folderUrl: 'ProjectFolderUrl',
-  folderId: 'ProjectFolderId', notes: 'ProjectNotes', existing: 'ExistingJob',
+  folderId: 'ProjectFolderId', notes: 'ProjectNotes', existing: 'ExistingJob', fieldNote: 'FieldNote',
 };
 const DATE_FIELDS = { awardDate: 'AwardDate', awardLetterDate: 'AwardLetterDate', ntpDate: 'NTPDate' };
 
@@ -282,6 +285,8 @@ function toFields(changes) {
   for (const [k, v] of Object.entries(changes)) {
     if (TO_FIELD[k]) out[TO_FIELD[k]] = v === '' ? null : v;
     if (DATE_FIELDS[k]) out[DATE_FIELDS[k]] = v ? `${v}T12:00:00Z` : null;
+    if (k === 'fieldFolders') out.FieldFoldersJSON = v ? JSON.stringify(v) : null;
+    if (k === 'fieldAccess') out.FieldAccessJSON = v ? JSON.stringify(v) : null;
   }
   return out;
 }

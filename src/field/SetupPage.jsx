@@ -75,7 +75,7 @@ export default function SetupPage() {
       const site = await graph(`/sites/${CONFIG.siteHost}:${CONFIG.sitePath}?$select=id,webUrl,displayName`);
       log(`Found the “${site.displayName}” site`);
       const lists = {};
-      for (const key of ['projects', 'reports', 'subs', 'access', 'scopeLibrary', 'subcontracts', 'subPrices']) lists[key] = await ensureList(site, key, log);
+      for (const key of ['projects', 'reports', 'subs', 'access', 'scopeLibrary', 'subcontracts', 'subPrices', 'jobEvents']) lists[key] = await ensureList(site, key, log);
       // First time only: add the starting people to App Access.
       const people = (await graph(`/sites/${site.id}/lists/${lists.access.id}/items?$top=1`)).value || [];
       if (people.length === 0) {
