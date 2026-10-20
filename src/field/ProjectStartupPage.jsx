@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Loader2, ArrowLeft, ExternalLink, Paperclip, CheckCircle2, Circle, FileText, RefreshCw, FolderOpen, Search } from 'lucide-react';
 import { can } from '@/field/roles';
+import { syncFieldAccess, FIELD_FOLDERS, RECEIPTS_FOLDER } from '@/field/jobData';
 import { useToast } from '@/components/ui/use-toast';
 import { todayStr } from '@/lib/dailyReportStore';
 import {
@@ -134,6 +135,59 @@ function FolderLink({ project, onLink }) {
   );
 }
 
+// Office: the job's field folders and the note shown on the crew's dashboard.
+function FieldAccessCard({ project, onSaved }) {
+  const { toast } = useToast();
+  const [busy, setBusy] = useState(false);
+  const [steps, setSteps] = useState([]);
+  const [note, setNote] = useState(project.fieldNote || '');
+  const [savingNote, setSavingNote] = useState(false);
+  const access = project.fieldAccess;
+
+  const sync = async () => {
+    setBusy(true); setSteps([]);
+    try {
+      const res = await syncFieldAccess(project, s => setSteps(x => [...x, s]));
+      await updateProjectRecord(project.id, { fieldFolders: res.fieldFolders, fieldAccess: res.fieldAccess });
+      onSaved({ fieldFolders: res.fieldFolders, fieldAccess: res.fieldAccess });
+      toast({ title: 'Field access updated', description: res.fieldAccess.emails.length ? `${res.fieldAccess.names.join(', ')} can open the job folders.` : 'No superintendent or crew is assigned yet.' });
+    } catch (err) {
+      toast({ title: 'Couldn’t update field access', description: err.message, variant: 'destructive' });
+    }
+    setBusy(false);
+  };
+  const saveNote = async () => {
+    setSavingNote(true);
+    try { await updateProjectRecord(project.id, { fieldNote: note }); onSaved({ fieldNote: note }); toast({ title: note ? 'Note posted to the field' : 'Note removed' }); } catch (err) { toast({ title: 'Couldn’t save', description: err.message, variant: 'destructive' }); }
+    setSavingNote(false);
+  };
+
+  return (
+    <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 mb-3 space-y-3">
+      <h2 className="font-bold text-[#0f2a5e] text-lg">Field crew access</h2>
+      <p className="text-sm text-gray-600">The assigned superintendent and crew can view {FIELD_FOLDERS.join(', ')}, and add files to {RECEIPTS_FOLDER}. Nothing else in the job folder.</p>
+      {access ? (
+        <p className="text-sm text-gray-700">Last updated {new Date(access.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} for: <strong>{access.names?.join(', ') || 'nobody assigned'}</strong>
+          {access.missing?.length ? <span className="block text-amber-700 mt-1">Not found in the job folder: {access.missing.join(', ')}</span> : null}</p>
+      ) : <p className="text-sm text-amber-800">Not set up yet. The crew won’t see job documents or receipts until you do this.</p>}
+      <button type="button" onClick={sync} disabled={busy || !project.folderId}
+        className="inline-flex items-center gap-2 h-11 px-4 rounded-md bg-[#0f2a5e] hover:bg-[#1e3a8a] text-white font-semibold disabled:opacity-50">
+        {busy && <Loader2 className="w-4 h-4 animate-spin" />} {access ? 'Update field access' : 'Give field crew access'}
+      </button>
+      {!project.folderId && <p className="text-xs text-gray-500">Link the job folder first (step 1).</p>}
+      <p className="text-xs text-gray-500">Run this again after changing the Superintendent or Crew Access, so people taken off the job lose access.</p>
+      <Link to={`/job?project=${project.id}`} className="inline-block text-sm text-[#1e3a8a] font-semibold underline">See the crew’s job dashboard</Link>
+      {busy && steps.length > 0 && <ul className="text-sm text-gray-600">{steps.map(x => <li key={x}>• {x}</li>)}</ul>}
+      <div className="pt-2 border-t border-gray-100 space-y-1.5">
+        <label htmlFor="field-note" className="text-sm font-semibold text-gray-700">Note to the field <span className="font-normal text-gray-400">(shows at the top of their dashboard)</span></label>
+        <textarea id="field-note" rows={2} value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. Owner walkthrough Thursday at 10 – site must be clean."
+          className="w-full rounded-md border border-gray-300 p-2 text-base md:text-sm" />
+        <button type="button" onClick={saveNote} disabled={savingNote || note === (project.fieldNote || '')} className="h-9 px-3 rounded-md border border-gray-300 text-sm font-semibold text-[#0f2a5e] disabled:opacity-50">{savingNote ? 'Saving…' : 'Post note'}</button>
+      </div>
+    </section>
+  );
+}
+
 export default function ProjectStartupPage() {
   const { id } = useParams();
   const { toast } = useToast();
@@ -210,6 +264,8 @@ export default function ProjectStartupPage() {
         )}
       </section>
 
+      {can('projectsEdit') && <FieldAccessCard project={p} onSaved={changes => setP(prev => ({ ...prev, ...changes }))} />}
+
       {can('subsView') && (
         <Link to={`/projects/${p.id}/subs`} className="flex items-center justify-between gap-3 bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3 mb-3 hover:border-[#0f2a5e]">
           <span><span className="font-bold text-[#0f2a5e]">Subcontracts &amp; scopes</span><span className="text-gray-500 text-sm"> · PM scopes, Exhibit A and contract files</span></span>
@@ -231,7 +287,7 @@ export default function ProjectStartupPage() {
               toast({ title: 'Folder linked', description: `${f.number} ${f.name}` });
             }} />
           )}
-          <p className="text-xs text-gray-500">Office only. Field crews never see this folder in the app.</p>
+          <p className="text-xs text-gray-500">Office only. Field crews see only the job’s field folders, once you give them access below.</p>
         </Step>
 
         <Step n={2} title="Award letter" done={stepDone('award')} hint="Date the award letter came in. Attach it to file it in Owner Contract.">

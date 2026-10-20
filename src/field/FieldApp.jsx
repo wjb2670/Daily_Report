@@ -16,6 +16,9 @@ import SubcontractsPage from '@/field/SubcontractsPage';
 import SubcontractEditor from '@/field/SubcontractEditor';
 import ScopeLibraryPage from '@/field/ScopeLibraryPage';
 import FieldScopesPage from '@/field/FieldScopesPage';
+import JobDashboard from '@/field/JobDashboard';
+import JobDocsPage from '@/field/JobDocsPage';
+import { currentRole } from '@/field/roles';
 import { loadMyRole } from '@/field/accessData';
 import { can } from '@/field/roles';
 import { initAuth, signIn, signOut, currentAccount } from '@/field/auth';
@@ -50,6 +53,12 @@ function SignIn({ error }) {
     </div>
   );
 }
+
+// Field crews open to their job dashboard; the daily report is a button on it.
+const FIELD_NAV = [
+  { to: '/', label: 'Job', area: 'daily' },
+  { to: '/report', label: 'Daily Report', area: 'daily' },
+];
 
 const NAV = [
   { to: '/', label: 'Daily Report', area: 'daily' },
@@ -88,7 +97,7 @@ const COLS = { 1: 'grid-cols-1', 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-co
 
 function Shell({ account, role, children }) {
   const { pathname } = useLocation();
-  const nav = NAV.filter(n => can(n.area));
+  const nav = currentRole() === 'Field' ? FIELD_NAV : NAV.filter(n => can(n.area));
   return (
     <div className="min-h-screen bg-blue-50 print:bg-white">
       <header className="bg-[#0f2a5e] text-white sticky top-0 z-40 shadow print:hidden">
@@ -170,7 +179,10 @@ export default function FieldApp() {
           <Route path="/scope-library" element={<Allowed area="subsView"><ScopeLibraryPage /></Allowed>} />
           <Route path="/scopes/:projectId" element={<Allowed area="fieldScopes"><FieldScopesPage /></Allowed>} />
           <Route path="/projects/:id" element={<Allowed area="projectsView" readOnlyUnless="projectsEdit"><ProjectStartupPage /></Allowed>} />
-          <Route path="*" element={can('daily') ? <DailyReport /> : <Navigate to="/reports" replace />} />
+          <Route path="/report" element={<Allowed area="daily"><DailyReport /></Allowed>} />
+          <Route path="/job" element={<Allowed area="daily"><JobDashboard /></Allowed>} />
+          <Route path="/docs/:projectId" element={<Allowed area="daily"><JobDocsPage /></Allowed>} />
+          <Route path="*" element={!can('daily') ? <Navigate to="/reports" replace /> : currentRole() === 'Field' ? <JobDashboard /> : <DailyReport />} />
         </Routes>
       </Shell>
       <Toaster />

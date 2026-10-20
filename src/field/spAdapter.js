@@ -84,8 +84,23 @@ function toProject(item) {
     superintendent: supers.map(p => p.LookupValue).filter(Boolean).join(', '),
     latitude: f.Latitude ?? null,
     longitude: f.Longitude ?? null,
+    field_note: f.FieldNote || '',
+    field_folders: (() => { try { return JSON.parse(f.FieldFoldersJSON || 'null'); } catch { return null; } })(),
     _people: [...supers, ...peopleIn(f.CrewAccess)],
   };
+}
+
+// Email addresses of everyone named as Superintendent or Crew Access on a project.
+export async function projectPeopleEmails(projectId) {
+  const path = await listPath('projects');
+  const item = await graph(`${path}/items/${projectId}?$expand=fields`);
+  const people = [...peopleIn(item.fields?.Superintendent), ...peopleIn(item.fields?.CrewAccess)];
+  const out = [];
+  for (const p of people) {
+    const email = (p.Email || '').toLowerCase() || (p.LookupId != null ? await emailForLookup(p.LookupId) : '');
+    if (email && !out.some(x => x.email === email)) out.push({ email, name: p.LookupValue || email });
+  }
+  return out;
 }
 
 // The site's own user list maps person IDs to email addresses, for the rare

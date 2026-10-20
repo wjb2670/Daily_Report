@@ -46,6 +46,9 @@ export const LISTS = {
       text('ProjectFolderUrl', 'Project Folder'),
       text('ProjectFolderId', 'Project Folder ID'),
       { name: 'ExistingJob', displayName: 'Existing Job', boolean: {} },
+      notes('FieldNote', 'Note to Field'),
+      notes('FieldFoldersJSON', 'Field Folders'),
+      notes('FieldAccessJSON', 'Field Access'),
     ],
   },
   reports: {
@@ -122,6 +125,18 @@ export const LISTS = {
     columns: [
       text('SubcontractId', 'Subcontract ID', { indexed: true }),
       number('Amount'),
+    ],
+  },
+  jobEvents: {
+    displayName: 'Job Events',
+    description: 'Meetings, inspections and other dated items shown on the field dashboard.',
+    titleLabel: 'What',
+    columns: [
+      text('ProjectId', 'Project ID', { indexed: true }),
+      { name: 'EventDate', displayName: 'When', dateTime: { format: 'dateTime' } },
+      choice('Kind', ['Meeting', 'Inspection', 'Delivery', 'Other']),
+      notes('Notes'),
+      text('AddedBy', 'Added By'),
     ],
   },
   access: {
