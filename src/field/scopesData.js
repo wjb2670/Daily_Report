@@ -4,6 +4,7 @@ import { graph, graphAll } from '@/field/graph';
 import { getSite, getListId } from '@/field/spAdapter';
 import { getPmDrive, makeFolder, safeName } from '@/field/projectsData';
 import { STANDARD_CONDITIONS, OPENING, CLOSING, TRADES } from '@/field/scopeSeed';
+import { DH_TRADES, IMPORT_TAG } from '@/field/scopeSeedDH';
 
 const SHARED = { _standard: 'Whayland standard conditions', _opening: 'Opening lines (every trade)', _closing: 'Closing lines (every trade)' };
 export const SECTION_TITLES = {
@@ -20,13 +21,61 @@ const clean = items => items.map(i => ({ text: i.text, on: i.on !== false, ...(i
 
 // ---- Library ------------------------------------------------------------------
 
+const sameText = (a, b) => String(a).toLowerCase().replace(/[^a-z0-9]+/g, '') === String(b).toLowerCase().replace(/[^a-z0-9]+/g, '');
+const isProvideLine = i => /^provide all necessary/i.test(i.text || '');
+
+// Folds a set of imported trades into a list of trades. A cost code the
+// library already has gets the new lines as extra, unticked options (not its
+// own "Provide all…" line); anything else becomes a new trade.
+export function mergeTrades(existing, incoming) {
+  const trades = existing.map(t => ({ ...t, items: [...t.items] }));
+  const changed = new Set();
+  for (const add of incoming) {
+    const match = add.merge && trades.find(t => t.costCode === add.costCode);
+    if (match) {
+      for (const it of add.items) {
+        if (isProvideLine(it) || match.items.some(x => sameText(x.text, it.text))) continue;
+        match.items.push({ ...it, on: false });
+        changed.add(match);
+      }
+    } else if (!trades.some(t => t.costCode === add.costCode && sameText(t.name, add.name))) {
+      const t = { id: null, name: add.name, costCode: add.costCode, workName: add.workName, items: add.items.map(i => ({ ...i })) };
+      trades.push(t);
+      changed.add(t);
+    }
+  }
+  return { trades, changed: [...changed] };
+}
+
+const rowFields = t => ({ Title: t.name, CostCode: t.costCode, WorkName: t.workName || '', ItemsJSON: JSON.stringify(clean(t.items)) });
+
 export function libraryRowsFromSeed() {
+  const { trades } = mergeTrades(TRADES.map(t => ({ ...t, items: clean(t.items) })), DH_TRADES);
   return [
     { Title: SHARED._standard, CostCode: '_standard', WorkName: '', ItemsJSON: JSON.stringify(clean(STANDARD_CONDITIONS)) },
     { Title: SHARED._opening, CostCode: '_opening', WorkName: '', ItemsJSON: JSON.stringify(clean(OPENING)) },
     { Title: SHARED._closing, CostCode: '_closing', WorkName: '', ItemsJSON: JSON.stringify(clean(CLOSING)) },
-    ...TRADES.map(t => ({ Title: t.name, CostCode: t.costCode, WorkName: t.workName, ItemsJSON: JSON.stringify(clean(t.items)) })),
+    { Title: 'Imported scope sets', CostCode: '_imports', WorkName: '', ItemsJSON: JSON.stringify([{ text: IMPORT_TAG, on: true }]) },
+    ...trades.map(rowFields),
   ];
+}
+
+// One-time import of the Dutchman's Harvest trades into an existing library.
+export const importAvailable = lib => !lib.imports.includes(IMPORT_TAG);
+export async function importDutchmansHarvest(lib, onStep = () => {}) {
+  const path = await listPath('scopeLibrary');
+  const { changed } = mergeTrades(lib.trades, DH_TRADES);
+  let added = 0;
+  let updated = 0;
+  for (const t of changed) {
+    onStep(`${t.costCode} ${t.name}`);
+    if (t.id) { await graph(`${path}/items/${t.id}/fields`, { method: 'PATCH', body: rowFields(t) }); updated += 1; }
+    else { await graph(`${path}/items`, { method: 'POST', body: { fields: rowFields(t) } }); added += 1; }
+  }
+  const marker = { Title: 'Imported scope sets', CostCode: '_imports', WorkName: '', ItemsJSON: JSON.stringify([...lib.imports, IMPORT_TAG].map(text => ({ text, on: true }))) };
+  if (lib.importsId) await graph(`${path}/items/${lib.importsId}/fields`, { method: 'PATCH', body: marker });
+  else await graph(`${path}/items`, { method: 'POST', body: { fields: marker } });
+  return { added, updated };
 }
 
 const listPath = async key => `/sites/${(await getSite()).id}/lists/${await getListId(key)}`;
@@ -48,6 +97,8 @@ export async function loadLibrary() {
     standard: shared('_standard'),
     opening: shared('_opening'),
     closing: shared('_closing'),
+    imports: (rows.find(r => r.costCode === '_imports')?.items || []).map(i => i.text),
+    importsId: rows.find(r => r.costCode === '_imports')?.id || null,
     trades: rows.filter(r => !r.costCode.startsWith('_')).sort((a, b) => a.costCode.localeCompare(b.costCode, undefined, { numeric: true })),
   };
 }
@@ -73,10 +124,12 @@ export async function deleteLibraryRow(id) {
 const toLine = (i, extra = {}) => ({ id: newId(), text: i.text, on: i.on !== false, sub: i.sub ? [...i.sub] : [], fills: {}, ...extra });
 
 export function buildScope(library, trade) {
+  // A trade with its own "Provide all necessary…" line doesn't need the generic one.
+  const ownProvide = (trade?.items || []).some(i => i.on !== false && isProvideLine(i));
   return {
     sections: [
       { key: 'standard', lines: library.standard.items.map(i => toLine(i)) },
-      { key: 'opening', lines: library.opening.items.map(i => toLine(i)) },
+      { key: 'opening', lines: library.opening.items.map(i => toLine(i, ownProvide && isProvideLine(i) ? { on: false } : {})) },
       { key: 'trade', lines: (trade?.items || []).map(i => toLine(i)) },
       { key: 'closing', lines: library.closing.items.map(i => toLine(i)) },
     ],

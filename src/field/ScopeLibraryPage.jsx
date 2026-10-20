@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, ArrowLeft, ArrowUp, ArrowDown, Trash2, Plus, Search } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { loadLibrary, saveLibraryRow, deleteLibraryRow } from '@/field/scopesData';
+import { loadLibrary, saveLibraryRow, deleteLibraryRow, importAvailable, importDutchmansHarvest } from '@/field/scopesData';
+import { DH_TRADES } from '@/field/scopeSeedDH';
 import { can } from '@/field/roles';
 
 const input = 'w-full h-11 rounded-md border border-gray-300 bg-white px-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] disabled:bg-gray-50';
@@ -93,6 +94,18 @@ export default function ScopeLibraryPage() {
   const [pick, setPick] = useState('_standard');
   const [query, setQuery] = useState('');
   const editable = can('scopesEdit');
+  const [importing, setImporting] = useState('');
+  const [importDone, setImportDone] = useState('');
+  const runImport = async () => {
+    setImporting('Starting…');
+    try {
+      const r = await importDutchmansHarvest(lib, s => setImporting(s));
+      const fresh = await loadLibrary();
+      setLib(fresh);
+      setImportDone(`Added ${r.added} trades and added extra lines to ${r.updated} existing trades.`);
+    } catch (err) { setImportDone(`Import stopped: ${err.message}. Tap the button again to finish.`); }
+    setImporting('');
+  };
 
   useEffect(() => {
     loadLibrary().then(l => { setLib(l); if (l.trades[0]) setPick(l.trades[0].id); })
@@ -127,6 +140,15 @@ export default function ScopeLibraryPage() {
       <button type="button" onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold mb-3 py-2"><ArrowLeft className="w-5 h-5" /> Back</button>
       <h1 className="text-2xl sm:text-3xl font-bold text-[#0f2a5e] mb-1">Scope library</h1>
       <p className="text-gray-500 mb-5">The normal scope lines for each trade. {editable ? 'Changes apply to new subcontracts; ones already written keep their lines.' : 'Only PMs can change the library.'}</p>
+      {importDone && <p className="mb-4 text-sm text-green-800 bg-green-50 border border-green-200 rounded-lg px-3 py-2">{importDone}</p>}
+      {editable && lib && importAvailable(lib) && (
+        <section className="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div className="text-sm text-blue-900"><strong>Add the Dutchman’s Harvest trades.</strong> {DH_TRADES.length} trades from the Dutchman’s Harvest scope sheet (cabinets, countertops, drywall, flooring, painting, plumbing, HVAC, electrical and more). Trades you already have get the new lines as extra options, unticked.</div>
+          <button type="button" onClick={runImport} disabled={!!importing} className="h-11 px-4 rounded-md bg-[#0f2a5e] text-white font-semibold disabled:opacity-60 shrink-0 inline-flex items-center gap-2">
+            {importing ? <><Loader2 className="w-4 h-4 animate-spin" /> {importing}</> : 'Add these trades'}
+          </button>
+        </section>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-[16rem_minmax(0,1fr)] gap-5">
         <aside className="bg-white rounded-xl border border-gray-200 p-2 space-y-1 self-start">
           <div className="px-3 pt-2 pb-1 text-xs font-bold uppercase tracking-wide text-gray-500">Every subcontract</div>
