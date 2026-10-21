@@ -256,6 +256,29 @@ function subFields(changes) {
   return out;
 }
 
+// Approved subcontracts for one job, as the field sees them. Kept on the
+// device too, so scopes still open and search with no signal.
+export async function fieldSubcontracts(projectId) {
+  const key = `fieldReports:scopes:${projectId}`;
+  try {
+    const subs = (await listSubcontracts(projectId)).filter(s => s.status !== 'Draft');
+    try { localStorage.setItem(key, JSON.stringify(subs)); } catch { /* full */ }
+    return subs;
+  } catch (err) {
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(key) || 'null'); } catch { /* ignore */ }
+    if (cached) return Object.assign(cached, { offline: true });
+    throw err;
+  }
+}
+
+// Every subcontract on every job, for the office's contract queue.
+export async function listAllSubcontracts() {
+  const path = await listPath('subcontracts');
+  const items = await graphAll(`${path}/items?$expand=fields&$top=999`);
+  return items.map(toSub);
+}
+
 export async function listSubcontracts(projectId) {
   const path = await listPath('subcontracts');
   const items = await graphAll(`${path}/items?$expand=fields&$filter=fields/ProjectId eq '${projectId}'&$top=999`, { headers: { Prefer: 'HonorNonIndexedQueriesWarningMayFailRandomly' } });
