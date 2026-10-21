@@ -19,6 +19,13 @@ let uid = 0;
 const newId = () => `l${Date.now().toString(36)}${(uid++).toString(36)}`;
 const clean = items => items.map(i => ({ text: i.text, on: i.on !== false, ...(i.sub?.length ? { sub: i.sub } : {}) }));
 
+// ---- No dollars in the field -------------------------------------------------
+// Supers and crews never see a dollar amount. Anything shown in the field
+// passes through this, so a figure typed into a scope line or note is hidden.
+const DOLLARS = /\$\s*[\d,]*\d(?:\.\d+)?(?:\s*(?:k|m|million|thousand)\b)?|\b\d[\d,]*(?:\.\d+)?\s*(?:dollars|usd)\b/gi;
+export const HIDDEN_AMOUNT = '(amount on file with the office)';
+export const noDollars = text => String(text ?? '').replace(DOLLARS, HIDDEN_AMOUNT);
+
 // ---- Library ------------------------------------------------------------------
 
 const sameText = (a, b) => String(a).toLowerCase().replace(/[^a-z0-9]+/g, '') === String(b).toLowerCase().replace(/[^a-z0-9]+/g, '');
