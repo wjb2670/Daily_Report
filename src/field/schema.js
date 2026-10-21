@@ -139,6 +139,29 @@ export const LISTS = {
       text('AddedBy', 'Added By'),
     ],
   },
+  turnovers: {
+    displayName: 'Turnovers',
+    description: 'One row per job: the estimating-to-PM-and-super turnover checklist and sign-offs. Dollar notes are kept in Turnover Office Notes.',
+    titleLabel: 'Project',
+    columns: [
+      text('ProjectId', 'Project ID', { indexed: true }),
+      text('JobNumber', 'Job Number'),
+      choice('Status', ['In progress', 'Signed off']),
+      date('MeetingDate', 'Meeting Date'),
+      notes('ChecklistJSON', 'Checklist'),
+      notes('SignoffsJSON', 'Sign-offs'),
+      text('PacketUrl', 'Turnover Packet'),
+    ],
+  },
+  turnoverMoney: {
+    displayName: 'Turnover Office Notes',
+    description: 'Turnover notes that carry dollar amounts (budget, alternates, sub numbers). Office only: limit this list to office staff in SharePoint.',
+    titleLabel: 'Project',
+    columns: [
+      text('ProjectId', 'Project ID', { indexed: true }),
+      notes('NotesJSON', 'Notes'),
+    ],
+  },
   access: {
     displayName: 'App Access',
     description: 'Who can use which part of the Field Reports app. Managed on the app’s Access page. Anyone not listed is Field.',

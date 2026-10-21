@@ -20,6 +20,9 @@ import JobDashboard from '@/field/JobDashboard';
 import JobDocsPage from '@/field/JobDocsPage';
 import HomePage from '@/field/HomePage';
 import SubQueuePage from '@/field/SubQueuePage';
+import TurnoverPage from '@/field/TurnoverPage';
+import TurnoverListPage from '@/field/TurnoverListPage';
+import FieldTurnoverPage from '@/field/FieldTurnoverPage';
 import { currentRole } from '@/field/roles';
 import { loadMyRole } from '@/field/accessData';
 import { can } from '@/field/roles';
@@ -179,6 +182,9 @@ export default function FieldApp() {
           <Route path="/projects/existing" element={<Allowed area="projectsEdit"><AddExistingPage /></Allowed>} />
           <Route path="/projects/:id/subs" element={<Allowed area="subsView"><SubcontractsPage /></Allowed>} />
           <Route path="/projects/:id/subs/:subId" element={<Allowed area="subsView"><SubcontractEditor /></Allowed>} />
+          <Route path="/turnover" element={<Allowed area="projectsView"><TurnoverListPage /></Allowed>} />
+          <Route path="/turnover/:projectId" element={<Allowed area="daily"><FieldTurnoverPage /></Allowed>} />
+          <Route path="/projects/:id/turnover" element={<Allowed area="projectsView" readOnlyUnless="projectsEdit"><TurnoverPage /></Allowed>} />
           <Route path="/subcontracts" element={<Allowed area="subsView"><SubQueuePage /></Allowed>} />
           <Route path="/scope-library" element={<Allowed area="subsView"><ScopeLibraryPage /></Allowed>} />
           <Route path="/scopes/:projectId" element={<Allowed area="fieldScopes"><FieldScopesPage /></Allowed>} />

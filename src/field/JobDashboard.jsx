@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Loader2, Phone, Search, ClipboardList, Receipt, FolderOpen, HardHat, CalendarPlus, ChevronRight, AlertTriangle, CheckCircle2, Megaphone, CalendarDays, Trash2, X, Camera,
+  Loader2, Phone, Search, Handshake, ClipboardList, Receipt, FolderOpen, HardHat, CalendarPlus, ChevronRight, AlertTriangle, CheckCircle2, Megaphone, CalendarDays, Trash2, X, Camera,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { todayStr, readDraft, draftKey, findServerReport, LAST_PROJECT_KEY } from '@/lib/dailyReportStore';
@@ -11,6 +11,7 @@ import {
   findLookahead, readLookahead, listEvents, addEvent, deleteEvent, saveReceipt, sendPendingReceipts, pendingReceipts, receiptsThisWeek, RECEIPTS_DUE_DAY,
 } from '@/field/jobData';
 import { noDollars, fieldSubcontracts } from '@/field/scopesData';
+import { getTurnover } from '@/field/turnoverData';
 
 const input = 'w-full h-11 rounded-md border border-gray-300 bg-white px-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]';
 const DAY = 86_400_000;
@@ -128,6 +129,7 @@ export default function JobDashboard() {
   const [flash, setFlash] = useState('');
   const [subs, setSubs] = useState(null);
   const [scopeQ, setScopeQ] = useState('');
+  const [turnover, setTurnover] = useState(null);
   const today = todayStr();
 
   useEffect(() => {
@@ -170,6 +172,8 @@ export default function JobDashboard() {
     listEvents(project.id).then(setEvents).catch(() => setEvents([]));
     setSubs(null);
     fieldSubcontracts(project.id).then(setSubs).catch(() => setSubs([]));
+    setTurnover(null);
+    getTurnover(project.id).then(t => setTurnover(t.id ? t : null)).catch(() => {});
     const refreshReceipts = () => {
       sendPendingReceipts().finally(() => {
         receiptsThisWeek(project.field_folders)
@@ -344,6 +348,7 @@ export default function JobDashboard() {
         <Tile onClick={() => setSheet('receipt')} icon={Receipt} title="Snap receipt" sub={receipts.count == null ? 'Weekly Receipts' : `${receipts.count} sent this week`} />
         <Tile to={`/docs/${project.id}`} icon={FolderOpen} title="Job documents" sub="Drawings, specs, submittals, RFIs…" />
         <Tile to={`/scopes/${project.id}`} icon={HardHat} title="Sub scopes" sub="What each sub agreed to do" />
+        {turnover && <Tile to={`/turnover/${project.id}`} icon={Handshake} title="Turnover notes" sub={turnover.signoffs?.Superintendent ? 'From the turnover meeting' : 'Review and sign off'} />}
         <Tile onClick={() => setSheet('event')} icon={CalendarPlus} title="Add meeting / inspection" sub="Shows here for the whole crew" />
       </div>
       <Link to={`/report?project=${project.id}`} className="flex items-center justify-center gap-2 text-sm text-[#1e3a8a] font-semibold py-2"><CalendarDays className="w-4 h-4" /> Earlier reports and other days</Link>
