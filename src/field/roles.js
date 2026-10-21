@@ -28,6 +28,7 @@ export const INITIAL_ACCESS = [
 // area → roles that may open it
 const AREAS = {
   daily: ['Field', 'Office', 'PM', 'Admin'],
+  home: ['Reports only', 'Office', 'PM', 'Admin'], // the modules home screen
   allProjects: ['Office', 'PM', 'Admin'], // every project in Daily Report, not just assigned ones
   reports: ['Reports only', 'Office', 'PM', 'Admin'],
   projectsView: ['Reports only', 'Office', 'PM', 'Admin'],

@@ -18,6 +18,8 @@ import ScopeLibraryPage from '@/field/ScopeLibraryPage';
 import FieldScopesPage from '@/field/FieldScopesPage';
 import JobDashboard from '@/field/JobDashboard';
 import JobDocsPage from '@/field/JobDocsPage';
+import HomePage from '@/field/HomePage';
+import SubQueuePage from '@/field/SubQueuePage';
 import { currentRole } from '@/field/roles';
 import { loadMyRole } from '@/field/accessData';
 import { can } from '@/field/roles';
@@ -61,7 +63,8 @@ const FIELD_NAV = [
 ];
 
 const NAV = [
-  { to: '/', label: 'Daily Report', area: 'daily' },
+  { to: '/', label: 'Home', area: 'home' },
+  { to: '/report', label: 'Daily Report', area: 'daily' },
   { to: '/projects', label: 'Projects', area: 'projectsView' },
   { to: '/reports', label: 'Reports', area: 'reports' },
   { to: '/access', label: 'Access', area: 'admin' },
@@ -93,7 +96,7 @@ function Allowed({ area, readOnlyUnless, children }) {
   return children;
 }
 
-const COLS = { 1: 'grid-cols-1', 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-cols-4' };
+const COLS = { 1: 'grid-cols-1', 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-cols-4', 5: 'grid-cols-5' };
 
 function Shell({ account, role, children }) {
   const { pathname } = useLocation();
@@ -176,13 +179,14 @@ export default function FieldApp() {
           <Route path="/projects/existing" element={<Allowed area="projectsEdit"><AddExistingPage /></Allowed>} />
           <Route path="/projects/:id/subs" element={<Allowed area="subsView"><SubcontractsPage /></Allowed>} />
           <Route path="/projects/:id/subs/:subId" element={<Allowed area="subsView"><SubcontractEditor /></Allowed>} />
+          <Route path="/subcontracts" element={<Allowed area="subsView"><SubQueuePage /></Allowed>} />
           <Route path="/scope-library" element={<Allowed area="subsView"><ScopeLibraryPage /></Allowed>} />
           <Route path="/scopes/:projectId" element={<Allowed area="fieldScopes"><FieldScopesPage /></Allowed>} />
           <Route path="/projects/:id" element={<Allowed area="projectsView" readOnlyUnless="projectsEdit"><ProjectStartupPage /></Allowed>} />
           <Route path="/report" element={<Allowed area="daily"><DailyReport /></Allowed>} />
           <Route path="/job" element={<Allowed area="daily"><JobDashboard /></Allowed>} />
           <Route path="/docs/:projectId" element={<Allowed area="daily"><JobDocsPage /></Allowed>} />
-          <Route path="*" element={!can('daily') ? <Navigate to="/reports" replace /> : currentRole() === 'Field' ? <JobDashboard /> : <DailyReport />} />
+          <Route path="*" element={currentRole() === 'Field' ? <JobDashboard /> : <HomePage />} />
         </Routes>
       </Shell>
       <Toaster />

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Loader2, ClipboardList, Receipt, FolderOpen, HardHat, CalendarPlus, ChevronRight, AlertTriangle, CheckCircle2, Megaphone, CalendarDays, Trash2, X, Camera,
+  Loader2, Phone, Search, ClipboardList, Receipt, FolderOpen, HardHat, CalendarPlus, ChevronRight, AlertTriangle, CheckCircle2, Megaphone, CalendarDays, Trash2, X, Camera,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { todayStr, readDraft, draftKey, findServerReport, LAST_PROJECT_KEY } from '@/lib/dailyReportStore';
@@ -10,7 +10,7 @@ import { currentAccount } from '@/field/auth';
 import {
   findLookahead, readLookahead, listEvents, addEvent, deleteEvent, saveReceipt, sendPendingReceipts, pendingReceipts, receiptsThisWeek, RECEIPTS_DUE_DAY,
 } from '@/field/jobData';
-import { noDollars } from '@/field/scopesData';
+import { noDollars, fieldSubcontracts } from '@/field/scopesData';
 
 const input = 'w-full h-11 rounded-md border border-gray-300 bg-white px-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]';
 const DAY = 86_400_000;
@@ -126,6 +126,8 @@ export default function JobDashboard() {
   const [receipts, setReceipts] = useState({ count: null, waiting: 0 });
   const [sheet, setSheet] = useState('');
   const [flash, setFlash] = useState('');
+  const [subs, setSubs] = useState(null);
+  const [scopeQ, setScopeQ] = useState('');
   const today = todayStr();
 
   useEffect(() => {
@@ -166,6 +168,8 @@ export default function JobDashboard() {
       } catch (err) { setLookahead({ loading: false, error: err.status === 403 ? 'You don’t have access to the Schedule folder yet. Ask the office.' : 'Couldn’t read the look-ahead.' }); }
     })();
     listEvents(project.id).then(setEvents).catch(() => setEvents([]));
+    setSubs(null);
+    fieldSubcontracts(project.id).then(setSubs).catch(() => setSubs([]));
     const refreshReceipts = () => {
       sendPendingReceipts().finally(() => {
         receiptsThisWeek(project.field_folders)
@@ -307,6 +311,33 @@ export default function JobDashboard() {
             )}
           </>
         )}
+      </Card>
+
+      <Card>
+        <h2 className="font-bold text-[#0f2a5e] text-lg mb-2">Subs on this job</h2>
+        <form onSubmit={e => { e.preventDefault(); navigate(`/scopes/${project.id}${scopeQ.trim() ? `?q=${encodeURIComponent(scopeQ.trim())}` : ''}`); }} className="flex gap-2 mb-3">
+          <div className="relative flex-1">
+            <Search className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
+            <input aria-label="Search the scopes" value={scopeQ} onChange={e => setScopeQ(e.target.value)} placeholder="Search scopes"
+              className="w-full h-11 rounded-md border border-gray-300 bg-white pl-10 pr-3 text-base md:text-sm" />
+          </div>
+          <button type="submit" className="h-11 px-4 rounded-md bg-[#0f2a5e] text-white font-semibold">Search</button>
+        </form>
+        {!subs ? <div className="flex items-center gap-2 text-sm text-gray-500"><Loader2 className="w-4 h-4 animate-spin" /> Loading subs…</div>
+          : subs.length === 0 ? <p className="text-sm text-gray-500">No approved subcontracts on this job yet.</p> : (
+            <ul className="divide-y divide-gray-100">
+              {subs.map(s => (
+                <li key={s.id} className="flex items-center gap-3 py-2.5">
+                  <Link to={`/scopes/${project.id}?sub=${s.id}`} className="flex-1 min-w-0">
+                    <span className="block font-semibold text-gray-900 truncate">{s.company}</span>
+                    <span className="block text-sm text-gray-500 truncate">{[s.tradeName, s.companyContact].filter(Boolean).join(' · ')}</span>
+                  </Link>
+                  {s.companyPhone && <a href={`tel:${s.companyPhone.replace(/[^\d+]/g, '')}`} aria-label={`Call ${s.company}`} className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border border-[#0f2a5e] text-[#0f2a5e] font-semibold text-sm shrink-0"><Phone className="w-4 h-4" /> Call</a>}
+                  <Link to={`/scopes/${project.id}?sub=${s.id}`} className="h-10 px-3 inline-flex items-center rounded-lg bg-blue-50 text-[#1e3a8a] font-semibold text-sm shrink-0">Scope</Link>
+                </li>
+              ))}
+            </ul>
+          )}
       </Card>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -55,7 +55,7 @@ export default function JobDocsPage() {
     }
   };
 
-  const back = <Link to="/" className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold mb-3 py-2"><ArrowLeft className="w-5 h-5" /> Job dashboard</Link>;
+  const back = <Link to={`/job?project=${projectId}`} className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold mb-3 py-2"><ArrowLeft className="w-5 h-5" /> Job dashboard</Link>;
   if (error) return <div className="max-w-3xl mx-auto">{back}<p className="text-red-700 bg-red-50 border border-red-200 rounded-lg p-4">{error}</p></div>;
   if (!project) return <div className="flex items-center justify-center gap-2 text-gray-500 py-16"><Loader2 className="w-5 h-5 animate-spin" /> Loading…</div>;
 

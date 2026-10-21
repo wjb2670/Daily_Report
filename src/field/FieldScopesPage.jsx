@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Loader2, ArrowLeft, Search } from 'lucide-react';
 import base44 from '@/field/spAdapter';
-import { listSubcontracts, exhibitLines, noDollars } from '@/field/scopesData';
+import { fieldSubcontracts, exhibitLines, noDollars } from '@/field/scopesData';
 import { can } from '@/field/roles';
 
 const letter = i => String.fromCharCode(97 + (i % 26));
@@ -29,8 +29,9 @@ export default function FieldScopesPage() {
   const [project, setProject] = useState(null);
   const [subs, setSubs] = useState(null);
   const [error, setError] = useState('');
-  const [query, setQuery] = useState('');
-  const [open, setOpen] = useState(null);
+  const [params] = useSearchParams();
+  const [query, setQuery] = useState(params.get('q') || '');
+  const [open, setOpen] = useState(params.get('sub'));
 
   useEffect(() => {
     (async () => {
@@ -38,12 +39,11 @@ export default function FieldScopesPage() {
       const p = mine.find(x => String(x.id) === String(projectId));
       if (!p) { setError(can('allProjects') ? 'Project not found.' : 'You’re not assigned to this project.'); return; }
       setProject(p);
-      const all = await listSubcontracts(projectId);
-      setSubs(all.filter(s => s.status !== 'Draft'));
+      setSubs(await fieldSubcontracts(projectId));
     })().catch(err => setError(err.code === 'not_set_up' ? 'Scopes aren’t set up yet.' : err.message));
   }, [projectId]);
 
-  if (error) return <div className="max-w-3xl mx-auto"><Link to="/" className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold mb-3 py-2"><ArrowLeft className="w-5 h-5" /> Daily Report</Link><p className="text-red-700 bg-red-50 border border-red-200 rounded-lg p-4">{error}</p></div>;
+  if (error) return <div className="max-w-3xl mx-auto"><Link to={`/job?project=${projectId}`} className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold mb-3 py-2"><ArrowLeft className="w-5 h-5" /> Job dashboard</Link><p className="text-red-700 bg-red-50 border border-red-200 rounded-lg p-4">{error}</p></div>;
   if (!subs) return <div className="flex items-center justify-center gap-2 text-gray-500 py-16"><Loader2 className="w-5 h-5 animate-spin" /> Loading scopes…</div>;
 
   const q = query.trim().toLowerCase();
@@ -52,9 +52,10 @@ export default function FieldScopesPage() {
 
   return (
     <div className="max-w-3xl mx-auto pb-10">
-      <Link to="/" className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold mb-3 py-2"><ArrowLeft className="w-5 h-5" /> Daily Report</Link>
+      <Link to={`/job?project=${projectId}`} className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold mb-3 py-2"><ArrowLeft className="w-5 h-5" /> Job dashboard</Link>
       <h1 className="text-2xl sm:text-3xl font-bold text-[#0f2a5e]">Sub scopes</h1>
       <p className="text-gray-500 mb-4">{project.job_number} {project.name}. What each subcontractor agreed to do, as approved by the PM.</p>
+      {subs.offline && <p className="text-sm text-amber-800 bg-amber-50 rounded-md px-3 py-2 mb-3">No signal. Showing the scopes saved on this device.</p>}
       <div className="relative mb-4">
         <Search className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
         <input aria-label="Search scopes" className="w-full h-11 rounded-md border border-gray-300 bg-white pl-10 pr-3 text-base md:text-sm" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search a company or a word, e.g. bollards" />
@@ -64,7 +65,7 @@ export default function FieldScopesPage() {
       ) : (
         <ul className="space-y-3">
           {shown.map(s => {
-            const isOpen = open === s.id || !!q;
+            const isOpen = String(open) === String(s.id) || !!q;
             return (
               <li key={s.id} className="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <button type="button" onClick={() => setOpen(isOpen && !q ? null : s.id)} className="w-full text-left p-4" aria-expanded={isOpen}>
