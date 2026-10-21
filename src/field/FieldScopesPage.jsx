@@ -2,10 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Loader2, ArrowLeft, Search } from 'lucide-react';
 import base44 from '@/field/spAdapter';
-import { listSubcontracts, exhibitLines } from '@/field/scopesData';
+import { listSubcontracts, exhibitLines, noDollars } from '@/field/scopesData';
 import { can } from '@/field/roles';
 
 const letter = i => String.fromCharCode(97 + (i % 26));
+
+// Shows the searched words in yellow.
+function Marked({ text, q }) {
+  if (!q) return text;
+  const parts = [];
+  const lower = text.toLowerCase();
+  let at = 0;
+  for (let i = lower.indexOf(q); i !== -1; i = lower.indexOf(q, i + q.length)) {
+    if (i > at) parts.push(text.slice(at, i));
+    parts.push(<mark key={i} className="bg-yellow-200 rounded px-0.5">{text.slice(i, i + q.length)}</mark>);
+    at = i + q.length;
+  }
+  parts.push(text.slice(at));
+  return parts;
+}
 
 // What each sub is on the hook for, for the superintendent on site.
 // Approved scopes only, and never the contract amount.
@@ -32,7 +47,7 @@ export default function FieldScopesPage() {
   if (!subs) return <div className="flex items-center justify-center gap-2 text-gray-500 py-16"><Loader2 className="w-5 h-5 animate-spin" /> Loading scopes…</div>;
 
   const q = query.trim().toLowerCase();
-  const withLines = subs.map(s => ({ ...s, lines: exhibitLines(s.scope, { project: project.name, company: s.company }) }));
+  const withLines = subs.map(s => ({ ...s, lines: exhibitLines(s.scope, { project: project.name, company: s.company }).map(l => ({ text: noDollars(l.text), sub: l.sub.map(noDollars) })) }));
   const shown = withLines.filter(s => !q || `${s.company} ${s.tradeName} ${s.costCode} ${s.lines.map(l => [l.text, ...l.sub].join(' ')).join(' ')}`.toLowerCase().includes(q));
 
   return (
@@ -53,15 +68,15 @@ export default function FieldScopesPage() {
             return (
               <li key={s.id} className="bg-white rounded-xl border border-gray-200 shadow-sm">
                 <button type="button" onClick={() => setOpen(isOpen && !q ? null : s.id)} className="w-full text-left p-4" aria-expanded={isOpen}>
-                  <div className="font-bold text-[#0f2a5e] text-lg leading-tight">{s.company}</div>
+                  <div className="font-bold text-[#0f2a5e] text-lg leading-tight"><Marked text={s.company} q={q} /></div>
                   <div className="text-sm text-gray-600">{s.tradeName} · cost code {s.costCode} · {s.lines.length} items</div>
                 </button>
                 {isOpen && (
                   <ol className="px-4 pb-4 space-y-1.5 text-[15px] text-gray-900">
-                    {s.lines.map((l, i) => (
+                    {s.lines.map((l, i) => ({ l, i })).filter(({ l }) => !q || [l.text, ...l.sub].join(' ').toLowerCase().includes(q) || s.company.toLowerCase().includes(q) || `${s.tradeName} ${s.costCode}`.toLowerCase().includes(q)).map(({ l, i }) => (
                       <li key={i} className="flex gap-2">
                         <span className="w-6 shrink-0 text-right font-semibold text-[#0f2a5e]">{i + 1}.</span>
-                        <div className="min-w-0">{l.text}{l.sub.map((x, j) => <div key={j} className="pl-1"><span className="font-semibold mr-1">{letter(j)}.</span>{x}</div>)}</div>
+                        <div className="min-w-0"><Marked text={l.text} q={q} />{l.sub.map((x, j) => <div key={j} className="pl-1"><span className="font-semibold mr-1">{letter(j)}.</span><Marked text={x} q={q} /></div>)}</div>
                       </li>
                     ))}
                   </ol>

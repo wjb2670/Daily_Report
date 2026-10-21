@@ -10,6 +10,7 @@ import { currentAccount } from '@/field/auth';
 import {
   findLookahead, readLookahead, listEvents, addEvent, deleteEvent, saveReceipt, sendPendingReceipts, pendingReceipts, receiptsThisWeek, RECEIPTS_DUE_DAY,
 } from '@/field/jobData';
+import { noDollars } from '@/field/scopesData';
 
 const input = 'w-full h-11 rounded-md border border-gray-300 bg-white px-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]';
 const DAY = 86_400_000;
@@ -216,7 +217,7 @@ export default function JobDashboard() {
   }
   if (receipts.waiting) reminders.push({ text: `${receipts.waiting} receipt${receipts.waiting === 1 ? ' is' : 's are'} waiting for signal to send.` });
   const tomorrow = addDays(today, 1);
-  upcomingEvents.filter(e => e.day === today || e.day === tomorrow).forEach(e => reminders.push({ text: `${e.kind} ${e.day === today ? 'today' : 'tomorrow'}${e.time ? ` at ${e.time}` : ''}: ${e.title}` }));
+  upcomingEvents.filter(e => e.day === today || e.day === tomorrow).forEach(e => reminders.push({ text: `${e.kind} ${e.day === today ? 'today' : 'tomorrow'}${e.time ? ` at ${e.time}` : ''}: ${noDollars(e.title)}` }));
 
   return (
     <div className="max-w-3xl mx-auto pb-12 space-y-4">
@@ -252,7 +253,7 @@ export default function JobDashboard() {
 
       {project.field_note && (
         <Card className="border-amber-300 bg-amber-50">
-          <div className="flex gap-3"><Megaphone className="w-6 h-6 text-amber-700 shrink-0" /><div><div className="text-sm font-bold uppercase tracking-wide text-amber-800">From the office</div><p className="text-gray-900 whitespace-pre-wrap">{project.field_note}</p></div></div>
+          <div className="flex gap-3"><Megaphone className="w-6 h-6 text-amber-700 shrink-0" /><div><div className="text-sm font-bold uppercase tracking-wide text-amber-800">From the office</div><p className="text-gray-900 whitespace-pre-wrap">{noDollars(project.field_note)}</p></div></div>
         </Card>
       )}
 
@@ -295,7 +296,7 @@ export default function JobDashboard() {
                       {list.map((x, k) => (
                         <li key={k} className="flex items-start gap-2">
                           <span className={`shrink-0 rounded-full text-[11px] font-bold uppercase px-2 py-0.5 ${KIND_STYLE[x.kind] || KIND_STYLE.Other}`}>{x.kind === 'Work' ? 'Starts' : x.kind}</span>
-                          <span className="min-w-0 text-gray-900">{x.time && <span className="font-semibold">{x.time} </span>}{x.title}{x.notes ? <span className="text-gray-500"> – {x.notes}</span> : null}</span>
+                          <span className="min-w-0 text-gray-900">{x.time && <span className="font-semibold">{x.time} </span>}{noDollars(x.title)}{x.notes ? <span className="text-gray-500"> – {noDollars(x.notes)}</span> : null}</span>
                           {x.id && <button type="button" aria-label="Remove" onClick={async () => { await deleteEvent(x.id).catch(() => {}); setEvents(ev => ev.filter(e => e.id !== x.id)); }} className="ml-auto p-1 text-gray-300 hover:text-red-600 shrink-0"><Trash2 className="w-4 h-4" /></button>}
                         </li>
                       ))}
