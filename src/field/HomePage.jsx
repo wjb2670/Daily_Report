@@ -12,7 +12,7 @@ const MODULES = [
   { to: '/report', area: 'daily', icon: ClipboardList, title: 'Daily Report', sub: 'Fill in or review a day on any job' },
   { to: '/job', area: 'daily', icon: HardHat, title: 'Field dashboard', sub: 'What the super sees for a job' },
   { to: '/projects', area: 'projectsView', icon: FolderKanban, title: 'Project Startup', sub: 'New jobs, award, bonds, job folder, field access' },
-  { area: 'projectsView', icon: Handshake, title: 'Turnover', sub: 'Estimating → PM and super hand-off', soon: true },
+  { to: '/turnover', area: 'projectsView', icon: Handshake, title: 'Turnover', sub: 'Estimating → PM and super hand-off meeting' },
   { to: '/subcontracts', area: 'subsView', icon: FileSignature, title: 'Subcontracts', sub: 'Scopes, PM approval and contracts', badge: 'queue' },
   { to: '/scope-library', area: 'subsView', icon: BookOpen, title: 'Scope Library', sub: 'Standard scope lines by trade' },
   { to: '/reports', area: 'reports', icon: BarChart3, title: 'Reports', sub: 'Printed daily reports by job and date' },

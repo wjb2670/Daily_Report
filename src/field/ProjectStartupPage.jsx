@@ -266,6 +266,11 @@ export default function ProjectStartupPage() {
 
       {can('projectsEdit') && <FieldAccessCard project={p} onSaved={changes => setP(prev => ({ ...prev, ...changes }))} />}
 
+      <Link to={`/projects/${p.id}/turnover`} className="flex items-center justify-between gap-3 bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3 mb-3 hover:border-[#0f2a5e]">
+        <span><span className="font-bold text-[#0f2a5e]">Turnover meeting</span><span className="text-gray-500 text-sm"> · checklist and sign-offs with the estimator, PM, super and Keith</span></span>
+        <span aria-hidden="true" className="text-[#0f2a5e] font-bold text-xl">›</span>
+      </Link>
+
       {can('subsView') && (
         <Link to={`/projects/${p.id}/subs`} className="flex items-center justify-between gap-3 bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3 mb-3 hover:border-[#0f2a5e]">
           <span><span className="font-bold text-[#0f2a5e]">Subcontracts &amp; scopes</span><span className="text-gray-500 text-sm"> · PM scopes, Exhibit A and contract files</span></span>
