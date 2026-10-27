@@ -63,7 +63,7 @@ export async function getTurnover(projectId, { office = false } = {}) {
     const money = await findRow('turnoverMoney', projectId);
     const notes = parse(money?.fields?.NotesJSON, {});
     t.moneyId = money?.id || null;
-    t.items = t.items.map(i => (i.office ? { ...i, notes: notes[i.id] || '' } : i));
+    t.items = t.items.map(i => (i.office ? { ...i, notes: notes[i.id] || '' } : notes[i.id] ? { ...i, notes: notes[i.id] } : i));
   } else {
     t.items = t.items.map(i => (i.office ? { ...i, notes: '' } : { ...i, notes: noDollars(i.notes), text: noDollars(i.text) }));
   }
@@ -84,7 +84,7 @@ export async function saveTurnover(project, t) {
   const fields = {
     Title: project.name, ProjectId: String(project.id), JobNumber: project.jobNumber || project.job_number || '', Status: status,
     MeetingDate: t.meetingDate ? `${t.meetingDate}T12:00:00Z` : null,
-    ChecklistJSON: JSON.stringify(t.items.map(({ id, text, office, done, notes, custom }) => ({ id, done, notes: office ? '' : notes, ...(custom ? { text, office: !!office, custom: true } : {}) }))),
+    ChecklistJSON: JSON.stringify(t.items.map(({ id, text, office, done, notes, custom }) => ({ id, done, notes: office ? '' : noDollars(notes), ...(custom ? { text, office: !!office, custom: true } : {}) }))),
     SignoffsJSON: JSON.stringify(t.signoffs || {}),
     ...(t.packetUrl != null ? { PacketUrl: t.packetUrl } : {}),
   };
@@ -93,7 +93,9 @@ export async function saveTurnover(project, t) {
   if (id) await graph(`${path}/items/${id}/fields`, { method: 'PATCH', body: fields });
   else id = (await graph(`${path}/items`, { method: 'POST', body: { fields } })).id;
 
-  const officeNotes = Object.fromEntries(t.items.filter(i => i.office && i.notes).map(i => [i.id, i.notes]));
+  // Office-only items, plus any other note that mentions a dollar amount: the
+  // full wording is kept here and the field row holds it with the amount hidden.
+  const officeNotes = Object.fromEntries(t.items.filter(i => i.notes && (i.office || noDollars(i.notes) !== i.notes)).map(i => [i.id, i.notes]));
   let { moneyId } = t;
   if (moneyId || Object.keys(officeNotes).length) {
     const mpath = await listPath('turnoverMoney');

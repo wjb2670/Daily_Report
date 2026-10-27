@@ -6,6 +6,7 @@ import { CONFIG } from '@/field/auth';
 import { LISTS, PHOTO_FOLDER } from '@/field/schema';
 import { INITIAL_ACCESS } from '@/field/roles';
 import { libraryRowsFromSeed } from '@/field/scopesData';
+import { moveContractAmountsOut } from '@/field/projectsData';
 
 // Creates (or completes) the lists, columns and photo folder the app needs in
 // the Field Reports site. Safe to run again: it only adds what's missing.
@@ -75,7 +76,8 @@ export default function SetupPage() {
       const site = await graph(`/sites/${CONFIG.siteHost}:${CONFIG.sitePath}?$select=id,webUrl,displayName`);
       log(`Found the “${site.displayName}” site`);
       const lists = {};
-      for (const key of ['projects', 'reports', 'subs', 'access', 'scopeLibrary', 'subcontracts', 'subPrices', 'jobEvents', 'turnovers', 'turnoverMoney']) lists[key] = await ensureList(site, key, log);
+      for (const key of ['projects', 'reports', 'subs', 'access', 'scopeLibrary', 'subcontracts', 'subPrices', 'jobEvents', 'turnovers', 'turnoverMoney', 'projectFinancials']) lists[key] = await ensureList(site, key, log);
+      await moveContractAmountsOut(site.id, lists.projects.id, log);
       // First time only: add the starting people to App Access.
       const people = (await graph(`/sites/${site.id}/lists/${lists.access.id}/items?$top=1`)).value || [];
       if (people.length === 0) {

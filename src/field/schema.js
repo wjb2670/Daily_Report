@@ -35,7 +35,6 @@ export const LISTS = {
       notes('ProjectNotes', 'Notes'),
       text('OwnerName', 'Owner / Client'),
       choice('ContractType', ['GC', 'CM'], 'Contract Type'),
-      number('ContractAmount', 'Contract Amount'),
       date('AwardDate', 'Award Date'),
       date('AwardLetterDate', 'Award Letter Received'),
       date('NTPDate', 'Notice to Proceed'),
@@ -137,6 +136,15 @@ export const LISTS = {
       choice('Kind', ['Meeting', 'Inspection', 'Delivery', 'Other']),
       notes('Notes'),
       text('AddedBy', 'Added By'),
+    ],
+  },
+  projectFinancials: {
+    displayName: 'Project Financials',
+    description: 'Dollar figures for each job (contract amount), kept out of the Projects list the field app reads. Office only: limit this list to office staff in SharePoint.',
+    titleLabel: 'Project',
+    columns: [
+      text('ProjectId', 'Project ID', { indexed: true }),
+      number('ContractAmount', 'Contract Amount'),
     ],
   },
   turnovers: {
