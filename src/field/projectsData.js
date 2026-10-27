@@ -248,7 +248,7 @@ export function toProjectRecord(item) {
     status: f.Status || 'Awarded',
     owner: f.OwnerName || '',
     contractType: f.ContractType || '',
-    contractAmount: f.ContractAmount ?? null,
+    contractAmount: null, // kept in the office-only Project Financials list
     address: f.Address || '', city: f.City || '', state: f.State || '', zip: f.Zip || '',
     projectManager: f.ProjectManager || '',
     superintendents: people(f.Superintendent),
@@ -273,7 +273,7 @@ export function toProjectRecord(item) {
 
 const TO_FIELD = {
   name: 'Title', jobNumber: 'JobNumber', status: 'Status', owner: 'OwnerName', contractType: 'ContractType',
-  contractAmount: 'ContractAmount', address: 'Address', city: 'City', state: 'State', zip: 'Zip',
+  address: 'Address', city: 'City', state: 'State', zip: 'Zip',
   projectManager: 'ProjectManager', bondsRequired: 'BondsRequired', paymentBond: 'PaymentBond',
   performanceBond: 'PerformanceBond', ownerContract: 'OwnerContract', folderUrl: 'ProjectFolderUrl',
   folderId: 'ProjectFolderId', notes: 'ProjectNotes', existing: 'ExistingJob', fieldNote: 'FieldNote',
@@ -296,22 +296,71 @@ async function projectsPath() {
   return `/sites/${site.id}/lists/${await getListId('projects')}`;
 }
 
+// ---- Dollar figures: the office-only Project Financials list ------------------------
+// The field app reads the Projects list, so no dollar amount is stored there.
+// People without access to Project Financials simply get no amounts back.
+
+async function financialsPath() {
+  const site = await getSite();
+  return `/sites/${site.id}/lists/${await getListId('projectFinancials')}`;
+}
+async function readFinancials(projectId) {
+  try {
+    const filter = projectId != null ? `&$filter=fields/ProjectId eq '${projectId}'` : '';
+    const items = await graphAll(`${await financialsPath()}/items?$expand=fields($select=ProjectId,ContractAmount)${filter}&$top=999`, { headers: { Prefer: 'HonorNonIndexedQueriesWarningMayFailRandomly' } });
+    return items.map(i => ({ id: i.id, projectId: String(i.fields?.ProjectId || ''), contractAmount: i.fields?.ContractAmount ?? null }));
+  } catch {
+    return []; // not set up yet, or no access
+  }
+}
+async function saveContractAmount(projectId, project, amount) {
+  const path = await financialsPath();
+  const [row] = await readFinancials(projectId);
+  const fields = { Title: project?.name || '', ProjectId: String(projectId), ContractAmount: amount ?? null };
+  if (row) await graph(`${path}/items/${row.id}/fields`, { method: 'PATCH', body: fields });
+  else await graph(`${path}/items`, { method: 'POST', body: { fields } });
+}
+
 export async function listProjectRecords() {
-  const items = await graphAll(`${await projectsPath()}/items?$expand=fields&$top=999`);
-  return items.map(toProjectRecord).sort((a, b) => b.jobNumber.localeCompare(a.jobNumber, undefined, { numeric: true }));
+  const [items, money] = await Promise.all([graphAll(`${await projectsPath()}/items?$expand=fields&$top=999`), readFinancials()]);
+  return items.map(toProjectRecord)
+    .map(p => ({ ...p, contractAmount: money.find(m => m.projectId === String(p.id))?.contractAmount ?? null }))
+    .sort((a, b) => b.jobNumber.localeCompare(a.jobNumber, undefined, { numeric: true }));
 }
 
 export async function getProjectRecord(id) {
-  return toProjectRecord(await graph(`${await projectsPath()}/items/${id}?$expand=fields`));
+  const [item, money] = await Promise.all([graph(`${await projectsPath()}/items/${id}?$expand=fields`), readFinancials(id)]);
+  return { ...toProjectRecord(item), contractAmount: money[0]?.contractAmount ?? null };
 }
 
 export async function createProjectRecord(data) {
   const item = await graph(`${await projectsPath()}/items`, { method: 'POST', body: { fields: toFields(data) } });
+  if (data.contractAmount != null) await saveContractAmount(item.id, data, data.contractAmount);
   return item.id;
 }
 
 export async function updateProjectRecord(id, changes) {
-  await graph(`${await projectsPath()}/items/${id}/fields`, { method: 'PATCH', body: toFields(changes) });
+  const fields = toFields(changes);
+  if (Object.keys(fields).length) await graph(`${await projectsPath()}/items/${id}/fields`, { method: 'PATCH', body: fields });
+  if ('contractAmount' in changes) await saveContractAmount(id, changes, changes.contractAmount);
+}
+
+// One-time move for sites set up before Project Financials existed: copies
+// each Contract Amount out of Projects, then removes that column.
+export async function moveContractAmountsOut(siteId, projectsListId, log) {
+  const cols = await graphAll(`/sites/${siteId}/lists/${projectsListId}/columns?$select=id,name`);
+  const col = cols.find(c => c.name === 'ContractAmount');
+  if (!col) return;
+  const items = await graphAll(`/sites/${siteId}/lists/${projectsListId}/items?$expand=fields($select=Title,ContractAmount)&$top=999`);
+  let moved = 0;
+  for (const i of items) {
+    const amount = i.fields?.ContractAmount;
+    if (amount == null) continue;
+    await saveContractAmount(i.id, { name: i.fields?.Title }, amount);
+    moved += 1;
+  }
+  await graph(`/sites/${siteId}/lists/${projectsListId}/columns/${col.id}`, { method: 'DELETE' });
+  log(`Moved ${moved} contract amount${moved === 1 ? '' : 's'} to Project Financials and removed the Contract Amount column from Projects`);
 }
 
 export async function projectsListUrl() {
