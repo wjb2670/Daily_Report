@@ -21,6 +21,7 @@ import JobDocsPage from '@/field/JobDocsPage';
 import HomePage from '@/field/HomePage';
 import SubQueuePage from '@/field/SubQueuePage';
 import TurnoverPage from '@/field/TurnoverPage';
+import CrewBoardPage from '@/field/CrewBoardPage';
 import TurnoverListPage from '@/field/TurnoverListPage';
 import FieldTurnoverPage from '@/field/FieldTurnoverPage';
 import { currentRole } from '@/field/roles';
@@ -182,6 +183,7 @@ export default function FieldApp() {
           <Route path="/projects/existing" element={<Allowed area="projectsEdit"><AddExistingPage /></Allowed>} />
           <Route path="/projects/:id/subs" element={<Allowed area="subsView"><SubcontractsPage /></Allowed>} />
           <Route path="/projects/:id/subs/:subId" element={<Allowed area="subsView"><SubcontractEditor /></Allowed>} />
+          <Route path="/crew" element={<Allowed area="projectsEdit"><CrewBoardPage /></Allowed>} />
           <Route path="/turnover" element={<Allowed area="projectsView"><TurnoverListPage /></Allowed>} />
           <Route path="/turnover/:projectId" element={<Allowed area="daily"><FieldTurnoverPage /></Allowed>} />
           <Route path="/projects/:id/turnover" element={<Allowed area="projectsView" readOnlyUnless="projectsEdit"><TurnoverPage /></Allowed>} />
