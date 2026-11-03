@@ -138,6 +138,16 @@ export const LISTS = {
       text('AddedBy', 'Added By'),
     ],
   },
+  fieldCrew: {
+    displayName: 'Field Crew',
+    description: 'Superintendents and crew shown on the Crew Board, including people not on a job right now.',
+    titleLabel: 'Name',
+    columns: [
+      text('Email', 'Email', { indexed: true }),
+      choice('Role', ['Superintendent', 'Crew']),
+      number('UserId', 'SharePoint User ID'),
+    ],
+  },
   projectFinancials: {
     displayName: 'Project Financials',
     description: 'Dollar figures for each job (contract amount), kept out of the Projects list the field app reads. Office only: limit this list to office staff in SharePoint.',

@@ -346,9 +346,10 @@ export default function ProjectStartupPage() {
             <p className="text-sm"><strong>{p.superintendents.join(', ')}</strong>{p.crew.length ? <span className="text-gray-500"> · Crew access: {p.crew.join(', ')}</span> : null}</p>
           ) : <p className="text-sm text-gray-600">No superintendent assigned yet.</p>}
           <div className="flex flex-wrap gap-2">
+            {can('projectsEdit') && <Link to="/crew" className="inline-flex items-center gap-1.5 h-10 px-3 rounded-md bg-[#0f2a5e] text-white text-sm font-semibold">Assign on the Crew Board</Link>}
             {listUrl && (
               <a href={`${listUrl}/EditForm.aspx?ID=${p.id}`} target="_blank" rel="noreferrer"
-                className="inline-flex items-center gap-1.5 h-10 px-3 rounded-md bg-[#0f2a5e] text-white text-sm font-semibold">
+                className="inline-flex items-center gap-1.5 h-10 px-3 rounded-md border border-gray-300 bg-white text-sm font-semibold text-[#0f2a5e]">
                 Assign in SharePoint <ExternalLink className="w-4 h-4" />
               </a>
             )}

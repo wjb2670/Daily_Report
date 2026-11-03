@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ClipboardList, FolderKanban, Handshake, FileSignature, BookOpen, BarChart3, Users, Calculator, Receipt, HardHat, ChevronRight,
+  ClipboardList, Columns3, FolderKanban, Handshake, FileSignature, BookOpen, BarChart3, Users, Calculator, Receipt, HardHat, ChevronRight,
 } from 'lucide-react';
 import { can, currentRole } from '@/field/roles';
 import { currentAccount } from '@/field/auth';
@@ -12,6 +12,7 @@ const MODULES = [
   { to: '/report', area: 'daily', icon: ClipboardList, title: 'Daily Report', sub: 'Fill in or review a day on any job' },
   { to: '/job', area: 'daily', icon: HardHat, title: 'Field dashboard', sub: 'What the super sees for a job' },
   { to: '/projects', area: 'projectsView', icon: FolderKanban, title: 'Project Startup', sub: 'New jobs, award, bonds, job folder, field access' },
+  { to: '/crew', area: 'projectsEdit', icon: Columns3, title: 'Crew Board', sub: 'Who is on which job; drag to move supers and crew' },
   { to: '/turnover', area: 'projectsView', icon: Handshake, title: 'Turnover', sub: 'Estimating → PM and super hand-off meeting' },
   { to: '/subcontracts', area: 'subsView', icon: FileSignature, title: 'Subcontracts', sub: 'Scopes, PM approval and contracts', badge: 'queue' },
   { to: '/scope-library', area: 'subsView', icon: BookOpen, title: 'Scope Library', sub: 'Standard scope lines by trade' },
