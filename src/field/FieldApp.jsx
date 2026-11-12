@@ -21,6 +21,8 @@ import JobDocsPage from '@/field/JobDocsPage';
 import HomePage from '@/field/HomePage';
 import SubQueuePage from '@/field/SubQueuePage';
 import TurnoverPage from '@/field/TurnoverPage';
+import ReceiptsPage from '@/field/ReceiptsPage';
+import ReceiptCodePage from '@/field/ReceiptCodePage';
 import CrewBoardPage from '@/field/CrewBoardPage';
 import TurnoverListPage from '@/field/TurnoverListPage';
 import FieldTurnoverPage from '@/field/FieldTurnoverPage';
@@ -188,6 +190,8 @@ export default function FieldApp() {
           <Route path="/turnover/:projectId" element={<Allowed area="daily"><FieldTurnoverPage /></Allowed>} />
           <Route path="/projects/:id/turnover" element={<Allowed area="projectsView" readOnlyUnless="projectsEdit"><TurnoverPage /></Allowed>} />
           <Route path="/subcontracts" element={<Allowed area="subsView"><SubQueuePage /></Allowed>} />
+          <Route path="/receipts" element={<Allowed area="receiptsView"><ReceiptsPage /></Allowed>} />
+          <Route path="/receipts/:id" element={<Allowed area="receiptsView"><ReceiptCodePage /></Allowed>} />
           <Route path="/scope-library" element={<Allowed area="subsView"><ScopeLibraryPage /></Allowed>} />
           <Route path="/scopes/:projectId" element={<Allowed area="fieldScopes"><FieldScopesPage /></Allowed>} />
           <Route path="/projects/:id" element={<Allowed area="projectsView" readOnlyUnless="projectsEdit"><ProjectStartupPage /></Allowed>} />

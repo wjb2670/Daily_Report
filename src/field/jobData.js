@@ -4,6 +4,7 @@ import { graph, graphAll } from '@/field/graph';
 import { getSite, getListId, projectPeopleEmails } from '@/field/spAdapter';
 import { getPmDrive, makeFolder, safeName } from '@/field/projectsData';
 import { photoQueue } from '@/lib/dailyReportStore';
+import { currentAccount } from '@/field/auth';
 
 // Folders in the job folder that superintendents and crew may open (read-only).
 export const FIELD_FOLDERS = ['Drawings', 'Inspection Reports', 'Permits', 'RFI', 'Schedule', 'Specifications', 'Submittals'];
@@ -248,12 +249,30 @@ async function putReceipt(fieldFolders, name, blob) {
 }
 
 // Saves the photo on the device first, then sends it; with no signal it waits.
+// Once the file is in Weekly Receipts, a row goes into the Receipts list so
+// the job's PM can code it to the budget.
 export async function saveReceipt(project, blob, meta) {
   const id = `rcpt-${Date.now().toString(36)}`;
   const name = receiptName(meta);
   await photoQueue.put(id, blob);
-  writePending([...readPending(), { id, projectId: project.id, name, folders: project.field_folders }]);
+  const me = currentAccount() || {};
+  const record = { store: meta.vendor || 'Receipt', date: meta.date, total: meta.amount ? Number(meta.amount) : null, jobNumber: project.job_number || '', by: me.name || '', email: me.email || '' };
+  writePending([...readPending(), { id, projectId: project.id, name, folders: project.field_folders, record }]);
   return sendPendingReceipts();
+}
+
+async function recordReceipt(r) {
+  const { record: m, file } = r;
+  const fields = {
+    Title: m.store, ProjectId: String(r.projectId), JobNumber: m.jobNumber, ReceiptDate: m.date ? `${m.date}T12:00:00Z` : null,
+    ...(m.total != null ? { Total: m.total } : {}), SubmittedBy: m.by, SubmittedEmail: m.email,
+    DriveId: file.driveId, FileId: file.id, FileUrl: file.webUrl || '',
+  };
+  try {
+    await graph(`/sites/${(await getSite()).id}/lists/${await getListId('receipts')}/items`, { method: 'POST', body: { fields } });
+  } catch (err) {
+    if (err.code !== 'not_set_up') throw err; // before Site setup, the file alone is kept
+  }
 }
 
 let sending = null;
@@ -264,9 +283,14 @@ export function sendPendingReceipts() {
     for (const r of readPending()) {
       if (navigator.onLine === false) break;
       try {
-        const blob = await photoQueue.get(r.id);
-        if (blob) await putReceipt(r.folders, r.name, blob);
-        await photoQueue.remove(r.id);
+        if (!r.file) {
+          const blob = await photoQueue.get(r.id);
+          const item = blob ? await putReceipt(r.folders, r.name, blob) : null;
+          r.file = item ? { driveId: item.parentReference?.driveId || r.folders.driveId, id: item.id, webUrl: item.webUrl } : { none: true };
+          writePending(readPending().map(x => (x.id === r.id ? r : x))); // uploaded: don't send it twice
+          await photoQueue.remove(r.id);
+        }
+        if (r.record && !r.file.none) await recordReceipt(r);
         writePending(readPending().filter(x => x.id !== r.id));
         sent += 1;
       } catch {
