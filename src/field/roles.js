@@ -9,7 +9,7 @@ export const ROLE_HELP = {
   Field: 'Daily reports for the projects they are assigned to.',
   'Reports only': 'View and print reports, and look at projects. Can’t change anything.',
   Office: 'Daily reports for every project, reports, adding or updating projects, and creating subcontracts from approved scopes.',
-  PM: 'Everything Office can do, plus writing and approving subcontract scopes and editing the scope library.',
+  PM: 'Everything Office can do, plus writing and approving subcontract scopes, editing the scope library, and coding receipts to the budget.',
   Admin: 'Everything, including the Access page and Site setup.',
 };
 
@@ -37,6 +37,8 @@ const AREAS = {
   subsContract: ['Office', 'PM', 'Admin'], // create contract files once a scope is approved
   scopesEdit: ['PM', 'Admin'], // write/approve scopes, edit the library
   fieldScopes: ['Field', 'Office', 'PM', 'Admin'], // approved scopes, no prices
+  receiptsView: ['Office', 'PM', 'Admin'], // receipts and their coding, weekly export
+  receiptsCode: ['PM', 'Admin'], // pick cost codes for a receipt
   admin: ['Admin'],
 };
 
