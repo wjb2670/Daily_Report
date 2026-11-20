@@ -21,6 +21,7 @@ import JobDocsPage from '@/field/JobDocsPage';
 import HomePage from '@/field/HomePage';
 import SubQueuePage from '@/field/SubQueuePage';
 import TurnoverPage from '@/field/TurnoverPage';
+import MarkupPage from '@/field/MarkupPage';
 import ReceiptsPage from '@/field/ReceiptsPage';
 import ReceiptCodePage from '@/field/ReceiptCodePage';
 import CrewBoardPage from '@/field/CrewBoardPage';
@@ -198,6 +199,7 @@ export default function FieldApp() {
           <Route path="/report" element={<Allowed area="daily"><DailyReport /></Allowed>} />
           <Route path="/job" element={<Allowed area="daily"><JobDashboard /></Allowed>} />
           <Route path="/docs/:projectId" element={<Allowed area="daily"><JobDocsPage /></Allowed>} />
+          <Route path="/docs/:projectId/markup/:itemId" element={<Allowed area="daily"><MarkupPage /></Allowed>} />
           <Route path="*" element={currentRole() === 'Field' ? <JobDashboard /> : <HomePage />} />
         </Routes>
       </Shell>

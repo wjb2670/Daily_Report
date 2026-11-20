@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Loader2, ArrowLeft, Folder, FileText, ChevronRight, ExternalLink, Search, Camera, Upload, CheckCircle2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Folder, FileText, ChevronRight, ExternalLink, Search, Camera, Upload, CheckCircle2, PenLine } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { listFolder, uploadToFolder, FIELD_FOLDERS, FIELD_UPLOAD_FOLDERS } from '@/field/jobData';
+import { listFolder, uploadToFolder, FIELD_FOLDERS, FIELD_UPLOAD_FOLDERS, MARKUPS_FOLDER } from '@/field/jobData';
+import { canMarkUp } from '@/field/MarkupPage';
 
 const kb = n => (n == null ? '' : n > 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1e3))} KB`);
 const when = d => (d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '');
@@ -62,7 +63,9 @@ export default function JobDocsPage() {
   const folders = FIELD_FOLDERS.filter(n => project.field_folders.folders[n]);
   const q = query.trim().toLowerCase();
   const shown = (items || []).filter(i => !q || i.name.toLowerCase().includes(q));
-  const canAdd = !!here && FIELD_UPLOAD_FOLDERS.includes(trail[0]?.name);
+  const inDrawings = trail[0]?.name === 'Drawings';
+  const inMarkups = inDrawings && trail.some(t => t.name.toLowerCase() === MARKUPS_FOLDER.toLowerCase());
+  const canAdd = !!here && (FIELD_UPLOAD_FOLDERS.includes(trail[0]?.name) || inMarkups);
   const pick = 'flex-1 inline-flex items-center justify-center gap-2 h-12 rounded-lg font-semibold cursor-pointer';
 
   return (
@@ -78,7 +81,7 @@ export default function JobDocsPage() {
               <button type="button" onClick={() => setTrail([{ id: project.field_folders.folders[n].id, name: n }])}
                 className="w-full flex items-center gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:border-[#0f2a5e] text-left">
                 <Folder className="w-7 h-7 text-[#0f2a5e] shrink-0" />
-                <span className="flex-1"><span className="block font-bold text-[#0f2a5e] text-lg">{n}</span>{FIELD_UPLOAD_FOLDERS.includes(n) && <span className="block text-xs text-gray-500">You can add files</span>}</span>
+                <span className="flex-1"><span className="block font-bold text-[#0f2a5e] text-lg">{n}</span>{FIELD_UPLOAD_FOLDERS.includes(n) && <span className="block text-xs text-gray-500">You can add files</span>}{n === 'Drawings' && <span className="block text-xs text-gray-500">View, or mark up a sheet</span>}</span>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>
             </li>
@@ -124,11 +127,16 @@ export default function JobDocsPage() {
                         <Folder className="w-5 h-5 text-[#0f2a5e] shrink-0" /><span className="flex-1 min-w-0 truncate font-medium text-gray-900">{i.name}</span><ChevronRight className="w-4 h-4 text-gray-400" />
                       </button>
                     ) : (
-                      <a href={i.webUrl} target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50">
-                        <FileText className="w-5 h-5 text-gray-500 shrink-0" />
-                        <span className="flex-1 min-w-0"><span className="block truncate text-gray-900">{i.name}</span><span className="block text-xs text-gray-500">{[when(i.modified), kb(i.size)].filter(Boolean).join(' · ')}</span></span>
-                        <ExternalLink className="w-4 h-4 text-gray-400 shrink-0" />
-                      </a>
+                      <div className="flex items-center">
+                        <a href={i.webUrl} target="_blank" rel="noreferrer" className="flex-1 min-w-0 flex items-center gap-3 px-4 py-3 hover:bg-blue-50">
+                          <FileText className="w-5 h-5 text-gray-500 shrink-0" />
+                          <span className="flex-1 min-w-0"><span className="block truncate text-gray-900">{i.name}</span><span className="block text-xs text-gray-500">{[when(i.modified), kb(i.size)].filter(Boolean).join(' · ')}</span></span>
+                          <ExternalLink className="w-4 h-4 text-gray-400 shrink-0" />
+                        </a>
+                        {inDrawings && !inMarkups && canMarkUp(i.name) && (
+                          <Link to={`/docs/${projectId}/markup/${i.id}`} aria-label={`Mark up ${i.name}`} className="mr-3 inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border border-[#0f2a5e] text-[#0f2a5e] font-semibold text-sm shrink-0"><PenLine className="w-4 h-4" /> Mark up</Link>
+                        )}
+                      </div>
                     )}
                   </li>
                 ))}
