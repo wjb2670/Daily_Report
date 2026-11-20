@@ -12,6 +12,9 @@ export const FIELD_FOLDERS = ['Drawings', 'Inspection Reports', 'Permits', 'RFI'
 export const RECEIPTS_FOLDER = 'Weekly Receipts';
 // Folders the crew can add files to as well as open.
 export const FIELD_UPLOAD_FOLDERS = ['Inspection Reports', 'Permits'];
+// Inside Drawings: where marked-up sheets from the field are saved. The crew can
+// add to it; the drawings themselves stay view-only.
+export const MARKUPS_FOLDER = 'Field Markups';
 export const RECEIPTS_DUE_DAY = 5; // Friday
 
 const norm = s => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -67,11 +70,26 @@ export async function syncFieldAccess(project, onStep = () => {}) {
     }
   };
 
+  if (folders.Drawings) {
+    const inDrawings = await graphAll(`/drives/${driveId}/items/${folders.Drawings.id}/children?$select=id,name,folder,webUrl&$top=999`);
+    let markups = inDrawings.find(k => k.folder && norm(k.name) === norm(MARKUPS_FOLDER));
+    if (!markups) {
+      onStep(`Creating Drawings › ${MARKUPS_FOLDER}`);
+      markups = await makeFolder(driveId, folders.Drawings.id, MARKUPS_FOLDER);
+    }
+    folders.Drawings.markups = { id: markups.id, webUrl: markups.webUrl };
+  }
+
   for (const [name, f] of Object.entries(folders)) {
     const canAdd = FIELD_UPLOAD_FOLDERS.includes(name);
     onStep(`${name}: ${canAdd ? 'view and add-files' : 'view'} access`);
     await grant(f.id, canAdd ? 'write' : 'read');
     await revoke(f.id);
+  }
+  if (folders.Drawings?.markups) {
+    onStep(`Drawings › ${MARKUPS_FOLDER}: view and add-files access`);
+    await grant(folders.Drawings.markups.id, 'write');
+    await revoke(folders.Drawings.markups.id);
   }
   onStep(`${RECEIPTS_FOLDER}: add-files access`);
   await grant(receipts.id, 'write');
@@ -114,6 +132,21 @@ export async function uploadToFolder(driveId, folderId, file, onProgress = () =>
     onProgress(end / file.size);
   }
   return item;
+}
+
+// A file's bytes, for marking up a drawing in the app.
+export async function downloadFile(driveId, itemId, onProgress = () => {}) {
+  const meta = await graph(`/drives/${driveId}/items/${itemId}`);
+  const url = meta['@microsoft.graph.downloadUrl'];
+  if (!url) throw new Error('This file can’t be opened here.');
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Couldn’t download ${meta.name} (${res.status}).`);
+  const total = Number(res.headers.get('content-length')) || meta.size || 0;
+  if (!res.body || !total) return { name: meta.name, size: meta.size, bytes: new Uint8Array(await res.arrayBuffer()) };
+  const reader = res.body.getReader(); const parts = []; let got = 0;
+  for (;;) { const { done, value } = await reader.read(); if (done) break; parts.push(value); got += value.length; onProgress(Math.min(1, got / total)); }
+  const bytes = new Uint8Array(got); let at = 0; for (const p of parts) { bytes.set(p, at); at += p.length; }
+  return { name: meta.name, size: meta.size, bytes };
 }
 
 // ---- 3-week look-ahead ----------------------------------------------------------
