@@ -38,7 +38,7 @@ export default function FooterActions({ report, status, lastSaved, pending, onSu
             Signed off by <strong>{report.signed_by}</strong> at {formatTime(report.signed_at)}.
             {report.status === 'sent'
               ? ' Filed to SharePoint.'
-              : ' It will be filed to SharePoint at 7:00 PM. You can keep adding notes and photos until then; changes are logged.'}
+              : ' Saved to SharePoint. You can keep adding notes and photos; changes are logged.'}
             {report.revisions?.length > 0 && <div className="text-green-700 mt-1">Edited {report.revisions.length} time{report.revisions.length === 1 ? '' : 's'} after sign-off.</div>}
           </div>
         </div>

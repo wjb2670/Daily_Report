@@ -201,8 +201,8 @@ export default function JobDashboard() {
   const lateHour = now.getHours() >= 17;
   const reportDone = ['submitted', 'sent'].includes(report.status);
   const reportLabel = report.loading ? 'Checking…'
-    : reportDone ? `Sent${report.signedAt ? ` at ${timeOf(report.signedAt)}` : ''}`
-      : report.status === 'draft' ? 'Started – finish and sign before 7 PM' : 'Not started';
+    : reportDone ? `Signed off${report.signedAt ? ` at ${timeOf(report.signedAt)}` : ''}`
+      : report.status === 'draft' ? 'Started – finish and sign off' : 'Not started';
   const reportUrgent = !report.loading && !reportDone && lateHour && isWeekday(today);
 
   // Coming up: look-ahead work + job events over the next 14 days.

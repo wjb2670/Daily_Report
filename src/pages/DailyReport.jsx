@@ -15,7 +15,7 @@ import ListSection from '@/components/report/ListSection';
 import ReportHeader from '@/components/report/ReportHeader';
 import WeatherCard, { useReportWeather } from '@/components/report/WeatherCard';
 import PhotoGalleryCard from '@/components/report/PhotoGalleryCard';
-import FooterActions from '@/components/report/FooterActions';
+import SignOffBar from '@/components/report/SignOffBar';
 import SectionTiles from '@/components/report/SectionTiles';
 import DeliveryTickets from '@/components/report/DeliveryTickets';
 import { isTicket } from '@/components/report/photoTools';
@@ -523,12 +523,15 @@ export default function DailyReport() {
   const current = sections.find(s => s.key === openKey);
   const missing = sections.filter(s => s.required && !s.done).map(s => s.title);
 
-  const submit = signer => {
-    if (missing.length && !window.confirm(`Still missing: ${missing.join(', ')}.\n\nSubmit anyway?`)) return;
+  // One tap: the signer is whoever is signed in to the app.
+  const signer = userName || report?.superintendent || '';
+  const submit = () => {
+    if (!signer) return;
+    if (missing.length && !window.confirm(`Still missing: ${missing.join(', ')}.\n\nSign off anyway?`)) return;
     const now = new Date().toISOString();
     change(prev => ({ ...prev, status: 'submitted', signed_by: signer, signed_at: now, submitted_at: now }), { system: true });
     setTimeout(sendNow, 0);
-    toast({ title: 'Report submitted', description: 'It will be filed to SharePoint at 7:00 PM.' });
+    toast({ title: 'Report signed off', description: `Signed by ${signer}. It’s saved to SharePoint.` });
   };
 
   // ---- One section open ---------------------------------------------------------------
@@ -596,13 +599,9 @@ export default function DailyReport() {
 
         {report && !loading && (
           <>
+            <SignOffBar report={report} sections={sections} onOpen={openSection} onSign={submit} signer={signer}
+              status={status} lastSaved={lastSaved} pending={pending} disabled={disabled} />
             <SectionTiles sections={sections} onOpen={openSection} />
-            {missing.length > 0 && report.status === 'draft' && (
-              <p className="text-base text-red-700 bg-red-50 border-2 border-red-500 rounded-lg px-3 py-2.5 font-medium">
-                Before you sign off, fill in: <strong>{missing.join(', ')}</strong>.
-              </p>
-            )}
-            <FooterActions report={report} status={status} lastSaved={lastSaved} pending={pending} onSubmit={submit} disabled={disabled} />
           </>
         )}
       </div>

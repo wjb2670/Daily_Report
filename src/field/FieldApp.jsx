@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { HashRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { LogOut, Loader2, ClipboardList, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -107,10 +107,18 @@ const COLS = { 1: 'grid-cols-1', 2: 'grid-cols-2', 3: 'grid-cols-3', 4: 'grid-co
 
 function Shell({ account, role, children }) {
   const { pathname } = useLocation();
+  // Pages with their own sticky bars sit just under the header, whatever its height.
+  const headerRef = useRef(null);
+  useEffect(() => {
+    const el = headerRef.current; if (!el || typeof ResizeObserver === 'undefined') return;
+    const set = () => document.documentElement.style.setProperty('--app-header-h', `${el.offsetHeight}px`);
+    set(); const ro = new ResizeObserver(set); ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const nav = currentRole() === 'Field' ? FIELD_NAV : NAV.filter(n => can(n.area));
   return (
     <div className="min-h-screen bg-blue-50 print:bg-white">
-      <header className="bg-[#0f2a5e] text-white sticky top-0 z-40 shadow print:hidden">
+      <header ref={headerRef} className="bg-[#0f2a5e] text-white sticky top-0 z-40 shadow print:hidden">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2 sm:h-14 sm:py-0">
           <Link to="/" className="flex items-center gap-3 min-w-0">
             <Logo className="h-8 w-auto" />
