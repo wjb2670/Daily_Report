@@ -5,6 +5,7 @@ import { graph, graphAll } from '@/field/graph';
 import { getSite, getListId } from '@/field/spAdapter';
 import { getPmDrive, listProjectRecords, makeFolder } from '@/field/projectsData';
 import { currentAccount } from '@/field/auth';
+import { isLibraryProject, listTyped } from '@/field/libraries';
 
 export const BUDGET_FOLDER = 'Estimating Turnover Folder';
 const listPath = async key => `/sites/${(await getSite()).id}/lists/${await getListId(key)}`;
@@ -86,6 +87,14 @@ export async function getBudgetCodes(projectId) {
 
 // Excel files in the job's Estimating Turnover Folder (and one level down).
 export async function findBudgetFiles(project) {
+  if (isLibraryProject(project)) {
+    const fin = project.libraryFolders?.financials;
+    if (!fin) throw new Error('This test job has no Job Financials folder.');
+    const files = (await listTyped(fin.driveId, fin.id)).filter(f => /\.xls[xm]?$/i.test(f.name) && f.inFolder !== 'Weekly Receipts');
+    if (!files.length) throw new Error('No Excel files in Job Financials for this job yet. Save the budget there (Document Type: Budget / Estimating Turnover), then tap Look again.');
+    return files.map(f => ({ id: f.id, name: f.name, webUrl: f.webUrl, modified: f.modified, driveId: fin.driveId, budget: /budget/i.test(f.type) || /budget/i.test(f.name) }))
+      .sort((a, b) => (b.budget - a.budget) || b.modified.localeCompare(a.modified));
+  }
   if (!project.folderId) throw new Error('This job has no job folder linked yet (Project Startup).');
   const { driveId } = await getPmDrive();
   const kids = await graphAll(`/drives/${driveId}/items/${project.folderId}/children?$select=id,name,folder&$top=999`);

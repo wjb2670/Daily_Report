@@ -5,6 +5,7 @@ import { getSite, getListId, projectPeopleEmails } from '@/field/spAdapter';
 import { getPmDrive, makeFolder, safeName } from '@/field/projectsData';
 import { photoQueue } from '@/lib/dailyReportStore';
 import { currentAccount } from '@/field/auth';
+import { isLibraryProject, listTyped, tagFile } from '@/field/libraries';
 
 // Folders in the job folder that superintendents and crew may open (read-only).
 export const FIELD_FOLDERS = ['Drawings', 'Inspection Reports', 'Permits', 'RFI', 'Schedule', 'Specifications', 'Submittals'];
@@ -26,7 +27,43 @@ async function folderPermissions(driveId, itemId) {
 }
 const permEmail = p => norm(p.grantedToV2?.user?.email || p.grantedTo?.user?.email || p.invitation?.email || p.grantedToV2?.siteUser?.email || '');
 
+// TEST library layout: the crew can view the job's Job Documents folder, add
+// to its Field Uploads folder, and add receipts to Job Financials › Weekly
+// Receipts. Nothing else in Job Financials or Contracts is shared.
+async function syncLibraryAccess(project, onStep) {
+  const lf = project.libraryFolders || {};
+  const docs = lf.jobDocuments; const fin = lf.financials;
+  if (!docs?.id || !fin?.receipts?.id) { const e = new Error('This test job’s library folders are missing.'); e.code = 'no_folder'; throw e; }
+  onStep('Reading who is assigned');
+  const people = await projectPeopleEmails(project.id);
+  const emails = people.map(p => p.email);
+  const before = project.fieldAccess?.emails || [];
+  const removed = before.filter(e => !emails.includes(e));
+  const share = async (driveId, itemId, role, label) => {
+    onStep(`${label}: ${role === 'write' ? 'view and add-files' : 'view'} access`);
+    if (emails.length) {
+      await graph(`/drives/${driveId}/items/${itemId}/invite`, { method: 'POST', body: { requireSignIn: true, sendInvitation: false, roles: [role], recipients: emails.map(email => ({ email })) } });
+    }
+    if (removed.length) {
+      for (const p of await folderPermissions(driveId, itemId)) {
+        if (!p.inheritedFrom && removed.includes(permEmail(p))) await graph(`/drives/${driveId}/items/${itemId}/permissions/${p.id}`, { method: 'DELETE' });
+      }
+    }
+  };
+  await share(docs.driveId, docs.id, 'read', 'Job Documents');
+  if (docs.uploads?.id) await share(docs.driveId, docs.uploads.id, 'write', 'Job Documents › Field Uploads');
+  await share(fin.driveId, fin.receipts.id, 'write', 'Job Financials › Weekly Receipts');
+  const fieldFolders = {
+    layout: 'libraries', job: project.jobNumber, driveId: docs.driveId,
+    root: { id: docs.id, webUrl: docs.webUrl }, uploads: docs.uploads,
+    receipts: { driveId: fin.driveId, id: fin.receipts.id, webUrl: fin.receipts.webUrl },
+  };
+  const fieldAccess = { emails, names: people.map(p => p.name), updatedAt: new Date().toISOString(), missing: [] };
+  return { fieldFolders, fieldAccess, removed };
+}
+
 export async function syncFieldAccess(project, onStep = () => {}) {
+  if (isLibraryProject(project)) return syncLibraryAccess(project, onStep);
   if (!project.folderId) {
     const err = new Error('Link the job folder first.');
     err.code = 'no_folder';
@@ -163,6 +200,13 @@ function dateFromName(name) {
 }
 
 export async function findLookahead(fieldFolders) {
+  if (fieldFolders?.layout === 'libraries') {
+    const files = (await listTyped(fieldFolders.driveId, fieldFolders.root.id, { deep: false }))
+      .filter(f => f.type === 'Schedule' && /\.xlsx?$/i.test(f.name) && LOOKAHEAD_NAME.test(f.name))
+      .sort((a, b) => (dateFromName(b.name) || b.modified).localeCompare(dateFromName(a.name) || a.modified));
+    const f = files[0];
+    return f ? { id: f.id, name: f.name, webUrl: f.webUrl, asOf: dateFromName(f.name) || String(f.modified).slice(0, 10) } : null;
+  }
   const sched = fieldFolders?.folders?.Schedule;
   if (!sched) return null;
   const files = await graphAll(`/drives/${fieldFolders.driveId}/items/${sched.id}/children?$select=id,name,file,webUrl,lastModifiedDateTime&$top=999`);
@@ -280,9 +324,12 @@ export function receiptName({ date, vendor, amount }) {
 }
 
 async function putReceipt(fieldFolders, name, blob) {
-  return graph(`/drives/${fieldFolders.driveId}/items/${fieldFolders.receipts.id}:/${encodeURIComponent(name)}:/content?@microsoft.graph.conflictBehavior=rename`, {
+  const driveId = fieldFolders.receipts.driveId || fieldFolders.driveId;
+  const item = await graph(`/drives/${driveId}/items/${fieldFolders.receipts.id}:/${encodeURIComponent(name)}:/content?@microsoft.graph.conflictBehavior=rename`, {
     method: 'PUT', body: blob, headers: { 'Content-Type': 'image/jpeg' },
   });
+  if (fieldFolders.layout === 'libraries') await tagFile(driveId, item.id, { DocumentType: 'Weekly Receipts', Job: fieldFolders.job }).catch(() => {});
+  return item;
 }
 
 // Saves the photo on the device first, then sends it; with no signal it waits.
@@ -323,7 +370,7 @@ export function sendPendingReceipts() {
         if (!r.file) {
           const blob = await photoQueue.get(r.id);
           const item = blob ? await putReceipt(r.folders, r.name, blob) : null;
-          r.file = item ? { driveId: item.parentReference?.driveId || r.folders.driveId, id: item.id, webUrl: item.webUrl } : { none: true };
+          r.file = item ? { driveId: item.parentReference?.driveId || r.folders.receipts?.driveId || r.folders.driveId, id: item.id, webUrl: item.webUrl } : { none: true };
           writePending(readPending().map(x => (x.id === r.id ? r : x))); // uploaded: don't send it twice
           await photoQueue.remove(r.id);
         }
@@ -342,6 +389,6 @@ export function sendPendingReceipts() {
 export async function receiptsThisWeek(fieldFolders) {
   if (!fieldFolders?.receipts) return [];
   const since = weekStart().getTime();
-  const files = await graphAll(`/drives/${fieldFolders.driveId}/items/${fieldFolders.receipts.id}/children?$select=id,name,createdDateTime,file&$top=999`);
+  const files = await graphAll(`/drives/${fieldFolders.receipts.driveId || fieldFolders.driveId}/items/${fieldFolders.receipts.id}/children?$select=id,name,createdDateTime,file&$top=999`);
   return files.filter(f => f.file && new Date(f.createdDateTime).getTime() >= since);
 }

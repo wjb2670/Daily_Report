@@ -11,6 +11,7 @@ import {
 } from '@/field/projectsData';
 import { BOND_STATUS, CONTRACT_STATUS, BONDS_REQUIRED } from '@/field/schema';
 import { ProjectStatus } from '@/field/ProjectsPage';
+import { isLibraryProject, tagUntagged, LIBRARIES } from '@/field/libraries';
 
 const input = 'h-11 rounded-md border border-gray-300 bg-white px-3 text-base md:text-sm';
 const fmt = d => { if (!d) return ''; const [y, m, dd] = d.split('-').map(Number); return new Date(y, m - 1, dd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); };
@@ -165,7 +166,9 @@ function FieldAccessCard({ project, onSaved }) {
   return (
     <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 mb-3 space-y-3">
       <h2 className="font-bold text-[#0f2a5e] text-lg">Field crew access</h2>
-      <p className="text-sm text-gray-600">The assigned superintendent and crew can view {FIELD_FOLDERS.join(', ')}, and add files to {RECEIPTS_FOLDER}. Nothing else in the job folder.</p>
+      <p className="text-sm text-gray-600">{isLibraryProject(project)
+        ? 'Test layout: the assigned superintendent and crew can view this job’s Job Documents folder, add files to its Field Uploads folder, and add receipts to Job Financials › Weekly Receipts. Nothing in Contracts or the rest of Job Financials.'
+        : `The assigned superintendent and crew can view ${FIELD_FOLDERS.join(', ')}, and add files to ${RECEIPTS_FOLDER}. Nothing else in the job folder.`}</p>
       {access ? (
         <p className="text-sm text-gray-700">Last updated {new Date(access.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} for: <strong>{access.names?.join(', ') || 'nobody assigned'}</strong>
           {access.missing?.length ? <span className="block text-amber-700 mt-1">Not found in the job folder: {access.missing.join(', ')}</span> : null}</p>
@@ -185,6 +188,23 @@ function FieldAccessCard({ project, onSaved }) {
         <button type="button" onClick={saveNote} disabled={savingNote || note === (project.fieldNote || '')} className="h-9 px-3 rounded-md border border-gray-300 text-sm font-semibold text-[#0f2a5e] disabled:opacity-50">{savingNote ? 'Saving…' : 'Post note'}</button>
       </div>
     </section>
+  );
+}
+
+// TEST layout: files dragged into a library job folder in SharePoint don't
+// get the Job column; this fills it in from the folder they're in.
+function TagFixer({ project }) {
+  const [state, setState] = useState('');
+  const run = async () => {
+    setState('Checking files…');
+    try { const n = await tagUntagged(project); setState(n ? `Filled in the Job on ${n} file${n === 1 ? '' : 's'}.` : 'Every file already has its Job.'); }
+    catch (err) { setState(`Couldn’t check: ${err.message}`); }
+  };
+  return (
+    <p className="text-sm">
+      <button type="button" onClick={run} disabled={state === 'Checking files…'} className="text-[#1e3a8a] font-semibold underline disabled:opacity-50">Fill in Job on files added in SharePoint</button>
+      {state && <span className="text-gray-600"> · {state}</span>}
+    </p>
   );
 }
 
@@ -280,12 +300,22 @@ export default function ProjectStartupPage() {
 
       <div className="space-y-3">
         <Step n={1} title="Job number & project folder" done={stepDone('number')}>
-          {p.folderUrl ? (
+          {isLibraryProject(p) ? (
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">Test project · library layout</p>
+              {['jobDocuments', 'contracts', 'financials'].filter(k => p.libraryFolders?.[k]).map(k => (
+                <a key={k} href={p.libraryFolders[k].webUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[#1e3a8a] font-semibold">
+                  {LIBRARIES[k].name} › {p.jobNumber} <ExternalLink className="w-4 h-4" />
+                </a>
+              ))}
+              {can('projectsEdit') && <TagFixer project={p} />}
+            </div>
+          ) : p.folderUrl ? (
             <a href={p.folderUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold">
               Open {p.jobNumber} folder on PM Team <ExternalLink className="w-4 h-4" />
             </a>
           ) : <p className="text-sm text-amber-800">No project folder is linked.</p>}
-          {can('projectsEdit') && (
+          {can('projectsEdit') && !isLibraryProject(p) && (
             <FolderLink project={p} onLink={f => {
               save({ folderUrl: f.webUrl, folderId: f.id });
               loadDocs({ ...p, folderUrl: f.webUrl, folderId: f.id });

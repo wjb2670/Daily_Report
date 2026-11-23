@@ -4,6 +4,7 @@ import { Loader2, ArrowLeft, Pen, Highlighter, Type, Hand, Undo2, Trash2, ZoomIn
 import { base44 } from '@/api/base44Client';
 import { downloadFile, uploadToFolder, MARKUPS_FOLDER } from '@/field/jobData';
 import { currentAccount } from '@/field/auth';
+import { tagFile } from '@/field/libraries';
 
 const COLORS = [['Red', '#dc2626'], ['Blue', '#2563eb'], ['Black', '#111827']];
 const isPdf = n => /\.pdf$/i.test(n || '');
@@ -166,7 +167,8 @@ export default function MarkupPage() {
   const allMarks = Object.values(marks).reduce((n, m) => n + m.length, 0);
   const save = async () => {
     setError(''); setSaved(null);
-    const markupsId = project.field_folders.folders?.Drawings?.markups?.id;
+    const lib = project.field_folders.layout === 'libraries';
+    const markupsId = lib ? project.field_folders.uploads?.id : project.field_folders.folders?.Drawings?.markups?.id;
     if (!markupsId) { setError(`There’s no ${MARKUPS_FOLDER} folder for this job yet. Ask the office to update field access for the job (Project Startup › Field crew access).`); return; }
     try {
       setStatus('Saving the marked-up sheet…');
@@ -203,6 +205,7 @@ export default function MarkupPage() {
       const name = `${base}${pagePart} markup ${ymd(now)} ${who}.pdf`;
       const blob = pdf.output('blob');
       const item = await uploadToFolder(project.field_folders.driveId, markupsId, new File([blob], name, { type: 'application/pdf' }), pct => setStatus(`Saving the marked-up sheet… ${Math.round(pct * 100)}%`));
+      if (lib && item?.id) await tagFile(project.field_folders.driveId, item.id, { DocumentType: 'Field Markups', Job: project.field_folders.job }).catch(() => {});
       setSaved({ name: item?.name || name, webUrl: item?.webUrl });
       setStatus('');
     } catch (err) {
@@ -268,7 +271,7 @@ export default function MarkupPage() {
           <button type="button" onClick={save} disabled={!allMarks || !!status} className="h-12 px-5 rounded-lg bg-[#0f2a5e] text-white font-semibold inline-flex items-center gap-2 disabled:opacity-40">{status ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />} Save to {MARKUPS_FOLDER}</button>
           <span className="text-sm text-gray-500">{status || (allMarks ? `${allMarks} mark${allMarks === 1 ? '' : 's'}${doc.pages > 1 ? ` on ${Object.values(marks).filter(m => m.length).length} page(s)` : ''}` : 'Draw or add a note to save.')}</span>
         </div>
-        {saved && <p className="text-sm text-green-800 flex flex-wrap items-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> Saved to Drawings › {MARKUPS_FOLDER} as “{saved.name}”.{saved.webUrl && <a href={saved.webUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-[#1e3a8a] underline">Open it <ExternalLink className="w-3.5 h-3.5" /></a>}</p>}
+        {saved && <p className="text-sm text-green-800 flex flex-wrap items-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> Saved to {project.field_folders.layout === 'libraries' ? 'Job Documents › Field Markups' : `Drawings › ${MARKUPS_FOLDER}`} as “{saved.name}”.{saved.webUrl && <a href={saved.webUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-[#1e3a8a] underline">Open it <ExternalLink className="w-3.5 h-3.5" /></a>}</p>}
         {error && <p className="text-sm text-red-700">{error}</p>}
       </section>
     </div>

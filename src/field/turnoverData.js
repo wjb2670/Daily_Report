@@ -6,6 +6,7 @@ import { graph, graphAll } from '@/field/graph';
 import { getSite, getListId } from '@/field/spAdapter';
 import { getPmDrive, safeName } from '@/field/projectsData';
 import { noDollars } from '@/field/scopesData';
+import { isLibraryProject, putTyped } from '@/field/libraries';
 
 export const SIGNOFF_SLOTS = ['Estimator', 'Project Manager', 'Superintendent', 'Keith'];
 
@@ -156,6 +157,12 @@ export async function packetPdf(project, t) {
 export async function savePacket(project, t) {
   if (!project.folderId) throw new Error('Link the job folder first (Project Startup).');
   const blob = await packetPdf(project, t);
+  if (isLibraryProject(project) && project.libraryFolders?.financials) {
+    const fin = project.libraryFolders.financials;
+    const nm = `${safeName(`${project.jobNumber || ''} Turnover Packet ${new Date().toISOString().slice(0, 10)}`.trim())}.pdf`;
+    const item = await putTyped(fin.driveId, fin.id, nm, blob, 'application/pdf', { DocumentType: 'Turnover Packet', Job: project.jobNumber });
+    return item.webUrl;
+  }
   const { driveId } = await getPmDrive();
   const name = `${safeName(`${project.jobNumber || ''} Turnover Packet ${new Date().toISOString().slice(0, 10)}`.trim())}.pdf`;
   const item = await graph(`/drives/${driveId}/items/${project.folderId}:/${encodeURIComponent(name)}:/content?@microsoft.graph.conflictBehavior=replace`, {

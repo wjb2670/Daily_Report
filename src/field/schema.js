@@ -48,6 +48,8 @@ export const LISTS = {
       notes('FieldNote', 'Note to Field'),
       notes('FieldFoldersJSON', 'Field Folders'),
       notes('FieldAccessJSON', 'Field Access'),
+      text('FolderLayout', 'Folder Layout'),
+      notes('LibraryFoldersJSON', 'Library Folders'),
     ],
   },
   reports: {
