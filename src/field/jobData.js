@@ -38,9 +38,13 @@ export async function syncFieldAccess(project, onStep = () => {}) {
   const folders = {};
   const missing = [];
   for (const name of FIELD_FOLDERS) {
-    const f = kids.find(k => norm(k.name) === norm(name));
-    if (f) folders[name] = { id: f.id, webUrl: f.webUrl };
-    else missing.push(name);
+    let f = kids.find(k => norm(k.name) === norm(name));
+    if (!f) {
+      // New jobs start as one empty folder: add the field folders now.
+      onStep(`Creating ${name}`);
+      f = await makeFolder(driveId, project.folderId, name);
+    }
+    folders[name] = { id: f.id, webUrl: f.webUrl };
   }
   let receipts = kids.find(k => norm(k.name) === norm(RECEIPTS_FOLDER));
   if (!receipts) {

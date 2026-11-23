@@ -9,14 +9,6 @@ export const TEMPLATE_FOLDER = 'Master Template Files';
 // Each year's Project Files has a master job folder the team copies for new jobs.
 export const MASTER_FOLDER = 'MAKE COPY - Master Job Folder';
 
-// Used only if no master job folder can be found: the same subfolders, empty.
-export const PROJECT_SUBFOLDERS = [
-  'Buy Out Log', 'Cert of Occupancies', 'Close-Out Docs', 'Drawings', 'Estimating Turnover Folder',
-  'Field Bulletins', 'Field Reports', 'Finish Schedule', 'Inspection Reports', 'Owner Change Orders',
-  'Owner Contract', 'Owner Invoices', 'Permits', 'Purchase Orders', 'Release of Liens', 'RFI',
-  'Safety Reports', 'Schedule', 'Sub Change Orders', 'Sub Contract  Agreements', 'Subcontractor Drug Policy',
-  'Submittals', 'Timesheet', 'Transmittals',
-];
 
 const enc = path => path.split('/').map(encodeURIComponent).join('/');
 
@@ -100,16 +92,6 @@ export async function makeFolder(driveId, parentId, name) {
   }
 }
 
-async function findMasterFolder(driveId, year) {
-  for (const y of [Number(year), Number(year) - 1, Number(year) - 2]) {
-    try {
-      return await graph(`/drives/${driveId}/root:/${enc(`${yearFolder(y)}/${MASTER_FOLDER}`)}?$select=id,name,webUrl`);
-    } catch (err) {
-      if (err.status !== 404) throw err;
-    }
-  }
-  return null;
-}
 
 async function itemAt(driveId, path) {
   try {
@@ -120,10 +102,11 @@ async function itemAt(driveId, path) {
   }
 }
 
-const wait = ms => new Promise(r => setTimeout(r, ms));
-
-// "2026 Project Files/2026-42 Project Name": a copy of the master job folder
-// (all subfolders, Job Tracking Log, Sub Contact List and templates).
+// "2026 Project Files/2026-42 Project Name": just the job's own folder.
+// Nothing is copied into it: no subfolders and no template files. The app
+// adds each subfolder the first time it's needed (Owner Contract when the
+// award letter is filed, the field folders when field access is set up, Sub
+// Contract Agreements with the first subcontract, and so on).
 export async function createProjectFolder(number, projectName, onStep) {
   const { driveId } = await getPmDrive();
   const year = number.slice(0, 4);
@@ -136,36 +119,9 @@ export async function createProjectFolder(number, projectName, onStep) {
     e.code = 'folder_exists';
     throw e;
   }
-
-  const master = await findMasterFolder(driveId, year);
-  if (master) {
-    onStep?.(`Copying “${MASTER_FOLDER}”…`);
-    await graph(`/drives/${driveId}/items/${master.id}/copy`, {
-      method: 'POST',
-      body: { parentReference: { driveId, id: yearDir.id }, name },
-    });
-    // SharePoint copies in the background; wait for the new folder to appear.
-    for (let i = 0; i < 60; i++) {
-      const made = await itemAt(driveId, path);
-      if (made) {
-        onStep?.(`Created folder “${name}” from the master job folder`);
-        return { id: made.id, webUrl: made.webUrl, name, fromMaster: true };
-      }
-      await wait(i < 10 ? 1000 : 2000);
-    }
-    throw new Error('SharePoint is still copying the master job folder. Check the PM Team site in a minute, then try again.');
-  }
-
-  // No master folder found: build the standard subfolders, empty.
   const folder = await graph(`/drives/${driveId}/items/${yearDir.id}/children`, { method: 'POST', body: { name, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' } });
-  onStep?.(`Created folder “${name}” (no master job folder found, so subfolders are empty)`);
-  let done = 0;
-  for (const sub of PROJECT_SUBFOLDERS) {
-    await makeFolder(driveId, folder.id, sub);
-    done += 1;
-    if (done % 6 === 0 || done === PROJECT_SUBFOLDERS.length) onStep?.(`Added ${done} of ${PROJECT_SUBFOLDERS.length} subfolders`);
-  }
-  return { id: folder.id, webUrl: folder.webUrl, name, fromMaster: false };
+  onStep?.(`Created folder “${name}”`);
+  return { id: folder.id, webUrl: folder.webUrl, name };
 }
 
 // Project folders already on the PM Team site (this year and the three before),
