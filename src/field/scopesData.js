@@ -1,5 +1,6 @@
 // Subcontract scopes: the trade library, each job's subcontracts, and the
 // Exhibit A text/Word file that goes in the subcontract.
+import { isLibraryProject, tagFile } from '@/field/libraries';
 import { graph, graphAll } from '@/field/graph';
 import { getSite, getListId } from '@/field/spAdapter';
 import { getPmDrive, makeFolder, safeName } from '@/field/projectsData';
@@ -334,6 +335,12 @@ export async function setPrice(subId, contractNumber, amount) {
 const isSubAgreementsFolder = name => /^sub\s*contract\s+agreements$/i.test(String(name).replace(/\s+/g, ' ').trim());
 
 async function subAgreementsFolder(project) {
+  if (isLibraryProject(project)) {
+    const c = project.libraryFolders?.contracts;
+    if (!c) throw new Error('This test job has no Contracts folder.');
+    const folder = { id: c.id, webUrl: c.webUrl };
+    return { driveId: c.driveId, folder, library: true, kids: await graphAll(`/drives/${c.driveId}/items/${c.id}/children?$select=id,name,folder&$top=999`) };
+  }
   if (!project.folderId) {
     const err = new Error('Link this job’s folder on the project page first, so the contract files have somewhere to go.');
     err.code = 'no_folder';
@@ -402,26 +409,36 @@ export async function exhibitDocx(sub, project) {
 export const MASTER_SUB_FOLDER = 'Master Template Files/MASTER Subcontractor File - COPY & RENAME';
 
 export async function createContractFiles(project, sub, onStep = () => {}) {
-  const { driveId, folder } = await subAgreementsFolder(project);
+  const { driveId, folder, library } = await subAgreementsFolder(project);
   const folderName = safeName(`${sub.contractNumber} ${sub.company}`);
   onStep(`Making the ${folderName} folder`);
   const target = await makeFolder(driveId, folder.id, folderName);
+  const tags = { DocumentType: 'Sub Agreement', Job: project.jobNumber, Company: sub.company, CostCodes: sub.costCode, ContractStatus: 'Draft' };
 
   onStep('Writing Exhibit A – Scope of Work');
   const blob = await exhibitDocx(sub, project);
   const exName = `${sub.contractNumber} Exhibit A - Scope of Work.docx`;
-  await graph(`/drives/${driveId}/items/${target.id}:/${encodeURIComponent(exName)}:/content?@microsoft.graph.conflictBehavior=replace`, {
+  const exItem = await graph(`/drives/${driveId}/items/${target.id}:/${encodeURIComponent(exName)}:/content?@microsoft.graph.conflictBehavior=replace`, {
     method: 'PUT', body: blob, headers: { 'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
   });
+  if (library && exItem?.id) await tagFile(driveId, exItem.id, tags).catch(() => {});
 
   onStep('Copying the master subcontract');
   const masterName = project.contractType === 'CM' ? 'MASTER Trade Contract.docx' : 'MASTER GC LONG CONTRACT.docx';
   let copied = '';
   try {
-    const master = await graph(`/drives/${driveId}/root:/${MASTER_SUB_FOLDER.split('/').map(encodeURIComponent).join('/')}/${encodeURIComponent(masterName)}?$select=id,name`);
+    const { driveId: pmDrive } = await getPmDrive(); // the master stays in Documents
+    const master = await graph(`/drives/${pmDrive}/root:/${MASTER_SUB_FOLDER.split('/').map(encodeURIComponent).join('/')}/${encodeURIComponent(masterName)}?$select=id,name`);
     const name = `${sub.contractNumber} Contract.docx`;
-    await graph(`/drives/${driveId}/items/${master.id}/copy`, { method: 'POST', body: { parentReference: { driveId, id: target.id }, name } });
+    await graph(`/drives/${pmDrive}/items/${master.id}/copy`, { method: 'POST', body: { parentReference: { driveId, id: target.id }, name } });
     copied = name;
+    if (library) {
+      for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, 1000));
+        const made = (await graphAll(`/drives/${driveId}/items/${target.id}/children?$select=id,name&$top=99`)).find(k => k.name === name);
+        if (made) { await tagFile(driveId, made.id, tags).catch(() => {}); break; }
+      }
+    }
   } catch (err) {
     if (err.status !== 404) throw err;
   }

@@ -3,6 +3,7 @@
 import { graph, graphAll } from '@/field/graph';
 import { CONFIG } from '@/field/auth';
 import { getSite, getListId } from '@/field/spAdapter';
+import { isLibraryProject, tagFile, listTyped } from '@/field/libraries';
 
 export const PM_SITE_PATH = '/sites/PMTeam';
 export const TEMPLATE_FOLDER = 'Master Template Files';
@@ -63,7 +64,23 @@ export async function nextJobNumber(year) {
   return `${year}-${String(max + 1).padStart(2, '0')}`;
 }
 
+// TEST projects are numbered TEST-01, TEST-02… so they never use a real job number.
+export async function nextTestNumber() {
+  let max = 0;
+  try {
+    const site = await getSite();
+    const items = await graphAll(`/sites/${site.id}/lists/${await getListId('projects')}/items?$expand=fields($select=JobNumber)&$top=999`);
+    items.forEach(i => { const m = String(i.fields?.JobNumber || '').match(/^TEST-(\d+)/); if (m) max = Math.max(max, Number(m[1])); });
+  } catch { /* list not set up yet */ }
+  return `TEST-${String(max + 1).padStart(2, '0')}`;
+}
+
 export async function jobNumberInUse(number) {
+  if (/^TEST-/.test(number)) {
+    const site = await getSite();
+    const items = await graphAll(`/sites/${site.id}/lists/${await getListId('projects')}/items?$expand=fields($select=JobNumber)&$top=999`);
+    return items.some(i => i.fields?.JobNumber === number);
+  }
   const year = number.slice(0, 4);
   const { driveId } = await getPmDrive();
   const re = new RegExp(`^${number.replace('-', '\\-')}\\b`);
@@ -150,6 +167,11 @@ export async function listContractTemplates() {
 }
 
 async function ownerContractFolderId(project) {
+  if (isLibraryProject(project)) {
+    const c = project.libraryFolders?.contracts;
+    if (!c) throw new Error('This test job has no Contracts folder.');
+    return { driveId: c.driveId, folderId: c.id, library: true };
+  }
   const { driveId } = await getPmDrive();
   const kids = await graphAll(`/drives/${driveId}/items/${project.folderId}/children?$select=id,name,folder`);
   let target = kids.find(k => k.folder && k.name === 'Owner Contract');
@@ -159,20 +181,30 @@ async function ownerContractFolderId(project) {
 
 // Copies a template into the job's Owner Contract folder as "<job #> Owner Contract.docx".
 export async function copyContractTemplate(project, template) {
-  const { driveId, folderId } = await ownerContractFolderId(project);
+  const { driveId, folderId, library } = await ownerContractFolderId(project);
   const ext = (template.name.match(/\.[^.]+$/) || ['.docx'])[0];
   const name = `${project.jobNumber} Owner Contract${ext}`;
-  await graph(`/drives/${driveId}/items/${template.id}/copy`, {
+  const { driveId: fromDrive } = await getPmDrive();
+  await graph(`/drives/${fromDrive}/items/${template.id}/copy`, {
     method: 'POST',
     body: { parentReference: { driveId, id: folderId }, name },
   });
+  if (library) {
+    // The copy runs in the background; tag it once it shows up.
+    for (let i = 0; i < 10; i++) {
+      await new Promise(r => setTimeout(r, 1000));
+      const kids = await graphAll(`/drives/${driveId}/items/${folderId}/children?$select=id,name&$top=999`);
+      const made = kids.find(k => k.name === name);
+      if (made) { await tagFile(driveId, made.id, { DocumentType: 'Owner Contract', Job: project.jobNumber, ContractStatus: 'Draft' }).catch(() => {}); break; }
+    }
+  }
   return name;
 }
 
 // Saves an attached document (award letter, NTP, bond, signed contract) into
 // the job's Owner Contract folder, named with the job number and what it is.
 export async function uploadStartupDoc(project, label, file) {
-  const { driveId, folderId } = await ownerContractFolderId(project);
+  const { driveId, folderId, library } = await ownerContractFolderId(project);
   const ext = (file.name.match(/\.[^.]+$/) || [''])[0];
   const name = safeName(`${project.jobNumber} ${label}`) + ext;
   const res = await graph(`/drives/${driveId}/items/${folderId}:/${encodeURIComponent(name)}:/content?@microsoft.graph.conflictBehavior=rename`, {
@@ -180,11 +212,21 @@ export async function uploadStartupDoc(project, label, file) {
     body: file,
     headers: { 'Content-Type': file.type || 'application/octet-stream' },
   });
+  if (library) {
+    const type = /contract/i.test(label) ? 'Owner Contract' : 'Award / NTP / Bonds';
+    await tagFile(driveId, res.id, { DocumentType: type, Job: project.jobNumber, ...(type === 'Owner Contract' ? { ContractStatus: /signed/i.test(label) ? 'Signed' : 'Draft' } : {}) }).catch(() => {});
+  }
   return { name: res.name || name, webUrl: res.webUrl };
 }
 
 export async function listStartupDocs(project) {
   if (!project.folderId) return [];
+  if (isLibraryProject(project)) {
+    const c = project.libraryFolders?.contracts;
+    if (!c) return [];
+    return (await listTyped(c.driveId, c.id, { deep: false })).filter(f => ['Owner Contract', 'Award / NTP / Bonds', ''].includes(f.type))
+      .map(f => ({ id: f.id, name: f.name, webUrl: f.webUrl, file: {}, lastModifiedDateTime: f.modified }));
+  }
   const { driveId, folderId } = await ownerContractFolderId(project);
   const items = await graphAll(`/drives/${driveId}/items/${folderId}/children?$select=id,name,webUrl,file,lastModifiedDateTime&$top=200`);
   return items.filter(i => i.file);
@@ -223,6 +265,8 @@ export function toProjectRecord(item) {
     fieldNote: f.FieldNote || '',
     fieldFolders: (() => { try { return JSON.parse(f.FieldFoldersJSON || 'null'); } catch { return null; } })(),
     fieldAccess: (() => { try { return JSON.parse(f.FieldAccessJSON || 'null'); } catch { return null; } })(),
+    layout: f.FolderLayout || '',
+    libraryFolders: (() => { try { return JSON.parse(f.LibraryFoldersJSON || 'null'); } catch { return null; } })(),
     created: item.createdDateTime || '',
   };
 }
@@ -232,7 +276,7 @@ const TO_FIELD = {
   address: 'Address', city: 'City', state: 'State', zip: 'Zip',
   projectManager: 'ProjectManager', bondsRequired: 'BondsRequired', paymentBond: 'PaymentBond',
   performanceBond: 'PerformanceBond', ownerContract: 'OwnerContract', folderUrl: 'ProjectFolderUrl',
-  folderId: 'ProjectFolderId', notes: 'ProjectNotes', existing: 'ExistingJob', fieldNote: 'FieldNote',
+  folderId: 'ProjectFolderId', notes: 'ProjectNotes', existing: 'ExistingJob', fieldNote: 'FieldNote', layout: 'FolderLayout',
 };
 const DATE_FIELDS = { awardDate: 'AwardDate', awardLetterDate: 'AwardLetterDate', ntpDate: 'NTPDate' };
 
@@ -243,6 +287,7 @@ function toFields(changes) {
     if (DATE_FIELDS[k]) out[DATE_FIELDS[k]] = v ? `${v}T12:00:00Z` : null;
     if (k === 'fieldFolders') out.FieldFoldersJSON = v ? JSON.stringify(v) : null;
     if (k === 'fieldAccess') out.FieldAccessJSON = v ? JSON.stringify(v) : null;
+    if (k === 'libraryFolders') out.LibraryFoldersJSON = v ? JSON.stringify(v) : null;
   }
   return out;
 }

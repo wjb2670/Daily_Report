@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, CheckCircle2, Pencil } from 'lucide-react';
 import { todayStr } from '@/lib/dailyReportStore';
-import { nextJobNumber, jobNumberInUse, createProjectFolder, createProjectRecord } from '@/field/projectsData';
+import { nextJobNumber, nextTestNumber, jobNumberInUse, createProjectFolder, createProjectRecord } from '@/field/projectsData';
+import { createLibraryJobFolders, LAYOUT } from '@/field/libraries';
+import { can } from '@/field/roles';
 
 const input = 'w-full h-11 rounded-md border border-gray-300 bg-white px-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]';
 
@@ -29,24 +31,25 @@ export default function NewProjectPage() {
   const [busy, setBusy] = useState(false);
   const [steps, setSteps] = useState([]);
   const [error, setError] = useState('');
+  const [test, setTest] = useState(false); // TEST: new library layout
 
   const year = form.awardDate.slice(0, 4);
 
   // The number comes from the year the job was awarded.
   useEffect(() => {
-    if (editingNumber || !/^\d{4}$/.test(year)) return undefined;
+    if (editingNumber || (!test && !/^\d{4}$/.test(year))) return undefined;
     let cancelled = false;
     setNumberLoading(true);
-    nextJobNumber(year)
+    (test ? nextTestNumber() : nextJobNumber(year))
       .then(n => { if (!cancelled) setNumber(n); })
       .catch(err => { if (!cancelled) setError(`Couldn’t read the ${year} Project Files folder: ${err.message}`); })
       .finally(() => { if (!cancelled) setNumberLoading(false); });
     return () => { cancelled = true; };
-  }, [year, editingNumber]);
+  }, [year, editingNumber, test]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const missing = ['name', 'owner', 'address', 'city', 'state', 'awardDate'].filter(k => !String(form[k]).trim());
-  const numberOk = /^\d{4}-\d{2,3}$/.test(number);
+  const numberOk = test ? /^TEST-\d{2,3}$/.test(number) : /^\d{4}-\d{2,3}$/.test(number);
 
   const create = async () => {
     setError('');
@@ -58,7 +61,13 @@ export default function NewProjectPage() {
         throw new Error(`${number} is already used by a project folder. Pick the next number.`);
       }
       log(`Job number ${number} is available`);
-      const folder = await createProjectFolder(number, form.name.trim(), log);
+      let folder; let library = null;
+      if (test) {
+        library = await createLibraryJobFolders(number, form.name.trim(), log);
+        folder = { id: library.folders.jobDocuments.id, webUrl: library.folders.jobDocuments.webUrl };
+      } else {
+        folder = await createProjectFolder(number, form.name.trim(), log);
+      }
       const amount = form.contractAmount ? Number(String(form.contractAmount).replace(/[^\d.]/g, '')) : null;
       const id = await createProjectRecord({
         name: form.name.trim(), jobNumber: number, status: 'Awarded', owner: form.owner.trim(), contractType: form.contractType,
@@ -66,6 +75,7 @@ export default function NewProjectPage() {
         state: form.state.trim().toUpperCase(), zip: form.zip.trim(), projectManager: form.projectManager.trim(),
         awardDate: form.awardDate, notes: form.notes.trim(), folderUrl: folder.webUrl, folderId: folder.id,
         bondsRequired: 'Not yet known', paymentBond: 'Not started', performanceBond: 'Not started', ownerContract: 'Not started',
+        ...(test ? { layout: LAYOUT, libraryFolders: library.folders } : {}),
       });
       log('Added to the Projects list');
       setTimeout(() => navigate(`/projects/${id}`), 900);
@@ -81,6 +91,13 @@ export default function NewProjectPage() {
       <p className="text-gray-500 mb-5">For a job we’ve been awarded. Creating it assigns the job number, builds the project folder on the PM Team site and starts the startup checklist.</p>
 
       <div className="space-y-4">
+        {can('admin') && (
+          <label className="flex items-start gap-3 bg-amber-50 border border-amber-300 rounded-xl p-4 cursor-pointer">
+            <input type="checkbox" className="w-5 h-5 mt-0.5" checked={test} onChange={e => { setTest(e.target.checked); setEditingNumber(false); }} />
+            <span><span className="block font-semibold text-amber-900">Test project: try the new library layout</span>
+              <span className="block text-sm text-amber-900">Numbered TEST-01, TEST-02… so no real job number is used. Its files go into the Job Documents, Contracts and Job Financials libraries instead of a {year} Project Files folder. Admins only.</span></span>
+          </label>
+        )}
         <section className="bg-[#0f2a5e] text-white rounded-xl p-5">
           <div className="text-sm text-blue-200 font-semibold uppercase tracking-wide">Job number</div>
           {editingNumber ? (
@@ -147,7 +164,9 @@ export default function NewProjectPage() {
 
         <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 text-sm text-gray-600">
           <div className="font-semibold text-[#0f2a5e] mb-1">This creates</div>
-          <p>PM Team › {year} Project Files › <strong>{number || `${year}-__`} {form.name || 'Project name'}</strong>: one empty folder. Nothing is copied into it; the app adds a subfolder (Owner Contract, Drawings, Sub Contract Agreements…) the first time something is saved there.</p>
+          {test ? (
+            <p>On the PM Team site, a <strong>{number || 'TEST-__'} {form.name || 'Project name'}</strong> folder in each of <strong>Job Documents</strong> (with a Field Uploads folder for the crew), <strong>Contracts</strong> and <strong>Job Financials</strong> (with Weekly Receipts). The five libraries are created the first time, if they don’t exist yet.</p>
+          ) : <p>PM Team › {year} Project Files › <strong>{number || `${year}-__`} {form.name || 'Project name'}</strong>: one empty folder. Nothing is copied into it; the app adds a subfolder (Owner Contract, Drawings, Sub Contract Agreements…) the first time something is saved there.</p>}
         </section>
 
         {steps.length > 0 && (

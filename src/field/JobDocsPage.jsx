@@ -4,6 +4,7 @@ import { Loader2, ArrowLeft, Folder, FileText, ChevronRight, ExternalLink, Searc
 import { base44 } from '@/api/base44Client';
 import { listFolder, uploadToFolder, FIELD_FOLDERS, FIELD_UPLOAD_FOLDERS, MARKUPS_FOLDER } from '@/field/jobData';
 import { canMarkUp } from '@/field/MarkupPage';
+import LibraryDocs from '@/field/LibraryDocs';
 
 const kb = n => (n == null ? '' : n > 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1e3))} KB`);
 const when = d => (d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '');
@@ -25,7 +26,7 @@ export default function JobDocsPage() {
     base44.entities.Project.list().then(all => {
       const p = all.find(x => String(x.id) === String(projectId));
       if (!p) setError('You’re not assigned to this job.');
-      else if (!p.field_folders?.folders) setError('The office hasn’t opened this job’s folders to the field crew yet.');
+      else if (!p.field_folders?.folders && p.field_folders?.layout !== 'libraries') setError('The office hasn’t opened this job’s folders to the field crew yet.');
       else setProject(p);
     }).catch(err => setError(err.message));
   }, [projectId]);
@@ -59,6 +60,16 @@ export default function JobDocsPage() {
   const back = <Link to={`/job?project=${projectId}`} className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold mb-3 py-2"><ArrowLeft className="w-5 h-5" /> Job dashboard</Link>;
   if (error) return <div className="max-w-3xl mx-auto">{back}<p className="text-red-700 bg-red-50 border border-red-200 rounded-lg p-4">{error}</p></div>;
   if (!project) return <div className="flex items-center justify-center gap-2 text-gray-500 py-16"><Loader2 className="w-5 h-5 animate-spin" /> Loading…</div>;
+  if (project.field_folders.layout === 'libraries') {
+    return (
+      <div className="max-w-3xl mx-auto pb-10">
+        {back}
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#0f2a5e]">Job documents</h1>
+        <p className="text-gray-500 mb-4">{project.job_number} {project.name}</p>
+        <LibraryDocs project={project} />
+      </div>
+    );
+  }
 
   const folders = FIELD_FOLDERS.filter(n => project.field_folders.folders[n]);
   const q = query.trim().toLowerCase();
