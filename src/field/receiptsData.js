@@ -3,7 +3,7 @@
 // split) are separate lists so the field never reads the coding.
 import { graph, graphAll } from '@/field/graph';
 import { getSite, getListId } from '@/field/spAdapter';
-import { getPmDrive, listProjectRecords } from '@/field/projectsData';
+import { getPmDrive, listProjectRecords, makeFolder } from '@/field/projectsData';
 import { currentAccount } from '@/field/auth';
 
 export const BUDGET_FOLDER = 'Estimating Turnover Folder';
@@ -90,7 +90,10 @@ export async function findBudgetFiles(project) {
   const { driveId } = await getPmDrive();
   const kids = await graphAll(`/drives/${driveId}/items/${project.folderId}/children?$select=id,name,folder&$top=999`);
   const folder = kids.find(k => k.folder && norm(k.name) === norm(BUDGET_FOLDER)) || kids.find(k => k.folder && norm(k.name).startsWith('estimating turnover'));
-  if (!folder) throw new Error(`There’s no “${BUDGET_FOLDER}” in this job’s folder.`);
+  if (!folder) {
+    await makeFolder(driveId, project.folderId, BUDGET_FOLDER);
+    throw new Error(`This job had no “${BUDGET_FOLDER}”, so one was just added to the job folder. Save the budget Excel file in it, then tap Look again.`);
+  }
   const pick = '$select=id,name,file,folder,webUrl,lastModifiedDateTime&$top=999';
   const top = await graphAll(`/drives/${driveId}/items/${folder.id}/children?${pick}`);
   const inner = (await Promise.all(top.filter(k => k.folder).map(k => graphAll(`/drives/${driveId}/items/${k.id}/children?${pick}`).then(v => v.map(x => ({ ...x, name: `${k.name} / ${x.name}` })))))).flat();
