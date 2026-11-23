@@ -3,8 +3,8 @@ import { getToken } from '@/field/auth';
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 
-export async function graph(path, { method = 'GET', body, headers = {} } = {}) {
-  const token = await getToken();
+export async function graph(path, { method = 'GET', body, headers = {}, scopes } = {}) {
+  const token = await getToken(scopes);
   const isJson = body !== undefined && !(body instanceof Blob);
   const res = await fetch(path.startsWith('http') ? path : `${GRAPH}${path}`, {
     method,

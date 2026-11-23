@@ -23,7 +23,7 @@ export const LIBRARIES = {
     name: 'Contracts', perJob: true,
     description: 'Owner contract, award, NTP and bonds, sub agreements, change orders, POs, lien releases. Office only.',
     types: ['Owner Contract', 'Award / NTP / Bonds', 'Sub Agreement', 'Sub Change Order', 'Owner Change Order', 'Purchase Order', 'Release of Lien', 'Insurance / Drug Policy', 'Other'],
-    extra: [text('Company', 'Company'), text('CostCodes', 'Cost Codes'), choice('ContractStatus', 'Status', ['Draft', 'Sent', 'Signed'])],
+    extra: [text('Company', 'Company'), text('CostCodes', 'Cost Codes'), choice('ContractStatus', 'Status', ['Draft', 'Sent', 'Signed', 'Signed by sub', 'Executed'])],
   },
   financials: {
     name: 'Job Financials', perJob: true,
@@ -34,6 +34,12 @@ export const LIBRARIES = {
     name: 'Closeout', perJob: false,
     description: 'Close-out documents, certificates of occupancy, warranties and safety reports.',
     types: ['Close-Out Docs', 'Cert of Occupancy', 'Warranty', 'Safety Reports', 'Other'],
+  },
+  companyDocs: {
+    name: 'Company Documents', perJob: false, standalone: true,
+    description: 'Yearly paperwork for each sub and supplier: W-9s and business licenses. One folder per company. Office only.',
+    types: ['W-9', 'Delaware Business License', 'Maryland Business License', 'City/Town License', 'Other'],
+    extra: [text('Company', 'Company'), text('DocYear', 'Year'), { name: 'Expires', displayName: 'Expires', dateTime: { format: 'dateOnly' } }],
   },
   templates: {
     name: 'Templates', perJob: false,
@@ -52,10 +58,10 @@ const columnsFor = def => [
 
 // Creates any missing library (and any missing column) on the PM Team site.
 const libCache = {};
-export async function ensureLibraries(log = () => {}) {
+export async function ensureLibraries(log = () => {}, keys = Object.keys(LIBRARIES).filter(k => !LIBRARIES[k].standalone)) {
   const { siteId } = await getPmDrive();
   const lists = await graphAll(`/sites/${siteId}/lists?$select=id,displayName,webUrl,list`);
-  for (const [key, def] of Object.entries(LIBRARIES)) {
+  for (const [key, def] of Object.entries(LIBRARIES).filter(([k]) => keys.includes(k))) {
     let lib = lists.find(l => l.displayName === def.name);
     if (!lib) {
       lib = await graph(`/sites/${siteId}/lists`, {

@@ -8,12 +8,13 @@ import { getProjectRecord } from '@/field/projectsData';
 import {
   loadLibrary, buildScope, newLine, lineBlanks, missingBlanks, exhibitLines, exhibitIntro, exhibitPlainText,
   listSubcontracts, getSubcontract, createSubcontract, updateSubcontract, deleteSubcontract, getPrices, setPrice,
-  nextContractNumber, createContractFiles, SECTION_TITLES, SUB_STATUS,
+  nextContractNumber, createContractFiles, SECTION_TITLES,
 } from '@/field/scopesData';
 import { currentAccount } from '@/field/auth';
 import { can } from '@/field/roles';
 import { SubStatus } from '@/field/SubcontractsPage';
 import CompanyPicker from '@/field/CompanyPicker';
+import ContractPanel from '@/field/ContractPanel';
 import { detailsFrom } from '@/field/subDirectory';
 
 const input = 'w-full h-11 rounded-md border border-gray-300 bg-white px-3 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] disabled:bg-gray-50 disabled:text-gray-600';
@@ -420,17 +421,7 @@ export default function SubcontractEditor() {
               {sub.folderUrl && (
                 <a href={sub.folderUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[#1e3a8a] font-semibold text-sm"><FolderOpen className="w-4 h-4" /> Open contract folder <ExternalLink className="w-3.5 h-3.5" /></a>
               )}
-              {sub.status !== 'Draft' && can('subsContract') && (
-                <div>
-                  <div className="text-sm font-semibold text-gray-700 mb-1.5">Contract status</div>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {SUB_STATUS.slice(1).map(st => (
-                      <button key={st} type="button" disabled={!!busy} onClick={() => setStatus(st)}
-                        className={`h-10 rounded-md text-sm font-semibold border ${sub.status === st ? 'bg-[#0f2a5e] text-white border-[#0f2a5e]' : 'bg-white text-[#0f2a5e] border-gray-300'}`}>{st}</button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {sub.status !== 'Draft' && <ContractPanel project={project} setProject={setProject} sub={sub} setSub={setSub} />}
             </section>
             <h2 className="font-bold text-[#0f2a5e]">Exhibit A preview</h2>
             <Preview sub={sub} project={project} />

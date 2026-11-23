@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { coiOk } from '@/field/contractsData';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Loader2, Phone, Search, Handshake, ClipboardList, Receipt, FolderOpen, HardHat, CalendarPlus, ChevronRight, AlertTriangle, CheckCircle2, Megaphone, CalendarDays, Trash2, X, Camera,
@@ -335,6 +336,7 @@ export default function JobDashboard() {
                   <Link to={`/scopes/${project.id}?sub=${s.id}`} className="flex-1 min-w-0">
                     <span className="block font-semibold text-gray-900 truncate">{s.company}</span>
                     <span className="block text-sm text-gray-500 truncate">{[s.tradeName, s.companyContact].filter(Boolean).join(' · ')}</span>
+                    {!coiOk(s) && <span className="inline-flex items-center gap-1 mt-0.5 rounded-full bg-red-50 text-red-800 border border-red-200 text-xs font-bold px-2 py-0.5"><AlertTriangle className="w-3 h-3" /> No insurance certificate on file</span>}
                   </Link>
                   {s.companyPhone && <a href={`tel:${s.companyPhone.replace(/[^\d+]/g, '')}`} aria-label={`Call ${s.company}`} className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border border-[#0f2a5e] text-[#0f2a5e] font-semibold text-sm shrink-0"><Phone className="w-4 h-4" /> Call</a>}
                   <Link to={`/scopes/${project.id}?sub=${s.id}`} className="h-10 px-3 inline-flex items-center rounded-lg bg-blue-50 text-[#1e3a8a] font-semibold text-sm shrink-0">Scope</Link>

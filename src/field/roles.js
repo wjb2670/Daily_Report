@@ -39,6 +39,7 @@ const AREAS = {
   fieldScopes: ['Field', 'Office', 'PM', 'Admin'], // approved scopes, no prices
   receiptsView: ['Office', 'PM', 'Admin'], // receipts and their coding, weekly export
   receiptsCode: ['PM', 'Admin'], // pick cost codes for a receipt
+  contractsSign: ['Admin'], // sign contracts for Whayland (Steve, Eric)
   admin: ['Admin'],
 };
 

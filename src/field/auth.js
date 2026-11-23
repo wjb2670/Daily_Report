@@ -39,17 +39,21 @@ export async function initAuth() {
 export const signIn = () => msal.loginRedirect({ scopes: SCOPES, prompt: 'select_account' });
 export const signOut = () => msal.logoutRedirect({ account: msal.getActiveAccount() });
 
-export async function getToken() {
+// Sending email (contracts to subs) asks for Mail.Send only when someone
+// first sends, so nobody else is asked for it.
+export const MAIL_SCOPES = ['Mail.Send', 'Mail.ReadWrite'];
+
+export async function getToken(scopes = SCOPES) {
   const account = msal.getActiveAccount();
   if (!account) throw new Error('Not signed in');
   try {
-    const result = await msal.acquireTokenSilent({ scopes: SCOPES, account });
+    const result = await msal.acquireTokenSilent({ scopes, account });
     return result.accessToken;
   } catch (err) {
     // Only bounce to the sign-in page when there's signal; offline, saving
     // simply waits on the device and retries later.
     if (err instanceof InteractionRequiredAuthError && navigator.onLine !== false) {
-      await msal.acquireTokenRedirect({ scopes: SCOPES, account });
+      await msal.acquireTokenRedirect({ scopes, account });
     }
     throw err;
   }
