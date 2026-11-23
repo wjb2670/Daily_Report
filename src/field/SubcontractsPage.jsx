@@ -11,7 +11,8 @@ const STATUS_STYLE = {
   Draft: 'bg-gray-100 text-gray-700',
   'PM approved': 'bg-blue-100 text-blue-800',
   'Contract sent': 'bg-amber-100 text-amber-800',
-  Signed: 'bg-green-100 text-green-800',
+  'Signed by sub': 'bg-orange-100 text-orange-900',
+  Executed: 'bg-green-100 text-green-800',
 };
 export function SubStatus({ status }) {
   return <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide whitespace-nowrap ${STATUS_STYLE[status] || STATUS_STYLE.Draft}`}>{status}</span>;

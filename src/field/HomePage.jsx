@@ -26,12 +26,16 @@ const MODULES = [
 
 export default function HomePage() {
   const [waiting, setWaiting] = useState(null);
+  const [toSign, setToSign] = useState(0); // contracts signed by the sub, waiting for Whayland
   const [toCode, setToCode] = useState(null); // receipts on my jobs waiting for a cost code
   const first = (currentAccount()?.name || '').split(' ')[0];
 
   useEffect(() => {
     if (!can('subsContract')) return;
-    listAllSubcontracts().then(all => setWaiting(all.filter(s => s.status === 'PM approved').length)).catch(() => {});
+    listAllSubcontracts().then(all => {
+      setWaiting(all.filter(s => s.status === 'PM approved').length);
+      if (can('contractsSign')) setToSign(all.filter(s => s.status === 'Signed by sub').length);
+    }).catch(() => {});
   }, []);
   useEffect(() => {
     if (!can('receiptsCode')) return;
@@ -47,6 +51,13 @@ export default function HomePage() {
     <div className="max-w-5xl mx-auto pb-10">
       <h1 className="text-2xl sm:text-3xl font-bold text-[#0f2a5e]">{first ? `Hi, ${first}` : 'Whayland projects'}</h1>
       <p className="text-gray-500 mb-5">{currentRole()} access</p>
+      {toSign > 0 && (
+        <Link to="/subcontracts?show=Signed%20by%20sub" className="flex items-center gap-3 rounded-xl border p-4 mb-4 bg-orange-50 border-orange-300 text-orange-900">
+          <FileSignature className="w-6 h-6 shrink-0" />
+          <span className="flex-1 font-semibold">{toSign} subcontract{toSign === 1 ? '' : 's'} waiting for Whayland’s signature</span>
+          <ChevronRight className="w-5 h-5 shrink-0" />
+        </Link>
+      )}
       {toCode?.count > 0 && (
         <Link to="/receipts" className={`flex items-center gap-3 rounded-xl border p-4 mb-4 ${toCode.old ? 'bg-red-50 border-red-300 text-red-900' : 'bg-amber-50 border-amber-300 text-amber-900'}`}>
           <AlertTriangle className="w-6 h-6 shrink-0" />

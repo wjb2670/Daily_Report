@@ -4,21 +4,22 @@ import { Loader2, ArrowLeft, ChevronRight } from 'lucide-react';
 import { listAllProjects } from '@/field/spAdapter';
 import { listAllSubcontracts, SUB_STATUS } from '@/field/scopesData';
 
-const ORDER = ['PM approved', 'Draft', 'Contract sent', 'Signed'];
+const ORDER = ['PM approved', 'Signed by sub', 'Contract sent', 'Draft', 'Executed'];
 const NOTE = {
-  'PM approved': 'Ready for a contract',
+  'PM approved': 'Ready for a contract to be emailed',
   Draft: 'PM still writing the scope',
   'Contract sent': 'Waiting on the sub’s signature',
-  Signed: 'Done',
+  'Signed by sub': 'Signed by the sub – waiting for Whayland’s signature',
+  Executed: 'Fully executed and sent back to the sub',
 };
-const STYLE = { 'PM approved': 'bg-amber-100 text-amber-900', Draft: 'bg-gray-100 text-gray-700', 'Contract sent': 'bg-blue-100 text-blue-800', Signed: 'bg-green-100 text-green-800' };
+const STYLE = { 'PM approved': 'bg-amber-100 text-amber-900', Draft: 'bg-gray-100 text-gray-700', 'Contract sent': 'bg-blue-100 text-blue-800', 'Signed by sub': 'bg-orange-100 text-orange-900', Executed: 'bg-green-100 text-green-800' };
 
 // Every subcontract on every job, by where it stands. Approved scopes come
 // first: that's Kendra's list of contracts to write.
 export default function SubQueuePage() {
   const [rows, setRows] = useState(null);
   const [error, setError] = useState('');
-  const [show, setShow] = useState('PM approved');
+  const [show, setShow] = useState(() => (new URLSearchParams(window.location.hash.split('?')[1] || '').get('show')) || 'PM approved');
 
   useEffect(() => {
     Promise.all([listAllSubcontracts(), listAllProjects()]).then(([subs, projects]) => {

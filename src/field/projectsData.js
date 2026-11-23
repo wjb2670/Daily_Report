@@ -245,6 +245,7 @@ export function toProjectRecord(item) {
     jobNumber: f.JobNumber || '',
     status: f.Status || 'Awarded',
     owner: f.OwnerName || '',
+    ownerAddress: f.OwnerAddress || '',
     contractType: f.ContractType || '',
     contractAmount: null, // kept in the office-only Project Financials list
     address: f.Address || '', city: f.City || '', state: f.State || '', zip: f.Zip || '',
@@ -272,7 +273,7 @@ export function toProjectRecord(item) {
 }
 
 const TO_FIELD = {
-  name: 'Title', jobNumber: 'JobNumber', status: 'Status', owner: 'OwnerName', contractType: 'ContractType',
+  name: 'Title', jobNumber: 'JobNumber', status: 'Status', owner: 'OwnerName', ownerAddress: 'OwnerAddress', contractType: 'ContractType',
   address: 'Address', city: 'City', state: 'State', zip: 'Zip',
   projectManager: 'ProjectManager', bondsRequired: 'BondsRequired', paymentBond: 'PaymentBond',
   performanceBond: 'PerformanceBond', ownerContract: 'OwnerContract', folderUrl: 'ProjectFolderUrl',

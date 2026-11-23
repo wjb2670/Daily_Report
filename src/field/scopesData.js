@@ -14,7 +14,7 @@ export const SECTION_TITLES = {
   trade: 'Trade scope',
   closing: 'Closing',
 };
-export const SUB_STATUS = ['Draft', 'PM approved', 'Contract sent', 'Signed'];
+export const SUB_STATUS = ['Draft', 'PM approved', 'Contract sent', 'Signed by sub', 'Executed'];
 
 let uid = 0;
 const newId = () => `l${Date.now().toString(36)}${(uid++).toString(36)}`;
@@ -227,7 +227,7 @@ const toSub = item => {
     costCode: f.CostCode || '',
     tradeName: f.TradeName || '',
     workName: f.WorkName || '',
-    status: f.Status || 'Draft',
+    status: f.Status === 'Signed' ? 'Executed' : f.Status || 'Draft',
     companyContact: f.CompanyContact || '',
     companyAddress: f.CompanyAddress || '',
     companyCity: f.CompanyCity || '',
@@ -238,6 +238,8 @@ const toSub = item => {
     folderUrl: f.FolderUrl || '',
     folderId: f.FolderId || '',
     scope: parse(f.ScopeJSON, { sections: [] }),
+    log: parse(f.ContractLogJSON, []),
+    compliance: parse(f.ComplianceJSON, {}),
     updated: item.lastModifiedDateTime || '',
   };
 };
@@ -252,6 +254,8 @@ function subFields(changes) {
   for (const [k, v] of Object.entries(changes)) {
     if (SUB_FIELDS[k]) out[SUB_FIELDS[k]] = v ?? '';
     if (k === 'scope') out.ScopeJSON = JSON.stringify(v);
+    if (k === 'log') out.ContractLogJSON = JSON.stringify(v);
+    if (k === 'compliance') out.ComplianceJSON = JSON.stringify(v);
     if (k === 'approvedAt') out.ApprovedAt = v || null;
   }
   return out;
