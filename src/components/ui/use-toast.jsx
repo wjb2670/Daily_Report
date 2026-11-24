@@ -1,8 +1,8 @@
 // Inspired by react-hot-toast library
 import { useState, useEffect } from "react";
 
-const TOAST_LIMIT = 20;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_LIMIT = 3;
+const TOAST_REMOVE_DELAY = 300;
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -133,6 +133,10 @@ function toast({ ...props }) {
       },
     },
   });
+
+  // Close on its own: 5 seconds, or 8 for a problem so there's time to read it.
+  const ms = props.duration ?? (props.variant === 'destructive' ? 8000 : 5000);
+  if (ms !== Infinity) setTimeout(dismiss, ms);
 
   return {
     id,
