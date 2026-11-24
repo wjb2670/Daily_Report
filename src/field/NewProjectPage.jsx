@@ -91,7 +91,8 @@ export default function NewProjectPage() {
       <p className="text-gray-500 mb-5">For a job we’ve been awarded. Creating it assigns the job number, builds the project folder on the PM Team site and starts the startup checklist.</p>
 
       <div className="space-y-4">
-        {can('admin') && (
+        {/* Hidden: the library-layout test option only shows at #/projects/new?test=1 (admins). */}
+        {can('admin') && /[?&]test=1/.test(window.location.hash) && (
           <label className="flex items-start gap-3 bg-amber-50 border border-amber-300 rounded-xl p-4 cursor-pointer">
             <input type="checkbox" className="w-5 h-5 mt-0.5" checked={test} onChange={e => { setTest(e.target.checked); setEditingNumber(false); }} />
             <span><span className="block font-semibold text-amber-900">Test project: try the new library layout</span>
